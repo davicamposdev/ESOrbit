@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// User - Tabela de usuários do sistema
+// ==========================================
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  displayName  String
+  credits      Int       @default(10000)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relações
+  purchases Purchase[]
+  returns   Return[]
+
+  @@index([email])
+  @@index([displayName])
+  @@map("users")
+}
+
+// ==========================================
+// Cosmetic - Catálogo de cosméticos e bundles
+// ==========================================
+model Cosmetic {
+  id        String   @id // ID externo da API do Fortnite
+  name      String
+  type      String   // outfit, pickaxe, glider, emote, etc
+  rarity    String   // common, uncommon, rare, epic, legendary, etc
+  imageUrl  String
+  addedAt   DateTime // Data que foi adicionado no Fortnite
+  
+  // Flags de estado
+  isNew     Boolean  @default(false)
+  onSale    Boolean  @default(false)
+  salePrice Int?     // Preço promocional quando onSale=true
+  
+  // Bundle info
+  isBundle  Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  purchases    Purchase[]
+  returns      Return[]
+  
+  // Relações de bundle
+  bundleItems  BundleItem[] @relation("Bundle")
+  itemOfBundle BundleItem[] @relation("Item")
+
+  @@index([name])
+  @@index([type])
+  @@index([rarity])
+  @@index([addedAt(sort: Desc)])
+  @@index([isNew])
+  @@index([onSale])
+  @@index([isBundle])
+  @@index([type, rarity])
+  @@index([onSale, salePrice])
+  @@map("cosmetics")
+}
+
+// ==========================================
+// BundleItem - Relação entre bundles e seus itens
+// ==========================================
+model BundleItem {
+  id       String @id @default(uuid())
+  bundleId String
+  itemId   String
+  
+  // Relações
+  bundle Cosmetic @relation("Bundle", fields: [bundleId], references: [id], onDelete: Cascade)
+  item   Cosmetic @relation("Item", fields: [itemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([bundleId, itemId])
+  @@index([bundleId])
+  @@index([itemId])
+  @@map("bundle_items")
+}
+
+// ==========================================
+// Purchase - Registro de compras
+// ==========================================
+model Purchase {
+  id         String   @id @default(uuid())
+  userId     String
+  cosmeticId String
+  price      Int      // Preço efetivamente pago no momento da compra
+  
+  // Rastreabilidade de bundle
+  isFromBundle     Boolean  @default(false) // Se foi adquirido como parte de um bundle
+  parentPurchaseId String?  // ID da compra do bundle pai (se aplicável)
+  
+  createdAt  DateTime @default(now())
+
+  // Relações
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
+  
+  // Auto-relação para compras de bundle
+  parentPurchase Purchase?  @relation("BundlePurchase", fields: [parentPurchaseId], references: [id], onDelete: Cascade)
+  childPurchases Purchase[] @relation("BundlePurchase")
+
+  @@unique([userId, cosmeticId]) // Garante que um usuário só pode comprar um item uma vez
+  @@index([userId])
+  @@index([cosmeticId])
+  @@index([createdAt(sort: Desc)])
+  @@index([parentPurchaseId])
+  @@map("purchases")
+}
+
+// ==========================================
+// Return - Registro de devoluções
+// ==========================================
+model Return {
+  id         String   @id @default(uuid())
+  userId     String
+  cosmeticId String
+  refunded   Int      // Valor estornado (mesmo que foi pago)
+  
+  // Se foi devolução de bundle, registrar
+  isBundle   Boolean  @default(false)
+  
+  createdAt  DateTime @default(now())
+
+  // Relações
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([cosmeticId])
+  @@index([createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("returns")
+}
+
+// ==========================================
+// SyncLog - Logs de sincronização com API externa
+// ==========================================
+model SyncLog {
+  id        String   @id @default(uuid())
+  job       String   // sync:cosmetics, sync:new, sync:shop
+  status    String   // pending, running, success, failed
+  message   String?  // Mensagem de erro ou sucesso
+  
+  // Métricas opcionais
+  itemsProcessed Int?
+  itemsCreated   Int?
+  itemsUpdated   Int?
+  duration       Int?     // Duração em ms
+  
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([job])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([job, status, createdAt(sort: Desc)])
+  @@map("sync_logs")
+}
+
+// ==========================================
+// IdempotencyKey - Para garantir idempotência em operações
+// ==========================================
+model IdempotencyKey {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  userId    String
+  endpoint  String
+  response  Json     // Resposta armazenada para reenvio
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([key])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}

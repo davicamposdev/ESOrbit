@@ -1,0 +1,211 @@
+version: "3.8"
+
+services:
+  # ===========================================
+  # Banco de Dados PostgreSQL
+  # ===========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: esorbit-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-esorbit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-esorbit123}
+      POSTGRES_DB: ${DB_NAME:-esorbit}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - esorbit-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-esorbit} -d ${DB_NAME:-esorbit}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===========================================
+  # Redis (Cache e BullMQ)
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: esorbit-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - esorbit-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ===========================================
+  # API Backend (NestJS)
+  # ===========================================
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: ${NODE_ENV:-development}
+    image: esorbit-api:latest
+    container_name: esorbit-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+      - "9229:9229" # Porta de debug para desenvolvimento
+    environment:
+      # App
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 4000
+
+      # Database
+      DATABASE_URL: postgresql://${DB_USER:-esorbit}:${DB_PASSWORD:-esorbit123}@postgres:5432/${DB_NAME:-esorbit}?schema=public
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # Auth
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-lax}
+
+      # External API
+      esorbit_API_BASE: ${esorbit_API_BASE:-https://esorbit-api.com}
+      esorbit_API_KEY: ${esorbit_API_KEY:-}
+
+      # Jobs/Crons
+      SYNC_FULL_CRON: ${SYNC_FULL_CRON:-0 3 * * *}
+      SYNC_NEW_CRON: ${SYNC_NEW_CRON:-*/45 * * * *}
+      SYNC_SHOP_CRON: ${SYNC_SHOP_CRON:-*/45 * * * *}
+
+      # Rate Limiting
+      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
+
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:4000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./api:/app:delegated
+      - /app/node_modules
+      - /app/dist
+    networks:
+      - esorbit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===========================================
+  # Frontend Web (Next.js)
+  # ===========================================
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: ${NODE_ENV:-development}
+    image: esorbit-web:latest
+    container_name: esorbit-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-ESOrbit}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    depends_on:
+      - api
+    volumes:
+      - ./web:/app:delegated
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - esorbit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===========================================
+  # BullMQ Board
+  # ===========================================
+  bull-board:
+    image: deadly0/bull-board:latest
+    container_name: esorbit-bull-board
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    depends_on:
+      - redis
+    networks:
+      - esorbit-network
+    profiles:
+      - monitoring
+
+  # ===========================================
+  # pgAdmin
+  # ===========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: esorbit-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@esorbit.shop}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - esorbit-network
+    profiles:
+      - tools
+
+# ===========================================
+# Volumes
+# ===========================================
+volumes:
+  postgres_data:
+    name: esorbit-postgres-data
+  redis_data:
+    name: esorbit-redis-data
+  pgadmin_data:
+    name: esorbit-pgadmin-data
+
+# ===========================================
+# Redes
+# ===========================================
+networks:
+  esorbit-network:
+    name: esorbit-network
+    driver: bridge
