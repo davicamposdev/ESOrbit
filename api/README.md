@@ -1,25 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 ESOrbit API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema de autenticação JWT com **Clean Architecture** e princípios **SOLID**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
+
+## 📖 Documentação
+
+- **[📚 Documentação Completa](./docs/README.md)** - Índice principal
+- **[⚡ Início Rápido](./docs/guides/quick-start.md)** - Como começar
+- **[🏗️ Arquitetura](./docs/architecture/clean-architecture.md)** - Clean Architecture
+- **[📡 API](./docs/api/endpoints.md)** - Endpoints disponíveis
+- **[🧪 Testes](./test/README.md)** - Guia de testes
+
+---
+
+## ⚡ Início Rápido
+
+```bash
+# Instalar dependências
+npm install
+
+# Configurar variáveis de ambiente
+cp .env.example .env
+
+# Gerar Prisma Client
+npx prisma generate
+
+# Executar migrations
+npx prisma migrate dev
+
+# Iniciar em desenvolvimento
+npm run start:dev
+```
+
+**API:** `http://localhost:4000/api`
+
+---
+
+## 🎯 Principais Recursos
+
+- ✅ **Autenticação JWT** (Access + Refresh tokens)
+- ✅ **Clean Architecture** (4 camadas)
+- ✅ **Princípios SOLID**
+- ✅ **Hash Argon2** (mais seguro que bcrypt)
+- ✅ **Guards Globais** com decorator @Public()
+- ✅ **Validação DTOs** com class-validator
+- ✅ **TypeScript Strict**
+- ✅ **Prisma ORM**
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── modules/
+│   ├── auth/
+│   │   ├── domain/           # Entidades e interfaces
+│   │   ├── application/      # Casos de uso
+│   │   ├── infrastructure/   # Implementações (Prisma, JWT, Argon2)
+│   │   └── presentation/     # Controllers, DTOs, Guards
+│   └── users/
+│       └── (mesma estrutura)
+└── common/
+    └── database/             # Prisma global
+
+docs/                         # 📚 Documentação
+test/                         # 🧪 Testes
+```
+
+---
+
+## 🧪 Testes
+
+```bash
+# Testes unitários
+npm test
+
+# Testes E2E
+npm run test:e2e
+
+# Cobertura
+npm run test:cov
+
+# Script bash (requer jq)
+./test/scripts/test-auth.sh
+```
+
+Ver [guia completo de testes](./test/README.md).
+
+---
+
+## 🛠️ Stack Tecnológica
+
+- **[NestJS](https://nestjs.com/)** - Framework Node.js
+- **[Prisma](https://www.prisma.io/)** - ORM
+- **[PostgreSQL](https://www.postgresql.org/)** - Banco de dados
+- **[JWT](https://jwt.io/)** - Autenticação
+- **[Argon2](https://github.com/ranisalt/node-argon2)** - Hash de senhas
+- **[Passport](https://www.passportjs.org/)** - Estratégias de autenticação
+
+---
+
+## 📝 Scripts Disponíveis
+
+```bash
+npm run start          # Produção
+npm run start:dev      # Desenvolvimento (watch)
+npm run build          # Build
+npm run lint           # Lint
+npm run format         # Format
+npm test               # Testes unitários
+npm run test:e2e       # Testes E2E
+npm run test:cov       # Cobertura
+```
+
+---
+
+## 🔗 Links Úteis
+
+- [Documentação NestJS](https://docs.nestjs.com)
+- [Documentação Prisma](https://www.prisma.io/docs)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Princípios SOLID](https://en.wikipedia.org/wiki/SOLID)
+
+---
+
+## 📄 Licença
+
+MIT
 
 ## Description
 

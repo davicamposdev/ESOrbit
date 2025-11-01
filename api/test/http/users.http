@@ -1,0 +1,52 @@
+### 👤 Testes de Usuários
+
+### Variáveis
+@baseUrl = http://localhost:4000/api
+@accessToken = seu-token-aqui
+@userId = seu-user-id-aqui
+
+### ============================================
+### 📝 IMPORTANTE
+### ============================================
+# 1. Faça login primeiro em auth.http
+# 2. Copie o accessToken recebido
+# 3. Cole na variável @accessToken acima
+# 4. Copie o user.id recebido
+# 5. Cole na variável @userId acima
+
+### ============================================
+### 1️⃣ BUSCAR USUÁRIO POR ID
+### ============================================
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{accessToken}}
+
+### Resposta esperada:
+# {
+#   "user": {
+#     "id": "uuid",
+#     "email": "teste@example.com",
+#     "displayName": "Usuário Teste",
+#     "credits": 10000,
+#     "createdAt": "2025-11-01T00:00:00.000Z",
+#     "updatedAt": "2025-11-01T00:00:00.000Z"
+#   }
+# }
+
+### ============================================
+### 🚫 TESTES DE ERRO
+### ============================================
+
+### Buscar sem autenticação (401 Unauthorized)
+GET {{baseUrl}}/users/{{userId}}
+
+### Buscar com token inválido (401 Unauthorized)
+GET {{baseUrl}}/users/{{userId}}
+Authorization: Bearer token-invalido
+
+### Buscar ID inexistente (404 Not Found)
+GET {{baseUrl}}/users/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{accessToken}}
+
+### Buscar ID inválido (400 Bad Request)
+GET {{baseUrl}}/users/id-invalido
+Authorization: Bearer {{accessToken}}

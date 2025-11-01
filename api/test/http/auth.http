@@ -1,0 +1,115 @@
+### 🔐 Testes de Autenticação
+
+### Variáveis
+@baseUrl = http://localhost:4000/api
+@accessToken = seu-token-aqui
+@userId = seu-user-id-aqui
+
+### ============================================
+### 1️⃣ REGISTRAR NOVO USUÁRIO
+### ============================================
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "senha123",
+  "displayName": "Usuário Teste"
+}
+
+### Resposta esperada:
+# {
+#   "user": {
+#     "id": "uuid",
+#     "email": "teste@example.com",
+#     "displayName": "Usuário Teste",
+#     "credits": 10000
+#   },
+#   "accessToken": "eyJhbGc..."
+# }
+# Cookie: refresh_token (HttpOnly)
+
+### ============================================
+### 2️⃣ LOGIN
+### ============================================
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "senha123"
+}
+
+### Resposta esperada: mesma estrutura do registro
+
+### ============================================
+### 3️⃣ OBTER DADOS DO USUÁRIO (/me)
+### ============================================
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Resposta esperada:
+# {
+#   "user": {
+#     "id": "uuid",
+#     "email": "teste@example.com",
+#     "displayName": "Usuário Teste",
+#     "credits": 10000
+#   }
+# }
+
+### ============================================
+### 4️⃣ REFRESH TOKEN
+### ============================================
+# O cookie refresh_token é enviado automaticamente
+POST {{baseUrl}}/auth/refresh
+
+### Resposta esperada:
+# {
+#   "accessToken": "eyJhbGc..."
+# }
+# Cookie: refresh_token (atualizado)
+
+### ============================================
+### 5️⃣ LOGOUT
+### ============================================
+POST {{baseUrl}}/auth/logout
+
+### Resposta esperada:
+# {
+#   "ok": true
+# }
+# Cookie: refresh_token removido
+
+### ============================================
+### 🚫 TESTES DE ERRO
+### ============================================
+
+### Registro com email duplicado (409 Conflict)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "senha123",
+  "displayName": "Outro Nome"
+}
+
+### Login com senha incorreta (401 Unauthorized)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@example.com",
+  "password": "senhaerrada"
+}
+
+### Acesso sem token (401 Unauthorized)
+GET {{baseUrl}}/auth/me
+
+### Acesso com token inválido (401 Unauthorized)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer token-invalido
+
+### Refresh sem cookie (401 Unauthorized)
+POST {{baseUrl}}/auth/refresh
