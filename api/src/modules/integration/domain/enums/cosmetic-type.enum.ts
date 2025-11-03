@@ -1,0 +1,17 @@
+export enum CosmeticType {
+  OUTFIT = 'outfit',
+  BACKPACK = 'backpack',
+  PICKAXE = 'pickaxe',
+  GLIDER = 'glider',
+  EMOTE = 'emote',
+  WRAP = 'wrap',
+  CONTRAIL = 'contrail',
+  LOADING_SCREEN = 'loadingScreen',
+  MUSIC = 'music',
+  BANNER = 'banner',
+  SPRAY = 'spray',
+  TOY = 'toy',
+  PET = 'pet',
+  BUNDLE = 'bundle',
+  UNKNOWN = 'unknown',
+}
