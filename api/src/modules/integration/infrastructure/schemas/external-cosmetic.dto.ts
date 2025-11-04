@@ -22,7 +22,7 @@ export interface ExternalCosmeticDTO {
 
 export interface ExternalCosmeticsResponse {
   status: number;
-  data: ExternalCosmeticDTO[];
+  data: Record<string, ExternalCosmeticDTO[]>;
 }
 
 export interface ExternalNewCosmeticsResponse {

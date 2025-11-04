@@ -5,8 +5,6 @@ export enum Rarity {
   EPIC = 'epic',
   LEGENDARY = 'legendary',
   MYTHIC = 'mythic',
-  EXOTIC = 'exotic',
-  TRANSCENDENT = 'transcendent',
   GAMINGLEGENDS = 'gamingLegends',
   ICON = 'icon',
   MARVEL = 'marvel',

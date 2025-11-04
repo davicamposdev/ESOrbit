@@ -27,14 +27,15 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
     return this.circuitBreaker.execute('cosmetics_all', async () => {
       const language = params?.language || 'pt-BR';
       const response = await this.httpClient.get<unknown>(
-        `/cosmetics/br?language=${language}`,
+        `/cosmetics?language=${language}`,
       );
 
       const validated = SchemaGuard.validateCosmeticsResponse(response);
 
-      return validated.data.map((dto) =>
-        CosmeticMapper.toIntegrationCosmetic(dto),
-      );
+      // Extract the array from the first available language key
+      // The API returns data with language keys (e.g., { br: [...] })
+      const items = Object.values(validated.data)[0] ?? [];
+      return items.map((dto) => CosmeticMapper.toIntegrationCosmetic(dto));
     });
   }
 
@@ -46,7 +47,7 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
     return this.circuitBreaker.execute('cosmetics_new', async () => {
       const language = params?.language || 'pt-BR';
       const response = await this.httpClient.get<unknown>(
-        `/cosmetics/br/new?language=${language}`,
+        `/cosmetics/new?language=${language}`,
       );
 
       const validated = SchemaGuard.validateNewCosmeticsResponse(response);
@@ -61,7 +62,7 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
     const startTime = Date.now();
 
     try {
-      await this.httpClient.get<unknown>('/cosmetics/br?limit=1');
+      await this.httpClient.get<unknown>('/cosmetics/');
       const latency = Date.now() - startTime;
 
       return { latency, status: 'healthy' };

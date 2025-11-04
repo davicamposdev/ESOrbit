@@ -3,8 +3,9 @@ import { FetchAllCosmeticsUseCase } from '../../application/use-cases/fetch-all-
 import { FetchNewCosmeticsUseCase } from '../../application/use-cases/fetch-new-cosmetics.use-case';
 import { HealthCheckUseCase } from '../../application/use-cases/health-check.use-case';
 import { MetricsService } from '../../infrastructure/observability/metrics.service';
-import { IntegrationCosmetic } from '../../domain/entities/integration-cosmetic.entity';
+import { Public } from '../../../auth/presentation/decorators/public.decorator';
 
+@Public()
 @Controller('integration')
 export class IntegrationController {
   private readonly logger = new Logger(IntegrationController.name);
@@ -40,12 +41,12 @@ export class IntegrationController {
   }
 
   @Get('metrics')
-  async getMetrics() {
+  getMetrics() {
     return this.metricsService.getSummary();
   }
 
   @Get('metrics/prometheus')
-  async getPrometheusMetrics() {
+  getPrometheusMetrics() {
     return this.metricsService.getMetrics();
   }
 }

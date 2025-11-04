@@ -1,0 +1,160 @@
+### 🔗 Testes de Integração
+
+### Variáveis
+@baseUrl = http://localhost:4000/api
+
+### ============================================
+### 1️⃣ HEALTH CHECK
+### ============================================
+GET {{baseUrl}}/integration/health
+
+### Resposta esperada:
+# {
+#   "status": "healthy",
+#   "fortniteApi": {
+#     "status": "up",
+#     "responseTime": 123
+#   },
+#   "timestamp": "2025-11-03T00:00:00.000Z"
+# }
+
+### ============================================
+### 2️⃣ BUSCAR COSMÉTICOS NOVOS
+### ============================================
+GET {{baseUrl}}/integration/cosmetics/new
+
+### Resposta esperada:
+# {
+#   "data": [...],
+#   "metadata": {
+#     "total": 10,
+#     "language": "en"
+#   }
+# }
+
+### ============================================
+### 3️⃣ BUSCAR COSMÉTICOS NOVOS (com idioma)
+### ============================================
+GET {{baseUrl}}/integration/cosmetics/new?language=pt-BR
+
+### Resposta esperada:
+# {
+#   "data": [...],
+#   "metadata": {
+#     "total": 10,
+#     "language": "pt-BR"
+#   }
+# }
+
+### ============================================
+### 4️⃣ BUSCAR TODOS OS COSMÉTICOS
+### ============================================
+GET {{baseUrl}}/integration/cosmetics
+
+### Resposta esperada:
+# {
+#   "data": [...],
+#   "metadata": {
+#     "total": 1000,
+#     "page": 1,
+#     "pageSize": 50,
+#     "totalPages": 20,
+#     "language": "en"
+#   }
+# }
+
+### ============================================
+### 5️⃣ BUSCAR COSMÉTICOS COM PAGINAÇÃO
+### ============================================
+GET {{baseUrl}}/integration/cosmetics?page=1&pageSize=10
+
+### Resposta esperada:
+# {
+#   "data": [...],
+#   "metadata": {
+#     "total": 1000,
+#     "page": 1,
+#     "pageSize": 10,
+#     "totalPages": 100,
+#     "language": "en"
+#   }
+# }
+
+### ============================================
+### 6️⃣ BUSCAR COSMÉTICOS COM IDIOMA E PAGINAÇÃO
+### ============================================
+GET {{baseUrl}}/integration/cosmetics?language=pt-BR
+
+### Resposta esperada:
+# {
+#   "data": [...],
+#   "metadata": {
+#     "total": 1000,
+#     "page": 2,
+#     "pageSize": 20,
+#     "totalPages": 50,
+#     "language": "pt-BR"
+#   }
+# }
+
+### ============================================
+### 7️⃣ BUSCAR MÉTRICAS (Resumo)
+### ============================================
+GET {{baseUrl}}/integration/metrics
+
+### Resposta esperada:
+# {
+#   "requests": {
+#     "total": 1234,
+#     "success": 1200,
+#     "failure": 34,
+#     "successRate": 0.972
+#   },
+#   "latency": {
+#     "average": 150.5,
+#     "min": 50,
+#     "max": 500,
+#     "p50": 140,
+#     "p95": 300,
+#     "p99": 450
+#   },
+#   "cache": {
+#     "hits": 800,
+#     "misses": 400,
+#     "hitRate": 0.667
+#   },
+#   "errors": {
+#     "total": 34,
+#     "byType": {
+#       "timeout": 10,
+#       "connection": 5,
+#       "http_error": 19
+#     }
+#   },
+#   "period": {
+#     "start": "2025-11-03T00:00:00.000Z",
+#     "end": "2025-11-03T23:59:59.999Z"
+#   }
+# }
+
+### ============================================
+### 8️⃣ BUSCAR MÉTRICAS (Formato Prometheus)
+### ============================================
+GET {{baseUrl}}/integration/metrics/prometheus
+
+### Resposta esperada (formato texto Prometheus):
+# # HELP fortnite_api_requests_total Total number of requests to Fortnite API
+# # TYPE fortnite_api_requests_total counter
+# fortnite_api_requests_total{status="success"} 1200
+# fortnite_api_requests_total{status="failure"} 34
+# 
+# # HELP fortnite_api_latency_seconds Request latency in seconds
+# # TYPE fortnite_api_latency_seconds histogram
+# fortnite_api_latency_seconds_bucket{le="0.1"} 500
+# fortnite_api_latency_seconds_bucket{le="0.5"} 1100
+# fortnite_api_latency_seconds_bucket{le="1"} 1200
+# fortnite_api_latency_seconds_bucket{le="+Inf"} 1234
+# 
+# # HELP fortnite_api_cache_hits_total Total number of cache hits
+# # TYPE fortnite_api_cache_hits_total counter
+# fortnite_api_cache_hits_total 800

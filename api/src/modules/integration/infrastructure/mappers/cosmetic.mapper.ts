@@ -4,6 +4,7 @@ import { Rarity } from '../../domain/enums/rarity.enum';
 import { IntegrationCosmetic } from '../../domain/entities/integration-cosmetic.entity';
 import { ExternalCosmeticDTO } from '../schemas/external-cosmetic.dto';
 import { MetricsService } from '../observability/metrics.service';
+import { wrap } from 'module';
 
 export class CosmeticMapper {
   private static readonly logger = new Logger(CosmeticMapper.name);
@@ -14,23 +15,24 @@ export class CosmeticMapper {
   }
 
   private static readonly TYPE_MAP: Record<string, CosmeticType> = {
-    outfit: CosmeticType.OUTFIT,
-    backpack: CosmeticType.BACKPACK,
-    'back bling': CosmeticType.BACKPACK,
-    pickaxe: CosmeticType.PICKAXE,
-    'harvesting tool': CosmeticType.PICKAXE,
-    glider: CosmeticType.GLIDER,
-    emote: CosmeticType.EMOTE,
+    emoji: CosmeticType.EMOJI,
     wrap: CosmeticType.WRAP,
+    glider: CosmeticType.GLIDER,
     contrail: CosmeticType.CONTRAIL,
-    'loading screen': CosmeticType.LOADING_SCREEN,
-    loadingscreen: CosmeticType.LOADING_SCREEN,
-    music: CosmeticType.MUSIC,
-    banner: CosmeticType.BANNER,
-    spray: CosmeticType.SPRAY,
     toy: CosmeticType.TOY,
+    spray: CosmeticType.SPRAY,
+    pickaxe: CosmeticType.PICKAXE,
+    aura: CosmeticType.AURA,
+    shoe: CosmeticType.SHOE,
     pet: CosmeticType.PET,
-    bundle: CosmeticType.BUNDLE,
+    music: CosmeticType.MUSIC,
+    loadingscreen: CosmeticType.LOADINGSCREEN,
+    emote: CosmeticType.EMOTE,
+    petcarrier: CosmeticType.PETCARRIER,
+    outfit: CosmeticType.OUTFIT,
+    sidekick: CosmeticType.SIDEKICK,
+    backpack: CosmeticType.BACKPACK,
+    banner: CosmeticType.BANNER,
   };
 
   private static readonly RARITY_MAP: Record<string, Rarity> = {
@@ -40,15 +42,10 @@ export class CosmeticMapper {
     epic: Rarity.EPIC,
     legendary: Rarity.LEGENDARY,
     mythic: Rarity.MYTHIC,
-    exotic: Rarity.EXOTIC,
-    transcendent: Rarity.TRANSCENDENT,
-    'gaming legends': Rarity.GAMINGLEGENDS,
     gaminglegends: Rarity.GAMINGLEGENDS,
     icon: Rarity.ICON,
-    'icon series': Rarity.ICON,
     marvel: Rarity.MARVEL,
     dc: Rarity.DC,
-    'star wars': Rarity.STARWARS,
     starwars: Rarity.STARWARS,
     shadow: Rarity.SHADOW,
     slurp: Rarity.SLURP,
@@ -65,17 +62,16 @@ export class CosmeticMapper {
     const imageUrl = this.selectBestImage(external.images);
     const addedAt = this.normalizeDate(external.added);
     const childrenExternalIds = this.extractChildren(external.set);
-
-    return new IntegrationCosmetic({
-      externalId: external.id,
-      name: external.name,
-      description: external.description,
+    return IntegrationCosmetic.create(
+      external.id,
+      external.name,
+      external.description,
       type,
       rarity,
       imageUrl,
       addedAt,
       childrenExternalIds,
-    });
+    );
   }
 
   private static mapType(value: string): CosmeticType {
