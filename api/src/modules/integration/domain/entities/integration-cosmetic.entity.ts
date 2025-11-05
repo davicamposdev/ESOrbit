@@ -1,13 +1,10 @@
-import { CosmeticType } from '../enums/cosmetic-type.enum';
-import { Rarity } from '../enums/rarity.enum';
-
 export class IntegrationCosmetic {
   private constructor(
     private readonly _externalId: string,
     private readonly _name: string,
     private readonly _description: string,
-    private readonly _type: CosmeticType,
-    private readonly _rarity: Rarity,
+    private readonly _type: string,
+    private readonly _rarity: string,
     private readonly _imageUrl: string,
     private readonly _addedAt: string,
     private readonly _childrenExternalIds: string[],
@@ -17,8 +14,8 @@ export class IntegrationCosmetic {
     externalId: string,
     name: string,
     description: string,
-    type: CosmeticType,
-    rarity: Rarity,
+    type: string,
+    rarity: string,
     imageUrl: string,
     addedAt: string,
     childrenExternalIds: string[],
@@ -47,11 +44,11 @@ export class IntegrationCosmetic {
     return this._description;
   }
 
-  get type(): CosmeticType {
+  get type(): string {
     return this._type;
   }
 
-  get rarity(): Rarity {
+  get rarity(): string {
     return this._rarity;
   }
 

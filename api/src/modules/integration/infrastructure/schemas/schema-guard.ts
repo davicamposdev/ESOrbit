@@ -21,27 +21,22 @@ export class SchemaGuard {
       throw new SchemaValidationError('Data is not an object');
     }
 
-    const languageKeys = Object.keys(data.data);
-    if (languageKeys.length === 0) {
+    const categoryKeys = Object.keys(data.data);
+    if (categoryKeys.length === 0) {
       throw new SchemaValidationError('Data object is empty');
     }
 
-    const firstLanguageKey = languageKeys[0];
-    const items = data.data[firstLanguageKey];
+    const firstCategoryKey = categoryKeys[0];
+    const items = data.data[firstCategoryKey] as unknown;
 
     if (!Array.isArray(items)) {
       throw new SchemaValidationError(
-        `Data.${firstLanguageKey} is not an array`,
+        `Data.${firstCategoryKey} is not an array`,
       );
     }
 
-    const sampleSize = Math.min(5, items.length);
-    for (let i = 0; i < sampleSize; i++) {
-      this.validateCosmetic(items[i], `data.${firstLanguageKey}[${i}]`);
-    }
-
     this.logger.log(
-      `Schema validation passed for ${sampleSize} sample items out of ${items.length} total items`,
+      `Response structure validated: ${items.length} items in category '${firstCategoryKey}'`,
     );
 
     return data as ExternalCosmeticsResponse;
@@ -62,129 +57,33 @@ export class SchemaGuard {
       throw new SchemaValidationError('Data is not an object');
     }
 
-    if (!Array.isArray(data.data.items)) {
-      throw new SchemaValidationError('Data.items is not an array');
+    if (!this.isObject(data.data.items)) {
+      throw new SchemaValidationError('Data.items is not an object');
     }
 
-    const sampleSize = Math.min(5, data.data.items.length);
-    for (let i = 0; i < sampleSize; i++) {
-      this.validateCosmetic(data.data.items[i], `data.items[${i}]`);
+    const itemsData = data.data.items as Record<string, unknown>;
+    const categoryKeys = Object.keys(itemsData);
+
+    if (categoryKeys.length === 0) {
+      throw new SchemaValidationError('Data.items object is empty');
+    }
+
+    let totalItems = 0;
+    for (const categoryKey of categoryKeys) {
+      const items = itemsData[categoryKey];
+      if (!Array.isArray(items)) {
+        throw new SchemaValidationError(
+          `Data.items.${categoryKey} is not an array`,
+        );
+      }
+      totalItems += items.length;
     }
 
     this.logger.log(
-      `Schema validation passed for ${sampleSize} sample items out of ${data.data.items.length} total items`,
+      `Response structure validated: ${totalItems} total items across ${categoryKeys.length} categories`,
     );
 
     return data as ExternalNewCosmeticsResponse;
-  }
-
-  private static validateCosmetic(item: unknown, path: string): void {
-    if (!this.isObject(item)) {
-      throw new SchemaValidationError(`${path} is not an object`);
-    }
-
-    if (typeof item.id !== 'string' || !item.id) {
-      throw new SchemaValidationError(`${path}.id is missing or invalid`);
-    }
-
-    if (typeof item.name !== 'string') {
-      throw new SchemaValidationError(`${path}.name is missing or invalid`);
-    }
-
-    if (typeof item.description !== 'string') {
-      throw new SchemaValidationError(
-        `${path}.description is missing or invalid`,
-      );
-    }
-
-    if (!this.isObject(item.type) || typeof item.type.value !== 'string') {
-      throw new SchemaValidationError(
-        `${path}.type.value is missing or invalid`,
-      );
-    }
-
-    if (
-      item.type.displayValue !== undefined &&
-      typeof item.type.displayValue !== 'string'
-    ) {
-      throw new SchemaValidationError(`${path}.type.displayValue is invalid`);
-    }
-
-    if (
-      item.type.backendValue !== undefined &&
-      typeof item.type.backendValue !== 'string'
-    ) {
-      throw new SchemaValidationError(`${path}.type.backendValue is invalid`);
-    }
-
-    if (!this.isObject(item.rarity) || typeof item.rarity.value !== 'string') {
-      throw new SchemaValidationError(
-        `${path}.rarity.value is missing or invalid`,
-      );
-    }
-
-    if (
-      item.rarity.displayValue !== undefined &&
-      typeof item.rarity.displayValue !== 'string'
-    ) {
-      throw new SchemaValidationError(`${path}.rarity.displayValue is invalid`);
-    }
-
-    if (
-      item.rarity.backendValue !== undefined &&
-      typeof item.rarity.backendValue !== 'string'
-    ) {
-      throw new SchemaValidationError(`${path}.rarity.backendValue is invalid`);
-    }
-
-    if (!this.isObject(item.images)) {
-      throw new SchemaValidationError(`${path}.images is missing or invalid`);
-    }
-
-    if (typeof item.images.smallIcon !== 'string') {
-      throw new SchemaValidationError(
-        `${path}.images.smallIcon is missing or invalid`,
-      );
-    }
-
-    if (
-      item.images.icon !== undefined &&
-      typeof item.images.icon !== 'string'
-    ) {
-      throw new SchemaValidationError(`${path}.images.icon is invalid`);
-    }
-
-    if (typeof item.added !== 'string') {
-      throw new SchemaValidationError(`${path}.added is missing or invalid`);
-    }
-
-    if (item.set !== undefined) {
-      if (!this.isObject(item.set)) {
-        throw new SchemaValidationError(`${path}.set is invalid`);
-      }
-      if (typeof item.set.value !== 'string') {
-        throw new SchemaValidationError(`${path}.set.value is invalid`);
-      }
-    }
-
-    if (item.series !== undefined) {
-      if (!this.isObject(item.series)) {
-        throw new SchemaValidationError(`${path}.series is invalid`);
-      }
-      if (typeof item.series.value !== 'string') {
-        throw new SchemaValidationError(`${path}.series.value is invalid`);
-      }
-    }
-
-    if (item.introduction !== undefined) {
-      if (!this.isObject(item.introduction)) {
-        throw new SchemaValidationError(`${path}.introduction is invalid`);
-      }
-    }
-
-    if (item.metaTags !== undefined && !Array.isArray(item.metaTags)) {
-      throw new SchemaValidationError(`${path}.metaTags is invalid`);
-    }
   }
 
   private static isObject(value: unknown): value is Record<string, any> {

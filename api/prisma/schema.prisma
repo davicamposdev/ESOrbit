@@ -13,11 +13,11 @@ datasource db {
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
-  passwordHash String
-  displayName  String
+  passwordHash String    @map("password_hash")
+  displayName  String    @map("display_name")
   credits      Int       @default(10000)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   // Relações
   purchases Purchase[]
@@ -32,23 +32,24 @@ model User {
 // Cosmetic - Catálogo de cosméticos e bundles
 // ==========================================
 model Cosmetic {
-  id        String   @id // ID externo da API do Fortnite
-  name      String
-  type      String   // outfit, pickaxe, glider, emote, etc
-  rarity    String   // common, uncommon, rare, epic, legendary, etc
-  imageUrl  String
-  addedAt   DateTime // Data que foi adicionado no Fortnite
+  id         String   @id @default(uuid()) // ID interno
+  externalId String   @unique @map("external_id") // ID externo da API do Fortnite
+  name       String
+  type       String   // Tipo dinâmico da API externa (outfit, pickaxe, glider, etc)
+  rarity     String   // Raridade dinâmica da API externa (common, rare, epic, etc)
+  imageUrl   String   @map("image_url")
+  addedAt    DateTime @map("added_at") // Data que foi adicionado no Fortnite
   
   // Flags de estado
-  isNew     Boolean  @default(false)
-  onSale    Boolean  @default(false)
-  salePrice Int?     // Preço promocional quando onSale=true
+  isNew     Boolean  @default(false) @map("is_new")
+  onSale    Boolean  @default(false) @map("on_sale")
+  salePrice Int?     @map("sale_price") // Preço promocional quando onSale=true
   
   // Bundle info
-  isBundle  Boolean  @default(false)
+  isBundle  Boolean  @default(false) @map("is_bundle")
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relações
   purchases    Purchase[]
@@ -67,6 +68,7 @@ model Cosmetic {
   @@index([isBundle])
   @@index([type, rarity])
   @@index([onSale, salePrice])
+  @@index([externalId])
   @@map("cosmetics")
 }
 
@@ -75,14 +77,14 @@ model Cosmetic {
 // ==========================================
 model BundleItem {
   id       String @id @default(uuid())
-  bundleId String
-  itemId   String
+  bundleId String @map("bundle_id")
+  itemId   String @map("item_id")
   
   // Relações
   bundle Cosmetic @relation("Bundle", fields: [bundleId], references: [id], onDelete: Cascade)
   item   Cosmetic @relation("Item", fields: [itemId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([bundleId, itemId])
   @@index([bundleId])
@@ -95,15 +97,15 @@ model BundleItem {
 // ==========================================
 model Purchase {
   id         String   @id @default(uuid())
-  userId     String
-  cosmeticId String
+  userId     String   @map("user_id")
+  cosmeticId String   @map("cosmetic_id")
   price      Int      // Preço efetivamente pago no momento da compra
   
   // Rastreabilidade de bundle
-  isFromBundle     Boolean  @default(false) // Se foi adquirido como parte de um bundle
-  parentPurchaseId String?  // ID da compra do bundle pai (se aplicável)
+  isFromBundle     Boolean  @default(false) @map("is_from_bundle") // Se foi adquirido como parte de um bundle
+  parentPurchaseId String?  @map("parent_purchase_id") // ID da compra do bundle pai (se aplicável)
   
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
 
   // Relações
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -126,14 +128,14 @@ model Purchase {
 // ==========================================
 model Return {
   id         String   @id @default(uuid())
-  userId     String
-  cosmeticId String
+  userId     String   @map("user_id")
+  cosmeticId String   @map("cosmetic_id")
   refunded   Int      // Valor estornado (mesmo que foi pago)
   
   // Se foi devolução de bundle, registrar
-  isBundle   Boolean  @default(false)
+  isBundle   Boolean  @default(false) @map("is_bundle")
   
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
 
   // Relações
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -156,14 +158,14 @@ model SyncLog {
   message   String?  // Mensagem de erro ou sucesso
   
   // Métricas opcionais
-  itemsProcessed Int?
-  itemsCreated   Int?
-  itemsUpdated   Int?
+  itemsProcessed Int?     @map("items_processed")
+  itemsCreated   Int?     @map("items_created")
+  itemsUpdated   Int?     @map("items_updated")
   duration       Int?     // Duração em ms
   
-  startedAt  DateTime?
-  finishedAt DateTime?
-  createdAt  DateTime  @default(now())
+  startedAt  DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   @@index([job])
   @@index([status])
@@ -178,11 +180,11 @@ model SyncLog {
 model IdempotencyKey {
   id        String   @id @default(uuid())
   key       String   @unique
-  userId    String
+  userId    String   @map("user_id")
   endpoint  String
   response  Json     // Resposta armazenada para reenvio
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([key])
   @@index([userId])

@@ -12,6 +12,8 @@ export interface ExternalCosmeticDTO {
     smallIcon?: string;
     icon?: string;
     featured?: string;
+    small: string;
+    large: string;
     other?: Record<string, string>;
   };
   added: string;
@@ -28,6 +30,11 @@ export interface ExternalCosmeticsResponse {
 export interface ExternalNewCosmeticsResponse {
   status: number;
   data: {
-    items: ExternalCosmeticDTO[];
+    date: string;
+    build: string;
+    previousBuild: string;
+    hashes: Record<string, string>;
+    lastAdditions: Record<string, string>;
+    items: Record<string, ExternalCosmeticDTO[]>;
   };
 }

@@ -32,8 +32,6 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
 
       const validated = SchemaGuard.validateCosmeticsResponse(response);
 
-      // Extract the array from the first available language key
-      // The API returns data with language keys (e.g., { br: [...] })
       const items = Object.values(validated.data)[0] ?? [];
       return items.map((dto) => CosmeticMapper.toIntegrationCosmetic(dto));
     });
@@ -52,9 +50,20 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
 
       const validated = SchemaGuard.validateNewCosmeticsResponse(response);
 
-      return validated.data.items.map((dto) =>
-        CosmeticMapper.toIntegrationCosmetic(dto),
+      const allItems = Object.values(validated.data.items).flat();
+
+      const validItems = allItems.filter((item) =>
+        CosmeticMapper.isValidCosmetic(item),
       );
+
+      this.logger.log({
+        message: 'Filtering cosmetic items',
+        totalItems: allItems.length,
+        validItems: validItems.length,
+        filtered: allItems.length - validItems.length,
+      });
+
+      return validItems.map((dto) => CosmeticMapper.toIntegrationCosmetic(dto));
     });
   }
 

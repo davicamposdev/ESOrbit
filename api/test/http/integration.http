@@ -64,23 +64,6 @@ GET {{baseUrl}}/integration/cosmetics
 # }
 
 ### ============================================
-### 5️⃣ BUSCAR COSMÉTICOS COM PAGINAÇÃO
-### ============================================
-GET {{baseUrl}}/integration/cosmetics?page=1&pageSize=10
-
-### Resposta esperada:
-# {
-#   "data": [...],
-#   "metadata": {
-#     "total": 1000,
-#     "page": 1,
-#     "pageSize": 10,
-#     "totalPages": 100,
-#     "language": "en"
-#   }
-# }
-
-### ============================================
 ### 6️⃣ BUSCAR COSMÉTICOS COM IDIOMA E PAGINAÇÃO
 ### ============================================
 GET {{baseUrl}}/integration/cosmetics?language=pt-BR

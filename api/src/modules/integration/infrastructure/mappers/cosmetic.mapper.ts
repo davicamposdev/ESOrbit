@@ -1,10 +1,7 @@
 import { Logger } from '@nestjs/common';
-import { CosmeticType } from '../../domain/enums/cosmetic-type.enum';
-import { Rarity } from '../../domain/enums/rarity.enum';
 import { IntegrationCosmetic } from '../../domain/entities/integration-cosmetic.entity';
 import { ExternalCosmeticDTO } from '../schemas/external-cosmetic.dto';
 import { MetricsService } from '../observability/metrics.service';
-import { wrap } from 'module';
 
 export class CosmeticMapper {
   private static readonly logger = new Logger(CosmeticMapper.name);
@@ -14,54 +11,41 @@ export class CosmeticMapper {
     this.metricsService = metricsService;
   }
 
-  private static readonly TYPE_MAP: Record<string, CosmeticType> = {
-    emoji: CosmeticType.EMOJI,
-    wrap: CosmeticType.WRAP,
-    glider: CosmeticType.GLIDER,
-    contrail: CosmeticType.CONTRAIL,
-    toy: CosmeticType.TOY,
-    spray: CosmeticType.SPRAY,
-    pickaxe: CosmeticType.PICKAXE,
-    aura: CosmeticType.AURA,
-    shoe: CosmeticType.SHOE,
-    pet: CosmeticType.PET,
-    music: CosmeticType.MUSIC,
-    loadingscreen: CosmeticType.LOADINGSCREEN,
-    emote: CosmeticType.EMOTE,
-    petcarrier: CosmeticType.PETCARRIER,
-    outfit: CosmeticType.OUTFIT,
-    sidekick: CosmeticType.SIDEKICK,
-    backpack: CosmeticType.BACKPACK,
-    banner: CosmeticType.BANNER,
-  };
+  static isValidCosmetic(external: unknown): external is ExternalCosmeticDTO {
+    if (typeof external !== 'object' || external === null) {
+      return false;
+    }
 
-  private static readonly RARITY_MAP: Record<string, Rarity> = {
-    common: Rarity.COMMON,
-    uncommon: Rarity.UNCOMMON,
-    rare: Rarity.RARE,
-    epic: Rarity.EPIC,
-    legendary: Rarity.LEGENDARY,
-    mythic: Rarity.MYTHIC,
-    gaminglegends: Rarity.GAMINGLEGENDS,
-    icon: Rarity.ICON,
-    marvel: Rarity.MARVEL,
-    dc: Rarity.DC,
-    starwars: Rarity.STARWARS,
-    shadow: Rarity.SHADOW,
-    slurp: Rarity.SLURP,
-    dark: Rarity.DARK,
-    frozen: Rarity.FROZEN,
-    lava: Rarity.LAVA,
-  };
+    const item = external as Record<string, unknown>;
+    const hasRequiredFields =
+      typeof item.id === 'string' &&
+      typeof item.name === 'string' &&
+      typeof item.added === 'string';
+
+    const hasValidType =
+      typeof item.type === 'object' &&
+      item.type !== null &&
+      typeof (item.type as Record<string, unknown>).value === 'string';
+
+    const hasValidRarity =
+      typeof item.rarity === 'object' &&
+      item.rarity !== null &&
+      typeof (item.rarity as Record<string, unknown>).value === 'string';
+
+    const hasImages = typeof item.images === 'object' && item.images !== null;
+
+    return hasRequiredFields && hasValidType && hasValidRarity && hasImages;
+  }
 
   static toIntegrationCosmetic(
     external: ExternalCosmeticDTO,
   ): IntegrationCosmetic {
-    const type = this.mapType(external.type.value);
-    const rarity = this.mapRarity(external.rarity.value);
+    const type = this.normalizeValue(external.type.value);
+    const rarity = this.normalizeValue(external.rarity.value);
     const imageUrl = this.selectBestImage(external.images);
     const addedAt = this.normalizeDate(external.added);
     const childrenExternalIds = this.extractChildren(external.set);
+
     return IntegrationCosmetic.create(
       external.id,
       external.name,
@@ -74,55 +58,18 @@ export class CosmeticMapper {
     );
   }
 
-  private static mapType(value: string): CosmeticType {
-    const normalized = value.toLowerCase().trim();
-    const mapped = this.TYPE_MAP[normalized];
-
-    if (!mapped) {
-      this.logger.warn({
-        message: 'Unknown cosmetic type',
-        value,
-        field: 'type',
-      });
-
-      if (this.metricsService) {
-        this.metricsService.incrementMapperUnknownValue('type', value);
-      }
-
-      return CosmeticType.UNKNOWN;
-    }
-
-    return mapped;
-  }
-
-  private static mapRarity(value: string): Rarity {
-    const normalized = value.toLowerCase().trim();
-    const mapped = this.RARITY_MAP[normalized];
-
-    if (!mapped) {
-      this.logger.warn({
-        message: 'Unknown rarity value',
-        value,
-        field: 'rarity',
-      });
-
-      if (this.metricsService) {
-        this.metricsService.incrementMapperUnknownValue('rarity', value);
-      }
-
-      return Rarity.UNKNOWN;
-    }
-
-    return mapped;
+  private static normalizeValue(value: string): string {
+    return value.toLowerCase().trim();
   }
 
   private static selectBestImage(
     images: ExternalCosmeticDTO['images'],
   ): string {
-    // Priority: featured > icon > smallIcon > other
     if (images.featured) return images.featured;
     if (images.icon) return images.icon;
     if (images.smallIcon) return images.smallIcon;
+    if (images.large) return images.large;
+    if (images.small) return images.small;
 
     if (images.other) {
       const firstKey = Object.keys(images.other)[0];
@@ -132,6 +79,7 @@ export class CosmeticMapper {
     this.logger.warn({
       message: 'No valid image URL found',
       field: 'imageUrl',
+      images,
     });
 
     return 'https://via.placeholder.com/512?text=No+Image';
