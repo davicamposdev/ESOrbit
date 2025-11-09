@@ -19,7 +19,6 @@ export class MetricsService {
   private readonly histograms = new Map<string, Map<string, MetricValue>>();
   private readonly counters = new Map<string, Map<string, CounterMetric>>();
 
-  // Histogram for request duration
   recordHttpDuration(endpoint: string, durationMs: number): void {
     const metricName = 'integration_http_request_duration_ms';
     const labelKey = `endpoint=${endpoint}`;
@@ -27,7 +26,6 @@ export class MetricsService {
     this.recordHistogram(metricName, labelKey, durationMs);
   }
 
-  // Counter for HTTP requests
   incrementHttpRequest(endpoint: string, statusCode: number): void {
     const metricName = 'integration_http_requests_total';
     const labelKey = `endpoint=${endpoint},status_code=${statusCode}`;
@@ -38,13 +36,11 @@ export class MetricsService {
     });
   }
 
-  // Counter for schema validation failures
   incrementSchemaValidationFailure(field: string): void {
     const metricName = 'integration_schema_validation_failures_total';
     this.incrementCounter(metricName, { field });
   }
 
-  // Counter for unknown mapper values
   incrementMapperUnknownValue(field: string, value: string): void {
     const metricName = 'integration_mapper_unknown_values_total';
     this.incrementCounter(metricName, { field, value });
@@ -82,7 +78,6 @@ export class MetricsService {
     metric.min = Math.min(metric.min, value);
     metric.max = Math.max(metric.max, value);
 
-    // Update buckets
     for (const [bucket, count] of metric.buckets) {
       if (value <= bucket) {
         metric.buckets.set(bucket, count + 1);
@@ -113,7 +108,6 @@ export class MetricsService {
   getMetrics(): string {
     const lines: string[] = [];
 
-    // Export histograms
     for (const [name, labelMap] of this.histograms) {
       lines.push(`# TYPE ${name} histogram`);
 
@@ -132,7 +126,6 @@ export class MetricsService {
       }
     }
 
-    // Export counters
     for (const [name, labelMap] of this.counters) {
       lines.push(`# TYPE ${name} counter`);
 

@@ -1,0 +1,127 @@
+### 🎨 Testes de Catálogo de Cosméticos
+
+### Variáveis
+@baseUrl = http://localhost:4000/api
+
+### ============================================
+### 📋 LISTAR COSMÉTICOS (GET)
+### ============================================
+
+### Listar todos os cosméticos
+GET {{baseUrl}}/catalog/cosmetics
+
+### Listar cosméticos com paginação
+GET {{baseUrl}}/catalog/cosmetics?page=1&pageSize=20
+
+### Listar cosméticos por tipo (outfit, emote, glider, pickaxe, etc)
+GET {{baseUrl}}/catalog/cosmetics?type=outfit
+
+### Listar cosméticos por raridade (common, uncommon, rare, epic, legendary)
+GET {{baseUrl}}/catalog/cosmetics?rarity=epic
+
+### Listar cosméticos com filtros combinados
+GET {{baseUrl}}/catalog/cosmetics?type=outfit&rarity=epic&page=1&pageSize=20
+
+### Listar apenas cosméticos novos
+GET {{baseUrl}}/catalog/cosmetics?isNew=true
+
+### Listar apenas bundles
+GET {{baseUrl}}/catalog/cosmetics?isBundle=true
+
+### Listar apenas cosméticos em promoção
+GET {{baseUrl}}/catalog/cosmetics?onSale=true
+
+### Listar com múltiplos filtros booleanos
+GET {{baseUrl}}/catalog/cosmetics?isNew=true&onSale=true&page=1&pageSize=10
+
+### ============================================
+### 🔄 SINCRONIZAR COSMÉTICOS (POST)
+### ============================================
+
+### Sincronizar TODOS os cosméticos (idioma padrão)
+POST {{baseUrl}}/catalog/sync/all
+Content-Type: application/json
+
+{}
+
+### Sincronizar TODOS os cosméticos (pt-BR)
+POST {{baseUrl}}/catalog/sync/all
+Content-Type: application/json
+
+{
+  "language": "pt-BR"
+}
+
+### Sincronizar TODOS os cosméticos (en)
+POST {{baseUrl}}/catalog/sync/all
+Content-Type: application/json
+
+{
+  "language": "en"
+}
+
+### Sincronizar apenas NOVOS cosméticos (idioma padrão)
+POST {{baseUrl}}/catalog/sync/new
+Content-Type: application/json
+
+{}
+
+### Sincronizar apenas NOVOS cosméticos (pt-BR)
+POST {{baseUrl}}/catalog/sync/new
+Content-Type: application/json
+
+{
+  "language": "pt-BR"
+}
+
+### Sincronizar apenas NOVOS cosméticos (en)
+POST {{baseUrl}}/catalog/sync/new
+Content-Type: application/json
+
+{
+  "language": "en"
+}
+
+### Sincronizar cosméticos da LOJA (idioma padrão)
+POST {{baseUrl}}/catalog/sync/shop
+Content-Type: application/json
+
+{}
+
+### Sincronizar cosméticos da LOJA (pt-BR)
+POST {{baseUrl}}/catalog/sync/shop
+Content-Type: application/json
+
+{
+  "language": "pt-BR"
+}
+
+### Sincronizar cosméticos da LOJA (en)
+POST {{baseUrl}}/catalog/sync/shop
+Content-Type: application/json
+
+{
+  "language": "en"
+}
+
+### Sincronizar BANCO COMPLETO (idioma padrão)
+POST {{baseUrl}}/catalog/sync/full
+Content-Type: application/json
+
+{}
+
+### Sincronizar BANCO COMPLETO (pt-BR)
+POST {{baseUrl}}/catalog/sync/full
+Content-Type: application/json
+
+{
+  "language": "ja"
+}
+
+### Sincronizar BANCO COMPLETO (en)
+POST {{baseUrl}}/catalog/sync/full
+Content-Type: application/json
+
+{
+  "language": "en"
+}

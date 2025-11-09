@@ -7,6 +7,7 @@ import { MetricsService } from './infrastructure/observability/metrics.service';
 import { FortniteApiAdapter } from './infrastructure/adapters/fortnite-api.adapter';
 import { FetchAllCosmeticsUseCase } from './application/use-cases/fetch-all-cosmetics.use-case';
 import { FetchNewCosmeticsUseCase } from './application/use-cases/fetch-new-cosmetics.use-case';
+import { FetchShopUseCase } from './application/use-cases/fetch-shop.use-case';
 import { HealthCheckUseCase } from './application/use-cases/health-check.use-case';
 import { CosmeticMapper } from './infrastructure/mappers/cosmetic.mapper';
 import { IntegrationController } from './presentation/controllers/integration.controller';
@@ -32,11 +33,13 @@ import { IntegrationController } from './presentation/controllers/integration.co
     // Use Cases
     FetchAllCosmeticsUseCase,
     FetchNewCosmeticsUseCase,
+    FetchShopUseCase,
     HealthCheckUseCase,
   ],
   exports: [
     FetchAllCosmeticsUseCase,
     FetchNewCosmeticsUseCase,
+    FetchShopUseCase,
     HealthCheckUseCase,
     MetricsService,
   ],

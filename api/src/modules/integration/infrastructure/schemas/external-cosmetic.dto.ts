@@ -18,7 +18,9 @@ export interface ExternalCosmeticDTO {
   };
   added: string;
   set?: {
-    items?: string[];
+    value: string;
+    text: string;
+    backendValue: string;
   };
 }
 
@@ -36,5 +38,21 @@ export interface ExternalNewCosmeticsResponse {
     hashes: Record<string, string>;
     lastAdditions: Record<string, string>;
     items: Record<string, ExternalCosmeticDTO[]>;
+  };
+}
+
+export interface ExternalShopEntry {
+  regularPrice: number;
+  finalPrice: number;
+  brItems?: ExternalCosmeticDTO[];
+}
+
+export interface ExternalShopResponse {
+  status: number;
+  data: {
+    hash: string;
+    date: string;
+    vbuckIcon: string;
+    entries: ExternalShopEntry[];
   };
 }

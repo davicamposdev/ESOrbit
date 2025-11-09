@@ -13,6 +13,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-esorbit123}
       POSTGRES_DB: ${DB_NAME:-esorbit}
       PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: America/Sao_Paulo
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -38,6 +39,8 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    environment:
+      TZ: America/Sao_Paulo
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
@@ -97,6 +100,9 @@ services:
 
       # CORS
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:4000}
+
+      # Timezone
+      TZ: America/Sao_Paulo
     depends_on:
       postgres:
         condition: service_healthy
@@ -114,6 +120,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    profiles:
+      - app
 
   # ===========================================
   # Frontend Web (Next.js)
@@ -133,6 +141,7 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
       NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-ESOrbit}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      TZ: America/Sao_Paulo
     depends_on:
       - api
     volumes:
@@ -147,6 +156,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    profiles:
+      - app
 
   # ===========================================
   # BullMQ Board
@@ -161,6 +172,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      TZ: America/Sao_Paulo
     depends_on:
       - redis
     networks:
@@ -179,6 +191,7 @@ services:
       - "8978:8978"
     environment:
       - CB_SERVER_NAME=ESOrbit DB Manager
+      - TZ=America/Sao_Paulo
     volumes:
       - cloudbeaver_data:/opt/cloudbeaver/workspace
     depends_on:

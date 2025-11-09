@@ -6,6 +6,7 @@ export interface FetchAllCosmeticsParams {
   language?: string;
   page?: number;
   pageSize?: number;
+  skipPagination?: boolean;
 }
 
 export interface CosmeticsResult {
@@ -31,6 +32,7 @@ export class FetchAllCosmeticsUseCase {
     const language = params.language || 'pt-BR';
     const page = params.page || 1;
     const pageSize = params.pageSize || 100;
+    const skipPagination = params.skipPagination || false;
 
     this.logger.log({
       message: 'Fetching all cosmetics from external API',
@@ -45,6 +47,16 @@ export class FetchAllCosmeticsUseCase {
       message: 'Cosmetics fetched successfully',
       totalCosmetics: allCosmetics.length,
     });
+
+    if (skipPagination) {
+      return {
+        items: allCosmetics,
+        total: allCosmetics.length,
+        page: 1,
+        pageSize: allCosmetics.length,
+        totalPages: 1,
+      };
+    }
 
     const totalPages = Math.ceil(allCosmetics.length / pageSize);
     const startIndex = (page - 1) * pageSize;

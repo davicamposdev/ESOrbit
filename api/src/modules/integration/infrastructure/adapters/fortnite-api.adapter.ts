@@ -26,9 +26,9 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
 
     return this.circuitBreaker.execute('cosmetics_all', async () => {
       const language = params?.language || 'pt-BR';
-      const response = await this.httpClient.get<unknown>(
-        `/cosmetics?language=${language}`,
-      );
+      const response = await this.httpClient.get<unknown>('/cosmetics', {
+        params: { language },
+      });
 
       const validated = SchemaGuard.validateCosmeticsResponse(response);
 
@@ -44,9 +44,9 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
 
     return this.circuitBreaker.execute('cosmetics_new', async () => {
       const language = params?.language || 'pt-BR';
-      const response = await this.httpClient.get<unknown>(
-        `/cosmetics/new?language=${language}`,
-      );
+      const response = await this.httpClient.get<unknown>('/cosmetics/new', {
+        params: { language },
+      });
 
       const validated = SchemaGuard.validateNewCosmeticsResponse(response);
 
@@ -84,6 +84,48 @@ export class FortniteApiAdapter implements ICosmeticsReadPort {
 
       return { latency, status: 'unhealthy' };
     }
+  }
+
+  async fetchShopCosmetics(params?: {
+    language?: string;
+  }): Promise<IntegrationCosmetic[]> {
+    await this.checkRateLimit();
+
+    return this.circuitBreaker.execute('shop', async () => {
+      const language = params?.language || 'pt-BR';
+      const response = await this.httpClient.get<unknown>('/shop', {
+        params: { language },
+      });
+
+      const validated = SchemaGuard.validateShopResponse(response);
+
+      const allItems = validated.data.entries
+        .flatMap((entry) =>
+          (entry.brItems || []).map((item) => ({
+            ...item,
+            basePrice: entry.regularPrice,
+            currentPrice: entry.finalPrice,
+          })),
+        )
+        .filter((item) => CosmeticMapper.isValidCosmetic(item));
+
+      this.logger.log({
+        message: 'Filtering shop cosmetic items',
+        totalEntries: validated.data.entries.length,
+        totalItems: validated.data.entries.reduce(
+          (acc, entry) => acc + (entry.brItems?.length || 0),
+          0,
+        ),
+        validItems: allItems.length,
+        filtered:
+          validated.data.entries.reduce(
+            (acc, entry) => acc + (entry.brItems?.length || 0),
+            0,
+          ) - allItems.length,
+      });
+
+      return allItems.map((dto) => CosmeticMapper.toIntegrationCosmetic(dto));
+    });
   }
 
   private async checkRateLimit(): Promise<void> {

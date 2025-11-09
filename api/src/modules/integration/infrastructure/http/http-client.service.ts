@@ -4,6 +4,7 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
   AxiosResponse,
+  AxiosRequestConfig,
 } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { IntegrationConfigService } from '../config/integration-config.service';
@@ -46,7 +47,6 @@ export class HttpClientService {
   }
 
   private setupInterceptors(): void {
-    // Request interceptor
     this.client.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const requestId = uuidv4();
@@ -76,7 +76,6 @@ export class HttpClientService {
       },
     );
 
-    // Response interceptor
     this.client.interceptors.response.use(
       (response: AxiosResponse) => {
         const requestId = response.config.headers['X-Request-ID'] as string;
@@ -165,13 +164,16 @@ export class HttpClientService {
     return new IntegrationError('Unknown error', 'UNKNOWN_ERROR');
   }
 
-  async get<T>(url: string, retries?: number): Promise<T> {
-    const config = this.configService.get();
-    const maxRetries = retries ?? config.retryAttempts;
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig & { retries?: number },
+  ): Promise<T> {
+    const appConfig = this.configService.get();
+    const maxRetries = config?.retries ?? appConfig.retryAttempts;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        const response = await this.client.get<T>(url);
+        const response = await this.client.get<T>(url, config);
         return response.data;
       } catch (error) {
         if (attempt === maxRetries) {
@@ -190,7 +192,7 @@ export class HttpClientService {
           }
         }
 
-        const backoff = config.retryBackoffMs * Math.pow(2, attempt);
+        const backoff = appConfig.retryBackoffMs * Math.pow(2, attempt);
         this.logger.warn({
           message: 'Retrying request',
           attempt: attempt + 1,

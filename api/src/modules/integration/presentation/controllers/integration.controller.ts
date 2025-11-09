@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Logger } from '@nestjs/common';
 import { FetchAllCosmeticsUseCase } from '../../application/use-cases/fetch-all-cosmetics.use-case';
 import { FetchNewCosmeticsUseCase } from '../../application/use-cases/fetch-new-cosmetics.use-case';
+import { FetchShopUseCase } from '../../application/use-cases/fetch-shop.use-case';
 import { HealthCheckUseCase } from '../../application/use-cases/health-check.use-case';
 import { MetricsService } from '../../infrastructure/observability/metrics.service';
 import { Public } from '../../../auth/presentation/decorators/public.decorator';
@@ -13,6 +14,7 @@ export class IntegrationController {
   constructor(
     private readonly fetchAllCosmeticsUseCase: FetchAllCosmeticsUseCase,
     private readonly fetchNewUseCase: FetchNewCosmeticsUseCase,
+    private readonly fetchShopUseCase: FetchShopUseCase,
     private readonly healthCheckUseCase: HealthCheckUseCase,
     private readonly metricsService: MetricsService,
   ) {}
@@ -38,6 +40,11 @@ export class IntegrationController {
       page: page ? parseInt(String(page), 10) : undefined,
       pageSize: pageSize ? parseInt(String(pageSize), 10) : undefined,
     });
+  }
+
+  @Get('shop')
+  async getShop(@Query('language') language?: string) {
+    return this.fetchShopUseCase.execute({ language });
   }
 
   @Get('metrics')

@@ -24,7 +24,6 @@ export class RateLimiterService {
       this.buckets.set(key, entry);
     }
 
-    // Refill tokens based on time elapsed
     const elapsed = now - entry.lastRefill;
     const tokensToAdd = Math.floor((elapsed / 1000) * refillRate);
 

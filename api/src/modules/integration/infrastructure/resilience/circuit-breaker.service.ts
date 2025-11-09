@@ -46,7 +46,6 @@ export class CircuitBreakerService {
       this.circuits.set(key, circuit);
     }
 
-    // Check if circuit is open
     if (circuit.state === CircuitState.OPEN) {
       if (Date.now() < circuit.nextAttempt) {
         this.logger.warn({
@@ -57,7 +56,6 @@ export class CircuitBreakerService {
         throw new ProviderUnavailableError('Circuit breaker is open');
       }
 
-      // Try to recover
       circuit.state = CircuitState.HALF_OPEN;
       circuit.successes = 0;
       this.logger.log({
@@ -69,7 +67,6 @@ export class CircuitBreakerService {
     try {
       const result = await fn();
 
-      // Success
       if (circuit.state === CircuitState.HALF_OPEN) {
         circuit.successes++;
 
@@ -88,7 +85,6 @@ export class CircuitBreakerService {
 
       return result;
     } catch (error) {
-      // Failure
       circuit.failures++;
       circuit.successes = 0;
 

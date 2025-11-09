@@ -81,7 +81,47 @@ GET {{baseUrl}}/integration/cosmetics?language=pt-BR
 # }
 
 ### ============================================
-### 7️⃣ BUSCAR MÉTRICAS (Resumo)
+### 6️⃣ BUSCAR SHOP (LOJA)
+### ============================================
+GET {{baseUrl}}/integration/shop
+
+### Resposta esperada:
+# [
+#   {
+#     "externalId": "CID_884_Athena_Commando_F_ChOneRamirez",
+#     "name": "Vintage Ramirez",
+#     "description": "Back again and ready for action.",
+#     "type": "outfit",
+#     "rarity": "uncommon",
+#     "imageUrl": "https://fortnite-api.com/images/cosmetics/br/cid_884_athena_commando_f_choneramirez/featured.png",
+#     "addedAt": "2020-11-05T00:00:00.000Z",
+#     "childrenExternalIds": []
+#   },
+#   ...
+# ]
+
+### ============================================
+### 7️⃣ BUSCAR SHOP COM IDIOMA
+### ============================================
+GET {{baseUrl}}/integration/shop?language=pt-BR
+
+### Resposta esperada:
+# [
+#   {
+#     "externalId": "...",
+#     "name": "Nome em Português",
+#     "description": "Descrição em português",
+#     "type": "outfit",
+#     "rarity": "uncommon",
+#     "imageUrl": "...",
+#     "addedAt": "...",
+#     "childrenExternalIds": []
+#   },
+#   ...
+# ]
+
+### ============================================
+### 8️⃣ BUSCAR MÉTRICAS (Resumo)
 ### ============================================
 GET {{baseUrl}}/integration/metrics
 
@@ -121,7 +161,7 @@ GET {{baseUrl}}/integration/metrics
 # }
 
 ### ============================================
-### 8️⃣ BUSCAR MÉTRICAS (Formato Prometheus)
+### 9️⃣ BUSCAR MÉTRICAS (Formato Prometheus)
 ### ============================================
 GET {{baseUrl}}/integration/metrics/prometheus
 

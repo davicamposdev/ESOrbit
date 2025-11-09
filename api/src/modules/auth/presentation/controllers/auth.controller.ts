@@ -9,8 +9,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import type { RegisterDto } from '../dtos/register.dto';
-import type { LoginDto } from '../dtos/login.dto';
+import { RegisterDto } from '../dtos/register.dto';
+import { LoginDto } from '../dtos/login.dto';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { JwtRefreshGuard } from '../guards/jwt-refresh.guard';

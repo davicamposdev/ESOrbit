@@ -3,6 +3,7 @@ import { SchemaValidationError } from '../../domain/errors/integration.errors';
 import {
   ExternalCosmeticsResponse,
   ExternalNewCosmeticsResponse,
+  ExternalShopResponse,
 } from './external-cosmetic.dto';
 
 export class SchemaGuard {
@@ -84,6 +85,30 @@ export class SchemaGuard {
     );
 
     return data as ExternalNewCosmeticsResponse;
+  }
+
+  static validateShopResponse(data: unknown): ExternalShopResponse {
+    if (!this.isObject(data)) {
+      throw new SchemaValidationError('Response is not an object');
+    }
+
+    if (typeof data.status !== 'number') {
+      throw new SchemaValidationError('Missing or invalid status');
+    }
+
+    if (!this.isObject(data.data)) {
+      throw new SchemaValidationError('Data is not an object');
+    }
+
+    if (!Array.isArray(data.data.entries)) {
+      throw new SchemaValidationError('Data.entries is not an array');
+    }
+
+    this.logger.log(
+      `Shop response validated: ${data.data.entries.length} entries`,
+    );
+
+    return data as ExternalShopResponse;
   }
 
   private static isObject(value: unknown): value is Record<string, any> {

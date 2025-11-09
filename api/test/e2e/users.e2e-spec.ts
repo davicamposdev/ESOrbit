@@ -19,7 +19,6 @@ describe('Users (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = app.get<PrismaService>(PrismaService);
 
-    // Configurar app
     app.use(cookieParser());
     app.useGlobalPipes(
       new ValidationPipe({
@@ -31,7 +30,6 @@ describe('Users (e2e)', () => {
 
     await app.init();
 
-    // Criar usuário de teste
     const res = await request(app.getHttpServer())
       .post('/api/auth/register')
       .send({
@@ -45,7 +43,6 @@ describe('Users (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Limpar banco
     await prisma.user.deleteMany({
       where: {
         email: {

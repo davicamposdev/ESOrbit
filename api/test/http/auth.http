@@ -3,6 +3,7 @@
 ### Variáveis
 @baseUrl = http://localhost:4000/api
 @accessToken = seu-token-aqui
+
 @userId = seu-user-id-aqui
 
 ### ============================================
@@ -12,9 +13,9 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "teste@example.com",
+  "email": "davicamspos@tuta.io",
   "password": "senha123",
-  "displayName": "Usuário Teste"
+  "displayName": "Davi Campos"
 }
 
 ### Resposta esperada:
@@ -36,7 +37,7 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "teste@example.com",
+  "email": "davicampos@tuta.io",
   "password": "senha123"
 }
 

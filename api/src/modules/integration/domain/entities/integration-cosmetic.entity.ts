@@ -1,3 +1,5 @@
+import { CosmeticSetInfo } from '../value-objects/set-info.vo';
+
 export class IntegrationCosmetic {
   private constructor(
     private readonly _externalId: string,
@@ -7,7 +9,9 @@ export class IntegrationCosmetic {
     private readonly _rarity: string,
     private readonly _imageUrl: string,
     private readonly _addedAt: string,
-    private readonly _childrenExternalIds: string[],
+    private readonly _setInfo?: CosmeticSetInfo,
+    private readonly _basePrice?: number,
+    private readonly _currentPrice?: number,
   ) {}
 
   static create(
@@ -18,7 +22,9 @@ export class IntegrationCosmetic {
     rarity: string,
     imageUrl: string,
     addedAt: string,
-    childrenExternalIds: string[],
+    setInfo?: CosmeticSetInfo,
+    basePrice?: number,
+    currentPrice?: number,
   ): IntegrationCosmetic {
     return new IntegrationCosmetic(
       externalId,
@@ -28,7 +34,9 @@ export class IntegrationCosmetic {
       rarity,
       imageUrl,
       addedAt,
-      childrenExternalIds,
+      setInfo,
+      basePrice,
+      currentPrice,
     );
   }
 
@@ -60,7 +68,15 @@ export class IntegrationCosmetic {
     return this._addedAt;
   }
 
-  get childrenExternalIds(): string[] {
-    return this._childrenExternalIds;
+  get setInfo(): CosmeticSetInfo | undefined {
+    return this._setInfo;
+  }
+
+  get basePrice(): number | undefined {
+    return this._basePrice;
+  }
+
+  get currentPrice(): number | undefined {
+    return this._currentPrice;
   }
 }

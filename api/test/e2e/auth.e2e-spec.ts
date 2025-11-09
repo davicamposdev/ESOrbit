@@ -17,7 +17,6 @@ describe('Auth (e2e)', () => {
     app = moduleFixture.createNestApplication();
     prisma = app.get<PrismaService>(PrismaService);
 
-    // Configurar app como em main.ts
     app.use(cookieParser());
     app.useGlobalPipes(
       new ValidationPipe({
@@ -31,7 +30,6 @@ describe('Auth (e2e)', () => {
   });
 
   afterAll(async () => {
-    // Limpar banco de dados de teste
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -67,7 +65,6 @@ describe('Auth (e2e)', () => {
     it('deve retornar 409 ao tentar registrar email duplicado', async () => {
       const email = `e2e-test-duplicate-${Date.now()}@example.com`;
 
-      // Primeiro registro
       await request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
@@ -77,7 +74,6 @@ describe('Auth (e2e)', () => {
         })
         .expect(201);
 
-      // Segundo registro com mesmo email
       return request(app.getHttpServer())
         .post('/api/auth/register')
         .send({
@@ -104,7 +100,6 @@ describe('Auth (e2e)', () => {
     const testPassword = 'senha123';
 
     beforeAll(async () => {
-      // Criar usuário para testes de login
       await request(app.getHttpServer()).post('/api/auth/register').send({
         email: testEmail,
         password: testPassword,
@@ -249,13 +244,11 @@ describe('Auth (e2e)', () => {
     });
 
     it('refresh não deve funcionar após logout', async () => {
-      // Fazer logout
       await request(app.getHttpServer())
         .post('/api/auth/logout')
         .set('Cookie', cookies)
         .expect(200);
 
-      // Tentar refresh
       return request(app.getHttpServer())
         .post('/api/auth/refresh')
         .set('Cookie', cookies)

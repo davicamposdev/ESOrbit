@@ -7,10 +7,8 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // Cookie parser
   app.use(cookieParser());
 
-  // Validation pipe global
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -19,13 +17,11 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS with credentials
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   });
 
-  // Global prefix
   const globalPrefix = process.env.API_PREFIX || 'api';
   app.setGlobalPrefix(globalPrefix);
 

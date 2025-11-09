@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { IntegrationCosmetic } from '../../domain/entities/integration-cosmetic.entity';
 import { ExternalCosmeticDTO } from '../schemas/external-cosmetic.dto';
 import { MetricsService } from '../observability/metrics.service';
+import { CosmeticSetInfo } from '../../domain/value-objects/set-info.vo';
 
 export class CosmeticMapper {
   private static readonly logger = new Logger(CosmeticMapper.name);
@@ -38,13 +39,16 @@ export class CosmeticMapper {
   }
 
   static toIntegrationCosmetic(
-    external: ExternalCosmeticDTO,
+    external: ExternalCosmeticDTO & {
+      basePrice?: number;
+      currentPrice?: number;
+    },
   ): IntegrationCosmetic {
     const type = this.normalizeValue(external.type.value);
     const rarity = this.normalizeValue(external.rarity.value);
     const imageUrl = this.selectBestImage(external.images);
     const addedAt = this.normalizeDate(external.added);
-    const childrenExternalIds = this.extractChildren(external.set);
+    const setInfo = this.extractChildren(external.set);
 
     return IntegrationCosmetic.create(
       external.id,
@@ -54,7 +58,9 @@ export class CosmeticMapper {
       rarity,
       imageUrl,
       addedAt,
-      childrenExternalIds,
+      setInfo,
+      external.basePrice,
+      external.currentPrice,
     );
   }
 
@@ -93,7 +99,6 @@ export class CosmeticMapper {
         throw new Error('Invalid date');
       }
 
-      // Validate reasonable date range (2017-2100)
       const year = date.getFullYear();
       if (year < 2017 || year > 2100) {
         throw new Error('Date out of valid range');
@@ -108,16 +113,15 @@ export class CosmeticMapper {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      // Fallback to current date
       return new Date().toISOString();
     }
   }
 
-  private static extractChildren(set: ExternalCosmeticDTO['set']): string[] {
-    if (!set || !set.items || !Array.isArray(set.items)) {
-      return [];
-    }
+  private static extractChildren(
+    set: ExternalCosmeticDTO['set'],
+  ): CosmeticSetInfo | undefined {
+    if (!set?.backendValue) return undefined;
 
-    return set.items.filter((id) => typeof id === 'string' && id.length > 0);
+    return CosmeticSetInfo.create(set.value, set.text, set.backendValue);
   }
 }

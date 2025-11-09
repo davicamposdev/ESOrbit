@@ -13,5 +13,9 @@ export interface ICosmeticsReadPort {
     params?: FetchCosmeticsParams,
   ): Promise<IntegrationCosmetic[]>;
 
+  fetchShopCosmetics(
+    params?: FetchCosmeticsParams,
+  ): Promise<IntegrationCosmetic[]>;
+
   pingCosmetics(): Promise<{ latency: number; status: string }>;
 }
