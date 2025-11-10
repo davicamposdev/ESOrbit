@@ -26,9 +26,9 @@ export interface SyncResult {
 }
 
 export interface SyncOptions {
-  updateIsNew?: boolean; // Se true, atualiza o campo isNew
-  updateIsAvailable?: boolean; // Se true, atualiza o campo isAvailable
-  isNewValue?: boolean; // Valor a ser usado para isNew quando updateIsNew = true
+  updateIsNew?: boolean;
+  updateIsAvailable?: boolean;
+  isNewValue?: boolean;
 }
 
 @Injectable()
@@ -83,7 +83,7 @@ export class CosmeticSyncService {
     cosmetics: IntegrationCosmetic[],
     options: SyncOptions = {},
   ): Promise<SyncResult> {
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 300;
     let itemsCreated = 0;
     let itemsUpdated = 0;
 
@@ -103,7 +103,11 @@ export class CosmeticSyncService {
       );
 
       results.forEach((result) => {
-        result.created ? itemsCreated++ : itemsUpdated++;
+        if (result.created) {
+          itemsCreated++;
+        } else {
+          itemsUpdated++;
+        }
       });
 
       this.logger.debug(
@@ -128,14 +132,8 @@ export class CosmeticSyncService {
     setInfo: { backendValue: string; value: string; text: string },
     cosmeticId: string,
   ): Promise<void> {
-    let bundle = await this.bundleRepository.findByExternalId(
-      setInfo.backendValue,
-    );
-
-    if (!bundle) {
-      const newBundle = Bundle.create(setInfo.backendValue, setInfo.value);
-      bundle = await this.bundleRepository.create(newBundle);
-    }
+    const newBundle = Bundle.create(setInfo.backendValue, setInfo.value);
+    const bundle = await this.bundleRepository.upsert(newBundle);
 
     await this.bundleRepository.createBundleRelation(
       bundle.id,

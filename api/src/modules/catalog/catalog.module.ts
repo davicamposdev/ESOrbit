@@ -12,6 +12,7 @@ import { SyncShopCosmeticsUseCase } from './application/use-cases/sync-shop-cosm
 import { ListCosmeticsUseCase } from './application/use-cases/list-cosmetics.use-case';
 import { CatalogController } from './presentation/controllers/catalog.controller';
 import { CatalogSyncCronService } from './application/services/catalog-sync-cron.service';
+import { CatalogBootstrapService } from './application/services/catalog-bootstrap.service';
 
 @Module({
   imports: [PrismaModule, IntegrationModule, ScheduleModule.forRoot()],
@@ -38,7 +39,8 @@ import { CatalogSyncCronService } from './application/services/catalog-sync-cron
     ListCosmeticsUseCase,
     // Domain services
     CosmeticSyncService,
-    // Cron services
+    // Application services
+    CatalogBootstrapService,
     CatalogSyncCronService,
   ],
   exports: [

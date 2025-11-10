@@ -25,6 +25,25 @@ NODE_ENV=development
 FRONTEND_URL="http://localhost:3000"
 ```
 
+### Integração com API Externa
+
+```env
+FORTNITE_API_BASE="https://fortnite-api.com/v2"
+TIMEOUT_MS=10000
+RETRY_ATTEMPTS=3
+RETRY_BACKOFF_MS=1000
+RATE_LIMIT_RPS=5
+```
+
+### Sincronização do Catálogo
+
+```env
+# Habilita sincronização automática ao iniciar a aplicação
+SYNC_ON_BOOTSTRAP=false
+```
+
+**Nota:** Defina como `true` apenas se desejar que o catálogo seja sincronizado automaticamente quando a aplicação iniciar. Útil para ambientes de desenvolvimento ou após deploy em produção para garantir que os dados estejam atualizados.
+
 ---
 
 ## Gerar Secrets Fortes

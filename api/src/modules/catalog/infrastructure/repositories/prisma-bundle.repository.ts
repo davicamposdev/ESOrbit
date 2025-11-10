@@ -18,6 +18,23 @@ export class PrismaBundleRepository implements IBundleRepository {
     return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
   }
 
+  async upsert(data: Bundle): Promise<Bundle> {
+    const bundle = await this.prisma.bundle.upsert({
+      where: {
+        externalId: data.externalId,
+      },
+      update: {
+        name: data.name,
+      },
+      create: {
+        externalId: data.externalId,
+        name: data.name,
+      },
+    });
+
+    return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
+  }
+
   async findById(id: string): Promise<Bundle | null> {
     const bundle = await this.prisma.bundle.findUnique({
       where: { id },
