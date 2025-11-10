@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  displayName  String    @map("display_name")
-  credits      Int       @default(10000)
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  credits      Int      @default(10000)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  purchases Purchase[]
-  returns   Return[]
+  purchases         Purchase[]
+  returns           Return[]
+  transfersSent     Transfer[] @relation("TransfersSent")
+  transfersReceived Transfer[] @relation("TransfersReceived")
 
   @@index([email])
   @@index([displayName])
@@ -25,29 +27,24 @@ model User {
 }
 
 model Cosmetic {
-  id         String   @id @default(uuid())
-  externalId String   @unique @map("external_id")
-  name       String
-  type       String
-  rarity     String
-  imageUrl   String   @map("image_url")
-  addedAt    DateTime @map("added_at")
-
+  id           String   @id @default(uuid())
+  externalId   String   @unique @map("external_id")
+  name         String
+  type         String
+  rarity       String
+  imageUrl     String   @map("image_url")
+  addedAt      DateTime @map("added_at")
   isNew        Boolean  @default(false) @map("is_new")
   isAvailable  Boolean  @default(false) @map("is_available")
+  basePrice    Int?     @map("base_price")
+  currentPrice Int?     @map("current_price")
+  isBundle     Boolean  @default(false) @map("is_bundle")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  basePrice    Int?   @map("base_price")
-  currentPrice Int?   @map("current_price")
-
-  isBundle  Boolean  @default(false) @map("is_bundle")
-  
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  purchases    Purchase[]
-  returns      Return[]
-  
-  bundleItems  BundleItem[]
+  purchases   Purchase[]
+  returns     Return[]
+  bundleItems BundleItem[]
 
   @@index([name])
   @@index([type])
@@ -63,29 +60,27 @@ model Cosmetic {
 }
 
 model Bundle {
-  id          String      @id @default(uuid())
-  externalId  String      @unique @map("external_id")
-  name        String      @map("name")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  externalId String   @unique @map("external_id")
+  name       String   @map("name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  items       BundleItem[]
+  items BundleItem[]
 
-  @@map("bundles")
   @@index([name])
+  @@map("bundles")
 }
 
-
 model BundleItem {
-  id           String    @id @default(uuid())
-  bundleId     String    @map("bundle_id")
-  itemId       String    @map("item_id")
-  description  String    @map("description")
+  id          String   @id @default(uuid())
+  bundleId    String   @map("bundle_id")
+  itemId      String   @map("item_id")
+  description String   @map("description")
+  createdAt   DateTime @default(now()) @map("created_at")
 
-  bundle       Bundle    @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  item         Cosmetic  @relation(fields: [itemId], references: [id], onDelete: Cascade)
-
-  createdAt    DateTime  @default(now()) @map("created_at")
+  bundle Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  item   Cosmetic @relation(fields: [itemId], references: [id], onDelete: Cascade)
 
   @@unique([bundleId, itemId])
   @@index([bundleId])
@@ -94,64 +89,106 @@ model BundleItem {
 }
 
 model Purchase {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  cosmeticId String   @map("cosmetic_id")
-  price      Int
+  id               String         @id @default(uuid())
+  userId           String         @map("user_id")
+  cosmeticId       String         @map("cosmetic_id")
+  transactionId    String         @unique @map("transaction_id")
+  isFromBundle     Boolean        @default(false) @map("is_from_bundle")
+  parentPurchaseId String?        @map("parent_purchase_id")
+  status           PurchaseStatus @default(ACTIVE)
+  returnedAt       DateTime?      @map("returned_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
 
-  isFromBundle     Boolean  @default(false) @map("is_from_bundle")
-  parentPurchaseId String?  @map("parent_purchase_id")
-
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
-
-  parentPurchase Purchase?  @relation("BundlePurchase", fields: [parentPurchaseId], references: [id], onDelete: Cascade)
-  childPurchases Purchase[] @relation("BundlePurchase")
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cosmetic       Cosmetic    @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  parentPurchase Purchase?   @relation("BundlePurchase", fields: [parentPurchaseId], references: [id], onDelete: Cascade)
+  childPurchases Purchase[]  @relation("BundlePurchase")
+  returns        Return[]
 
   @@unique([userId, cosmeticId])
   @@index([userId])
   @@index([cosmeticId])
-  @@index([createdAt(sort: Desc)])
-  @@index([parentPurchaseId])
+  @@index([status])
+  @@index([transactionId])
   @@map("purchases")
 }
 
 model Return {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  cosmeticId String   @map("cosmetic_id")
-  refunded   Int
+  id            String       @id @default(uuid())
+  purchaseId    String       @map("purchase_id")
+  userId        String       @map("user_id")
+  cosmeticId    String       @map("cosmetic_id")
+  transactionId String       @unique @map("transaction_id")
+  reason        String?
+  isPartial     Boolean      @default(false) @map("is_partial")
+  status        ReturnStatus @default(COMPLETED)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
 
-  isBundle   Boolean  @default(false) @map("is_bundle")
-
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
+  purchase    Purchase    @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cosmetic    Cosmetic    @relation(fields: [cosmeticId], references: [id], onDelete: Restrict)
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
 
   @@index([userId])
-  @@index([cosmeticId])
-  @@index([createdAt(sort: Desc)])
-  @@index([userId, createdAt(sort: Desc)])
+  @@index([purchaseId])
+  @@index([status])
+  @@index([transactionId])
   @@map("returns")
 }
 
+model Transfer {
+  id                String         @id @default(uuid())
+  fromUserId        String         @map("from_user_id")
+  toUserId          String         @map("to_user_id")
+  fromTransactionId String         @unique @map("from_transaction_id")
+  toTransactionId   String         @unique @map("to_transaction_id")
+  status            TransferStatus @default(COMPLETED)
+  description       String?
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  fromUser User @relation("TransfersSent", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUser   User @relation("TransfersReceived", fields: [toUserId], references: [id], onDelete: Restrict)
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([status])
+  @@map("transfers")
+}
+
+model Transaction {
+  id        String            @id @default(uuid())
+  amount    Int
+  currency  String
+  method    String
+  type      TransactionType
+  status    TransactionStatus @default(PENDING)
+  createdAt DateTime          @default(now()) @map("created_at")
+
+  purchases Purchase[]
+  returns   Return[]
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([type])
+  @@map("transactions")
+}
+
 model SyncLog {
-  id        String   @id @default(uuid())
-  job       String
-  status    String
-  message   String?
-
-  itemsProcessed Int?     @map("items_processed")
-  itemsCreated   Int?     @map("items_created")
-  itemsUpdated   Int?     @map("items_updated")
+  id             String    @id @default(uuid())
+  job            String
+  status         String
+  message        String?
+  itemsProcessed Int?      @map("items_processed")
+  itemsCreated   Int?      @map("items_created")
+  itemsUpdated   Int?      @map("items_updated")
   duration       Int?
-
-  startedAt  DateTime? @map("started_at")
-  finishedAt DateTime? @map("finished_at")
-  createdAt  DateTime  @default(now()) @map("created_at")
+  startedAt      DateTime? @map("started_at")
+  finishedAt     DateTime? @map("finished_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
   @@index([job])
   @@index([status])
@@ -160,17 +197,39 @@ model SyncLog {
   @@map("sync_logs")
 }
 
-model IdempotencyKey {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  userId    String   @map("user_id")
-  endpoint  String
-  response  Json
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+enum TransactionType {
+  PURCHASE   @map("purchase")
+  REFUND     @map("refund")
+  TRANSFER   @map("transfer")
+  BONUS      @map("bonus")
+  ADJUSTMENT @map("adjustment")
+}
 
-  @@index([key])
-  @@index([userId])
-  @@index([expiresAt])
-  @@map("idempotency_keys")
+enum TransactionDirection {
+  CREDIT @map("credit")
+  DEBIT  @map("debit")
+}
+
+enum TransactionStatus {
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  FAILED    @map("failed")
+}
+
+enum PurchaseStatus {
+  ACTIVE    @map("active")
+  RETURNED  @map("returned")
+  CANCELLED @map("cancelled")
+}
+
+enum ReturnStatus {
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  FAILED    @map("failed")
+}
+
+enum TransferStatus {
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+  FAILED    @map("failed")
 }
