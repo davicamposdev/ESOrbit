@@ -30,12 +30,12 @@ export class SyncNewCosmeticsUseCase {
       `Fetched ${newCosmetics.length} new cosmetics from external API`,
     );
 
-    // sync-new deve alterar apenas isNew, não altera isAvailable
     const syncResult = await this.cosmeticSyncService.processCosmeticsBatch(
       newCosmetics,
       {
         updateIsNew: true,
         updateIsAvailable: false,
+        updatePricing: false,
         isNewValue: true,
       },
     );

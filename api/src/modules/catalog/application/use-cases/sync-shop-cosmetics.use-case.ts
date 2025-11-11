@@ -31,12 +31,12 @@ export class SyncShopCosmeticsUseCase {
       `Fetched ${shopCosmetics.length} shop cosmetics from external API`,
     );
 
-    // sync-shop deve alterar apenas isAvailable, não altera isNew
     const syncResult = await this.cosmeticSyncService.processCosmeticsBatch(
       shopCosmetics,
       {
         updateIsNew: false,
         updateIsAvailable: true,
+        updatePricing: true,
       },
     );
 

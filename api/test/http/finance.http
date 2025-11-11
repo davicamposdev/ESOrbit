@@ -1,0 +1,362 @@
+### 💰 Testes do Módulo Finance
+
+### Variáveis
+@baseUrl = http://localhost:4000/api
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzI5ZTVjOS0zZWY5LTQyYzMtYTY2NS05ZjJlMWQ3YzI0NzEiLCJlbWFpbCI6ImRhdmljYW1wb3NAdHV0YS5pbyIsImp0aSI6IjA0YzliNzZjLTNiYWYtNDExZS05ZTdiLTZhNzA3Y2E2ZjhkYyIsImlhdCI6MTc2MjgyNDk2OCwiZXhwIjoxNzYyODI1ODY4fQ.f0LNK2UIBDqEV4a6g2YXdslBSHNXSWPSJ4L6QDb0Qww
+@userId = seu-user-id-aqui
+@cosmeticId = 0a6518bd-d88b-4156-9221-a6dbc8d31f30
+@purchaseId = 130bbf2a-a712-4aeb-b571-39881d449d4e
+@toUserId = id-do-usuario-destinatario
+
+### ============================================
+### 1️⃣ COMPRAR UM COSMÉTICO
+### ============================================
+POST {{baseUrl}}/finance/purchases
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "cosmeticId": "{{cosmeticId}}"
+}
+
+### Resposta esperada:
+# {
+#   "id": "uuid-da-compra",
+#   "userId": "uuid-do-usuario",
+#   "cosmeticId": "uuid-do-cosmetic",
+#   "transactionId": "uuid-da-transacao",
+#   "isFromBundle": false,
+#   "parentPurchaseId": null,
+#   "status": "active",
+#   "returnedAt": null,
+#   "createdAt": "2025-11-10T...",
+#   "updatedAt": "2025-11-10T..."
+# }
+
+### ============================================
+### 2️⃣ LISTAR MINHAS COMPRAS (TODAS)
+### ============================================
+GET {{baseUrl}}/finance/purchases
+Authorization: Bearer {{accessToken}}
+
+### Resposta esperada:
+# [
+#   {
+#     "id": "uuid-da-compra",
+#     "userId": "uuid-do-usuario",
+#     "cosmeticId": "uuid-do-cosmetic",
+#     "transactionId": "uuid-da-transacao",
+#     "isFromBundle": false,
+#     "parentPurchaseId": null,
+#     "status": "active",
+#     "returnedAt": null,
+#     "createdAt": "2025-11-10T...",
+#     "updatedAt": "2025-11-10T..."
+#   }
+# ]
+
+### ============================================
+### 3️⃣ LISTAR COMPRAS ATIVAS (COM FILTROS)
+### ============================================
+GET {{baseUrl}}/finance/purchases?status=ACTIVE&limit=20&offset=0
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 4️⃣ LISTAR COMPRAS DEVOLVIDAS
+### ============================================
+GET {{baseUrl}}/finance/purchases?status=returned
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 5️⃣ DEVOLVER UM COSMÉTICO
+### ============================================
+POST {{baseUrl}}/finance/returns
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "purchaseId": "{{purchaseId}}",
+  "reason": "Não gostei do item"
+}
+
+### Resposta esperada:
+# {
+#   "id": "uuid-da-devolucao",
+#   "purchaseId": "uuid-da-compra",
+#   "userId": "uuid-do-usuario",
+#   "cosmeticId": "uuid-do-cosmetic",
+#   "transactionId": "uuid-da-transacao-reembolso",
+#   "reason": "Não gostei do item",
+#   "isPartial": false,
+#   "status": "completed",
+#   "createdAt": "2025-11-10T...",
+#   "updatedAt": "2025-11-10T..."
+# }
+
+### ============================================
+### 6️⃣ DEVOLVER SEM MOTIVO (OPCIONAL)
+### ============================================
+POST {{baseUrl}}/finance/returns
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "purchaseId": "{{purchaseId}}"
+}
+
+### ============================================
+### 7️⃣ TRANSFERIR CRÉDITOS PARA OUTRO USUÁRIO
+### ============================================
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "{{toUserId}}",
+  "amount": 1000,
+  "description": "Pagamento por serviço prestado"
+}
+
+### Resposta esperada:
+# {
+#   "id": "uuid-da-transferencia",
+#   "fromUserId": "uuid-do-remetente",
+#   "toUserId": "uuid-do-destinatario",
+#   "fromTransactionId": "uuid-transacao-debito",
+#   "toTransactionId": "uuid-transacao-credito",
+#   "status": "completed",
+#   "description": "Pagamento por serviço prestado",
+#   "createdAt": "2025-11-10T...",
+#   "updatedAt": "2025-11-10T..."
+# }
+
+### ============================================
+### 8️⃣ TRANSFERIR CRÉDITOS SEM DESCRIÇÃO
+### ============================================
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "{{toUserId}}",
+  "amount": 500
+}
+
+### ============================================
+### 9️⃣ LISTAR TODAS AS TRANSFERÊNCIAS
+### ============================================
+GET {{baseUrl}}/finance/transfers
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 🔟 LISTAR TRANSFERÊNCIAS ENVIADAS
+### ============================================
+GET {{baseUrl}}/finance/transfers?direction=sent
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 1️⃣1️⃣ LISTAR TRANSFERÊNCIAS RECEBIDAS
+### ============================================
+GET {{baseUrl}}/finance/transfers?direction=received
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 1️⃣2️⃣ LISTAR TRANSFERÊNCIAS COM PAGINAÇÃO
+### ============================================
+GET {{baseUrl}}/finance/transfers?limit=10&offset=0
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### 1️⃣3️⃣ LISTAR TRANSFERÊNCIAS COMPLETADAS
+### ============================================
+GET {{baseUrl}}/finance/transfers?status=completed&direction=all
+Authorization: Bearer {{accessToken}}
+
+### ============================================
+### ❌ TESTES DE ERRO
+### ============================================
+
+### Erro: Comprar sem token
+POST {{baseUrl}}/finance/purchases
+Content-Type: application/json
+
+{
+  "cosmeticId": "{{cosmeticId}}",
+  "price": 1500
+}
+# Resposta esperada: 401 Unauthorized
+
+### ---
+
+### Erro: Comprar cosmético inexistente
+POST {{baseUrl}}/finance/purchases
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "cosmeticId": "00000000-0000-0000-0000-000000000000"
+}
+# Resposta esperada: 404 Not Found
+
+### ---
+
+### Erro: Comprar cosmético sem preço definido
+POST {{baseUrl}}/finance/purchases
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "cosmeticId": "{{cosmeticId}}"
+}
+# Resposta esperada: 400 Bad Request (cosmético sem preço válido)
+# Nota: Use um cosmético que tenha currentPrice null ou 0
+
+### ---
+
+### Erro: Comprar sem saldo suficiente
+POST {{baseUrl}}/finance/purchases
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "cosmeticId": "{{cosmeticId}}"
+}
+# Resposta esperada: 400 Bad Request (saldo insuficiente)
+# Nota: Use um cosmético com preço muito alto
+
+### ---
+
+### Erro: Devolver compra de outro usuário
+POST {{baseUrl}}/finance/returns
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "purchaseId": "compra-de-outro-usuario"
+}
+# Resposta esperada: 400 Bad Request
+
+### ---
+
+### Erro: Devolver compra já devolvida
+POST {{baseUrl}}/finance/returns
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "purchaseId": "{{purchaseId}}"
+}
+# Resposta esperada: 400 Bad Request (já foi devolvida)
+
+### ---
+
+### Erro: Transferir para si mesmo
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "{{userId}}",
+  "amount": 1000
+}
+# Resposta esperada: 400 Bad Request
+
+### ---
+
+### Erro: Transferir valor negativo
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "{{toUserId}}",
+  "amount": -500
+}
+# Resposta esperada: 400 Bad Request (validação)
+
+### ---
+
+### Erro: Transferir sem saldo suficiente
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "{{toUserId}}",
+  "amount": 999999999
+}
+# Resposta esperada: 400 Bad Request (saldo insuficiente)
+
+### ---
+
+### Erro: Transferir para usuário inexistente
+POST {{baseUrl}}/finance/transfers
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "toUserId": "00000000-0000-0000-0000-000000000000",
+  "amount": 100
+}
+# Resposta esperada: 404 Not Found
+
+### ============================================
+### 📊 FLUXO COMPLETO DE TESTE
+### ============================================
+
+### PASSO 1: Fazer login e obter token
+# Use o arquivo auth.http para fazer login
+
+### PASSO 2: Listar cosméticos disponíveis
+# Use o arquivo catalog.http para obter IDs de cosméticos
+
+### PASSO 3: Comprar um cosmético
+# POST /finance/purchases com cosmeticId (preço é obtido do banco)
+
+### PASSO 4: Verificar compras
+# GET /finance/purchases
+
+### PASSO 5: Devolver o cosmético
+# POST /finance/returns com purchaseId
+
+### PASSO 6: Verificar que a compra foi marcada como devolvida
+# GET /finance/purchases?status=returned
+
+### PASSO 7: Criar segundo usuário para testar transferência
+# Use o arquivo auth.http para registrar outro usuário
+
+### PASSO 8: Transferir créditos
+# POST /finance/transfers com toUserId e amount
+
+### PASSO 9: Verificar transferências
+# GET /finance/transfers
+
+### PASSO 10: Verificar saldo atualizado no perfil
+# Use o arquivo users.http para ver o perfil
+
+### ============================================
+### 💡 DICAS DE USO
+### ============================================
+
+# 1. Substitua as variáveis no topo do arquivo:
+#    - @accessToken: Token JWT obtido no login
+#    - @cosmeticId: ID de um cosmético disponível
+#    - @purchaseId: ID de uma compra ativa
+#    - @toUserId: ID de outro usuário para transferência
+
+# 2. Os endpoints retornam:
+#    - 200/201: Sucesso
+#    - 400: Erro de validação ou regra de negócio
+#    - 401: Não autenticado
+#    - 404: Recurso não encontrado
+
+# 3. Todas as operações são atômicas e usam transações do Prisma
+
+# 4. Os créditos são atualizados automaticamente após cada operação
+
+# 5. Para testar o fluxo completo:
+#    a) Registre/faça login (auth.http)
+#    b) Liste cosméticos (catalog.http)
+#    c) Compre um cosmético
+#    d) Devolva se necessário
+#    e) Transfira créditos para outro usuário

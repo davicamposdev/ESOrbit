@@ -30,12 +30,12 @@ export class SyncCosmeticsUseCase {
 
     this.logger.log(`Fetched ${result.total} cosmetics from external API`);
 
-    // sync-all não deve alterar isNew nem isAvailable
     const syncResult = await this.cosmeticSyncService.processCosmeticsBatch(
       result.items,
       {
         updateIsNew: false,
         updateIsAvailable: false,
+        updatePricing: false,
       },
     );
 

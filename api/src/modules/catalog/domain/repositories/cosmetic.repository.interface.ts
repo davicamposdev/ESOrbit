@@ -3,6 +3,7 @@ import type { Cosmetic } from '../entities/cosmetic.entity';
 export interface UpsertOptions {
   updateIsNew?: boolean;
   updateIsAvailable?: boolean;
+  updatePricing?: boolean;
 }
 
 export interface ICosmeticRepository {

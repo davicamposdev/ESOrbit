@@ -13,7 +13,7 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "davicamspos@tuta.io",
+  "email": "davicampos@tuta.io",
   "password": "senha123",
   "displayName": "Davi Campos"
 }

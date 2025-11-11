@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
+import { FinanceModule } from './modules/finance/finance.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CatalogModule } from './modules/catalog/catalog.module';
     UsersModule,
     IntegrationModule,
     CatalogModule,
+    FinanceModule,
   ],
   controllers: [],
   providers: [],

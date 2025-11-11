@@ -28,6 +28,7 @@ export interface SyncResult {
 export interface SyncOptions {
   updateIsNew?: boolean;
   updateIsAvailable?: boolean;
+  updatePricing?: boolean;
   isNewValue?: boolean;
 }
 
@@ -50,7 +51,21 @@ export class CosmeticSyncService {
 
     const isAvailable =
       integrationCosmetic.basePrice !== undefined &&
-      integrationCosmetic.currentPrice !== undefined;
+      integrationCosmetic.basePrice !== null &&
+      integrationCosmetic.basePrice > 0 &&
+      integrationCosmetic.currentPrice !== undefined &&
+      integrationCosmetic.currentPrice !== null &&
+      integrationCosmetic.currentPrice > 0;
+
+    if (
+      !isAvailable &&
+      (integrationCosmetic.basePrice !== undefined ||
+        integrationCosmetic.currentPrice !== undefined)
+    ) {
+      this.logger.debug(
+        `Item ${integrationCosmetic.name} (${integrationCosmetic.externalId}) não está disponível: preço inválido (base: ${integrationCosmetic.basePrice}, current: ${integrationCosmetic.currentPrice})`,
+      );
+    }
 
     const cosmetic = Cosmetic.create(
       integrationCosmetic.externalId,

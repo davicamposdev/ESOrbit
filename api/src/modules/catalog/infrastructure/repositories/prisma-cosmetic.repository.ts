@@ -67,8 +67,6 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       rarity: cosmetic.rarity,
       imageUrl: cosmetic.imageUrl,
       addedAt: cosmetic.addedAt,
-      basePrice: cosmetic.basePrice,
-      currentPrice: cosmetic.currentPrice,
       isBundle: cosmetic.isBundle,
     };
 
@@ -78,6 +76,10 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       ...(options.updateIsNew !== false && { isNew: cosmetic.isNew }),
       ...(options.updateIsAvailable !== false && {
         isAvailable: cosmetic.isAvailable,
+      }),
+      ...(options.updatePricing === true && {
+        basePrice: cosmetic.basePrice,
+        currentPrice: cosmetic.currentPrice,
       }),
     };
 
