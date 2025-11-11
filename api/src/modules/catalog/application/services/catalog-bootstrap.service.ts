@@ -37,11 +37,16 @@ export class CatalogBootstrapService implements OnModuleInit {
     });
 
     try {
-      const [allResult, newResult, shopResult] = await Promise.all([
-        this.syncCosmeticsUseCase.execute('pt-BR'),
-        this.syncNewCosmeticsUseCase.execute('pt-BR'),
-        this.syncShopCosmeticsUseCase.execute('pt-BR'),
-      ]);
+      // Executa sincronizações sequencialmente para evitar race conditions
+      // no upsert de cosméticos com o mesmo external_id
+      this.logger.log('Sincronizando catálogo completo...');
+      const allResult = await this.syncCosmeticsUseCase.execute('pt-BR');
+
+      this.logger.log('Sincronizando novos cosméticos...');
+      const newResult = await this.syncNewCosmeticsUseCase.execute('pt-BR');
+
+      this.logger.log('Sincronizando loja...');
+      const shopResult = await this.syncShopCosmeticsUseCase.execute('pt-BR');
 
       const duration = Date.now() - startTime;
       const totalProcessed =

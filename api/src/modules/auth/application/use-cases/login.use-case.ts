@@ -33,7 +33,7 @@ export class LoginUseCase {
     const authenticatedUser = AuthenticatedUser.create(
       user.id,
       user.email,
-      user.displayName,
+      user.username,
       user.credits,
     );
 

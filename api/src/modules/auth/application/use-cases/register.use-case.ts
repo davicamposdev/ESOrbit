@@ -8,7 +8,7 @@ import type { TokenPair } from '../../domain/interfaces/token.interface';
 export interface RegisterInput {
   email: string;
   password: string;
-  displayName: string;
+  username: string;
 }
 
 @Injectable()
@@ -29,7 +29,7 @@ export class RegisterUseCase {
     const user = await this.userRepository.create({
       email: input.email,
       passwordHash,
-      displayName: input.displayName,
+      username: input.username,
     });
 
     const tokens = await this.tokenService.generateTokens(user);

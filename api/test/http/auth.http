@@ -15,7 +15,7 @@ Content-Type: application/json
 {
   "email": "davicampos@tuta.io",
   "password": "senha123",
-  "displayName": "Davi Campos"
+  "username": "Davi Campos"
 }
 
 ### Resposta esperada:
@@ -23,7 +23,7 @@ Content-Type: application/json
 #   "user": {
 #     "id": "uuid",
 #     "email": "teste@example.com",
-#     "displayName": "Usuário Teste",
+#     "username": "Usuário Teste",
 #     "credits": 10000
 #   },
 #   "accessToken": "eyJhbGc..."
@@ -54,7 +54,7 @@ Authorization: Bearer {{accessToken}}
 #   "user": {
 #     "id": "uuid",
 #     "email": "teste@example.com",
-#     "displayName": "Usuário Teste",
+#     "username": "Usuário Teste",
 #     "credits": 10000
 #   }
 # }
@@ -93,7 +93,7 @@ Content-Type: application/json
 {
   "email": "teste@example.com",
   "password": "senha123",
-  "displayName": "Outro Nome"
+  "username": "Outro Nome"
 }
 
 ### Login com senha incorreta (401 Unauthorized)

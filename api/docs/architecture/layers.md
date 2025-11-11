@@ -23,7 +23,7 @@
 export interface AuthenticatedUser {
   id: string;
   email: string;
-  displayName: string;
+  username: string;
   credits: number;
 }
 ```

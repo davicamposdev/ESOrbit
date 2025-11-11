@@ -9,5 +9,5 @@ export interface IUserRepository {
 export interface CreateUserData {
   email: string;
   passwordHash: string;
-  displayName: string;
+  username: string;
 }

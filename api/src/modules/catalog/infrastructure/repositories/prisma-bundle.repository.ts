@@ -18,23 +18,6 @@ export class PrismaBundleRepository implements IBundleRepository {
     return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
   }
 
-  async upsert(data: Bundle): Promise<Bundle> {
-    const bundle = await this.prisma.bundle.upsert({
-      where: {
-        externalId: data.externalId,
-      },
-      update: {
-        name: data.name,
-      },
-      create: {
-        externalId: data.externalId,
-        name: data.name,
-      },
-    });
-
-    return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
-  }
-
   async findById(id: string): Promise<Bundle | null> {
     const bundle = await this.prisma.bundle.findUnique({
       where: { id },
@@ -62,28 +45,13 @@ export class PrismaBundleRepository implements IBundleRepository {
     );
   }
 
-  async update(id: string, data: Partial<Bundle>): Promise<Bundle | null> {
-    const bundle = await this.prisma.bundle.updateMany({
+  async update(id: string, name: string): Promise<Bundle> {
+    const updated = await this.prisma.bundle.update({
       where: { id },
-      data: {
-        externalId: data.externalId,
-        name: data.name,
-      },
+      data: { name },
     });
 
-    if (bundle.count === 0) return null;
-
-    const updatedBundle = await this.prisma.bundle.findUnique({
-      where: { id },
-    });
-
-    if (!updatedBundle) return null;
-
-    return Bundle.restore(
-      updatedBundle.id,
-      updatedBundle.externalId,
-      updatedBundle.name,
-    );
+    return Bundle.restore(updated.id, updated.externalId, updated.name);
   }
 
   async delete(id: string): Promise<boolean> {

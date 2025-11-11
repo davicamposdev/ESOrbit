@@ -22,7 +22,7 @@ REGISTER_RESPONSE=$(curl -s -X POST "${BASE_URL}/auth/register" \
   -d '{
     "email": "test@example.com",
     "password": "senha123",
-    "displayName": "Usuário Teste"
+    "username": "Usuário Teste"
   }')
 
 echo "$REGISTER_RESPONSE" | jq '.'

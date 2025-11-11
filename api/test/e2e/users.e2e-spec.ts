@@ -35,7 +35,7 @@ describe('Users (e2e)', () => {
       .send({
         email: `e2e-test-users-${Date.now()}@example.com`,
         password: 'senha123',
-        displayName: 'Users Test User',
+        username: 'Users Test User',
       });
 
     accessToken = res.body.accessToken;
@@ -63,7 +63,7 @@ describe('Users (e2e)', () => {
           expect(res.body.user).toBeDefined();
           expect(res.body.user.id).toBe(userId);
           expect(res.body.user.email).toBeDefined();
-          expect(res.body.user.displayName).toBe('Users Test User');
+          expect(res.body.user.username).toBe('Users Test User');
           expect(res.body.user.credits).toBe(10000);
           expect(res.body.user.createdAt).toBeDefined();
           expect(res.body.user.updatedAt).toBeDefined();

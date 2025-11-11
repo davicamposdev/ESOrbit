@@ -46,7 +46,7 @@ export class CosmeticSyncService {
   async processCosmetic(
     integrationCosmetic: IntegrationCosmetic,
     options: SyncOptions = {},
-  ): Promise<void> {
+  ): Promise<{ wasCreated: boolean; wasUpdated: boolean }> {
     const isBundle = integrationCosmetic.setInfo !== undefined;
 
     const isAvailable =
@@ -81,10 +81,31 @@ export class CosmeticSyncService {
       isBundle,
     );
 
-    const savedCosmetic = await this.cosmeticRepository.upsert(
-      cosmetic,
-      options,
+    // Verifica se o cosmético já existe
+    const existing = await this.cosmeticRepository.findByExternalId(
+      cosmetic.externalId,
     );
+
+    let savedCosmetic: Cosmetic;
+    let wasCreated = false;
+    let wasUpdated = false;
+
+    if (!existing) {
+      // Não existe, cria novo
+      savedCosmetic = await this.cosmeticRepository.create(cosmetic);
+      wasCreated = true;
+    } else {
+      // Existe, verifica se precisa atualizar
+      const needsUpdate = this.hasChanges(existing, cosmetic, options);
+
+      if (needsUpdate) {
+        savedCosmetic = await this.cosmeticRepository.update(cosmetic, options);
+        wasUpdated = true;
+      } else {
+        // Não há mudanças, usa o existente
+        savedCosmetic = existing;
+      }
+    }
 
     if (isBundle) {
       await this.processBundleRelation(
@@ -92,6 +113,8 @@ export class CosmeticSyncService {
         savedCosmetic.id,
       );
     }
+
+    return { wasCreated, wasUpdated };
   }
 
   async processCosmeticsBatch(
@@ -105,35 +128,36 @@ export class CosmeticSyncService {
     for (let i = 0; i < cosmetics.length; i += BATCH_SIZE) {
       const batch = cosmetics.slice(i, i + BATCH_SIZE);
 
-      const externalIds = batch.map((c) => c.externalId);
-      const existingCosmetics =
-        await this.cosmeticRepository.findManyByExternalIds(externalIds);
-
       const results = await Promise.all(
-        batch.map(async (cosmetic) => {
-          const exists = existingCosmetics.has(cosmetic.externalId);
-          await this.processCosmetic(cosmetic, options);
-          return { created: !exists };
-        }),
+        batch.map((cosmetic) => this.processCosmetic(cosmetic, options)),
       );
 
       results.forEach((result) => {
-        if (result.created) {
+        if (result.wasCreated) {
           itemsCreated++;
-        } else {
+        } else if (result.wasUpdated) {
           itemsUpdated++;
         }
       });
 
+      const batchCreated = results.filter((r) => r.wasCreated).length;
+      const batchUpdated = results.filter((r) => r.wasUpdated).length;
+      const batchUnchanged = results.filter(
+        (r) => !r.wasCreated && !r.wasUpdated,
+      ).length;
+
       this.logger.debug(
-        `Processed batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(cosmetics.length / BATCH_SIZE)} (${batch.length} items)`,
+        `Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(cosmetics.length / BATCH_SIZE)}: ${batchCreated} criados, ${batchUpdated} atualizados, ${batchUnchanged} inalterados`,
       );
     }
+
+    const itemsUnchanged = cosmetics.length - itemsCreated - itemsUpdated;
 
     this.logger.log({
       message: 'Batch processing completed',
       itemsCreated,
       itemsUpdated,
+      itemsUnchanged,
       total: cosmetics.length,
     });
 
@@ -143,12 +167,77 @@ export class CosmeticSyncService {
     };
   }
 
+  /**
+   * Verifica se há mudanças entre o cosmético existente e o novo
+   * Esta é a lógica de negócio que decide se um update é necessário
+   */
+  private hasChanges(
+    existing: Cosmetic,
+    cosmetic: Cosmetic,
+    options: SyncOptions,
+  ): boolean {
+    // Compara campos base que sempre são verificados
+    if (
+      existing.name !== cosmetic.name ||
+      existing.type !== cosmetic.type ||
+      existing.rarity !== cosmetic.rarity ||
+      existing.imageUrl !== cosmetic.imageUrl ||
+      existing.addedAt.getTime() !== cosmetic.addedAt.getTime() ||
+      existing.isBundle !== cosmetic.isBundle
+    ) {
+      return true;
+    }
+
+    // Verifica isNew se deve ser atualizado
+    if (options.updateIsNew !== false && existing.isNew !== cosmetic.isNew) {
+      return true;
+    }
+
+    // Verifica isAvailable se deve ser atualizado
+    if (
+      options.updateIsAvailable !== false &&
+      existing.isAvailable !== cosmetic.isAvailable
+    ) {
+      return true;
+    }
+
+    // Verifica preços se deve ser atualizado
+    if (options.updatePricing === true) {
+      if (
+        existing.basePrice !== cosmetic.basePrice ||
+        existing.currentPrice !== cosmetic.currentPrice
+      ) {
+        return true;
+      }
+    }
+
+    // Nenhuma mudança detectada
+    return false;
+  }
+
   private async processBundleRelation(
     setInfo: { backendValue: string; value: string; text: string },
     cosmeticId: string,
   ): Promise<void> {
     const newBundle = Bundle.create(setInfo.backendValue, setInfo.value);
-    const bundle = await this.bundleRepository.upsert(newBundle);
+
+    // Verifica se o bundle já existe
+    const existing = await this.bundleRepository.findByExternalId(
+      newBundle.externalId,
+    );
+
+    let bundle: Bundle;
+
+    if (!existing) {
+      // Cria novo bundle
+      bundle = await this.bundleRepository.create(newBundle);
+    } else if (existing.name !== newBundle.name) {
+      // Atualiza se o nome mudou
+      bundle = await this.bundleRepository.update(existing.id, newBundle.name);
+    } else {
+      // Usa o existente
+      bundle = existing;
+    }
 
     await this.bundleRepository.createBundleRelation(
       bundle.id,

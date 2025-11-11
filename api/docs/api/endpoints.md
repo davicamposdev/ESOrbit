@@ -16,7 +16,7 @@ Registra um novo usuário.
 {
   "email": "user@example.com",
   "password": "senha123",
-  "displayName": "Nome do Usuário"
+  "username": "Nome do Usuário"
 }
 ```
 
@@ -27,7 +27,7 @@ Registra um novo usuário.
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "displayName": "Nome do Usuário",
+    "username": "Nome do Usuário",
     "credits": 10000
   },
   "accessToken": "eyJhbGc..."
@@ -58,7 +58,7 @@ Autentica um usuário.
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "displayName": "Nome do Usuário",
+    "username": "Nome do Usuário",
     "credits": 10000
   },
   "accessToken": "eyJhbGc..."
@@ -116,7 +116,7 @@ Retorna dados do usuário autenticado.
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "displayName": "Nome do Usuário",
+    "username": "Nome do Usuário",
     "credits": 10000
   }
 }
@@ -135,7 +135,7 @@ Busca usuário por ID.
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "displayName": "Nome do Usuário",
+    "username": "Nome do Usuário",
     "credits": 10000,
     "createdAt": "2025-10-31T00:00:00.000Z",
     "updatedAt": "2025-10-31T00:00:00.000Z"

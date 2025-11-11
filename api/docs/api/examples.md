@@ -11,7 +11,7 @@ curl -X POST http://localhost:4000/api/auth/register \
   -d '{
     "email": "test@example.com",
     "password": "senha123",
-    "displayName": "Teste"
+    "username": "Teste"
   }'
 ```
 
@@ -66,7 +66,7 @@ const response = await fetch('http://localhost:4000/api/auth/register', {
   body: JSON.stringify({
     email: 'test@example.com',
     password: 'senha123',
-    displayName: 'Teste',
+    username: 'Teste',
   }),
 });
 

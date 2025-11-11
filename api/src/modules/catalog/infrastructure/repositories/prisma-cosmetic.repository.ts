@@ -56,7 +56,36 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
     return cosmetics.map((c) => this.toEntity(c));
   }
 
-  async upsert(
+  async create(cosmetic: Cosmetic): Promise<Cosmetic> {
+    const created = await this.prisma.cosmetic.create({
+      data: {
+        externalId: cosmetic.externalId,
+        name: cosmetic.name,
+        type: cosmetic.type,
+        rarity: cosmetic.rarity,
+        imageUrl: cosmetic.imageUrl,
+        addedAt: cosmetic.addedAt,
+        isNew: cosmetic.isNew,
+        isAvailable: cosmetic.isAvailable,
+        basePrice: cosmetic.basePrice,
+        currentPrice: cosmetic.currentPrice,
+        isBundle: cosmetic.isBundle,
+      },
+      include: {
+        bundleItems: {
+          select: {
+            item: {
+              select: { externalId: true },
+            },
+          },
+        },
+      },
+    });
+
+    return this.toEntity(created);
+  }
+
+  async update(
     cosmetic: Cosmetic,
     options: UpsertOptions = {},
   ): Promise<Cosmetic> {
@@ -83,22 +112,9 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       }),
     };
 
-    const result = await this.prisma.cosmetic.upsert({
+    const updated = await this.prisma.cosmetic.update({
       where: { externalId: cosmetic.externalId },
-      create: {
-        externalId: cosmetic.externalId,
-        name: cosmetic.name,
-        type: cosmetic.type,
-        rarity: cosmetic.rarity,
-        imageUrl: cosmetic.imageUrl,
-        addedAt: cosmetic.addedAt,
-        isNew: cosmetic.isNew,
-        isAvailable: cosmetic.isAvailable,
-        basePrice: cosmetic.basePrice,
-        currentPrice: cosmetic.currentPrice,
-        isBundle: cosmetic.isBundle,
-      },
-      update: updateData,
+      data: updateData,
       include: {
         bundleItems: {
           select: {
@@ -110,7 +126,7 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       },
     });
 
-    return this.toEntity(result);
+    return this.toEntity(updated);
   }
 
   async findManyByExternalIds(

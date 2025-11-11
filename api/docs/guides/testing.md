@@ -81,7 +81,7 @@ describe('RegisterUseCase', () => {
     mockUserRepository.create.mockResolvedValue({
       id: '1',
       email: 'test@test.com',
-      displayName: 'Test',
+      username: 'Test',
       credits: 10000,
     });
     mockTokenService.generateTokens.mockResolvedValue({
@@ -92,7 +92,7 @@ describe('RegisterUseCase', () => {
     const result = await useCase.execute({
       email: 'test@test.com',
       password: 'senha123',
-      displayName: 'Test',
+      username: 'Test',
     });
 
     expect(result.user).toBeDefined();
@@ -106,7 +106,7 @@ describe('RegisterUseCase', () => {
       useCase.execute({
         email: 'test@test.com',
         password: 'senha123',
-        displayName: 'Test',
+        username: 'Test',
       }),
     ).rejects.toThrow();
   });

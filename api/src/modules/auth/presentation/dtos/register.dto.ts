@@ -10,7 +10,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'Senha é obrigatória' })
   password: string;
 
-  @IsString({ message: 'Nome de exibição deve ser uma string' })
-  @IsNotEmpty({ message: 'Nome de exibição é obrigatório' })
-  displayName: string;
+  @IsString({ message: 'Nome de usuário deve ser uma string' })
+  @IsNotEmpty({ message: 'Nome de usuário é obrigatório' })
+  username: string;
 }

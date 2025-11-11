@@ -86,7 +86,7 @@ describe('Auth (e2e)', () => {
         .send({
           email: 'test@test.com',
           password: 'senha123',
-          displayName: 'Test',
+          username: 'Test',
         })
         .expect(201)
         .expect((res) => {

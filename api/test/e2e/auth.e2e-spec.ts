@@ -49,13 +49,13 @@ describe('Auth (e2e)', () => {
         .send({
           email,
           password: 'senha123',
-          displayName: 'E2E Test User',
+          username: 'E2E Test User',
         })
         .expect(201)
         .expect((res) => {
           expect(res.body.user).toBeDefined();
           expect(res.body.user.email).toBe(email);
-          expect(res.body.user.displayName).toBe('E2E Test User');
+          expect(res.body.user.username).toBe('E2E Test User');
           expect(res.body.user.credits).toBe(10000);
           expect(res.body.accessToken).toBeDefined();
           expect(res.headers['set-cookie']).toBeDefined();
@@ -70,7 +70,7 @@ describe('Auth (e2e)', () => {
         .send({
           email,
           password: 'senha123',
-          displayName: 'First User',
+          username: 'First User',
         })
         .expect(201);
 
@@ -79,7 +79,7 @@ describe('Auth (e2e)', () => {
         .send({
           email,
           password: 'senha123',
-          displayName: 'Second User',
+          username: 'Second User',
         })
         .expect(409);
     });
@@ -103,7 +103,7 @@ describe('Auth (e2e)', () => {
       await request(app.getHttpServer()).post('/api/auth/register').send({
         email: testEmail,
         password: testPassword,
-        displayName: 'Login Test User',
+        username: 'Login Test User',
       });
     });
 
@@ -154,7 +154,7 @@ describe('Auth (e2e)', () => {
         .send({
           email: testEmail,
           password: 'senha123',
-          displayName: 'Me Test User',
+          username: 'Me Test User',
         });
 
       accessToken = res.body.accessToken;
@@ -192,7 +192,7 @@ describe('Auth (e2e)', () => {
         .send({
           email: `e2e-test-refresh-${Date.now()}@example.com`,
           password: 'senha123',
-          displayName: 'Refresh Test User',
+          username: 'Refresh Test User',
         });
 
       cookies = Array.isArray(res.headers['set-cookie'])
@@ -225,7 +225,7 @@ describe('Auth (e2e)', () => {
         .send({
           email: `e2e-test-logout-${Date.now()}@example.com`,
           password: 'senha123',
-          displayName: 'Logout Test User',
+          username: 'Logout Test User',
         });
 
       cookies = Array.isArray(res.headers['set-cookie'])

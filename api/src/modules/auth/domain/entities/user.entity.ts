@@ -2,17 +2,17 @@ export class AuthenticatedUser {
   private constructor(
     private readonly _id: string,
     private readonly _email: string,
-    private readonly _displayName: string,
+    private readonly _username: string,
     private readonly _credits: number,
   ) {}
 
   static create(
     id: string,
     email: string,
-    displayName: string,
+    username: string,
     credits: number,
   ): AuthenticatedUser {
-    return new AuthenticatedUser(id, email, displayName, credits);
+    return new AuthenticatedUser(id, email, username, credits);
   }
 
   get id(): string {
@@ -23,8 +23,8 @@ export class AuthenticatedUser {
     return this._email;
   }
 
-  get displayName(): string {
-    return this._displayName;
+  get username(): string {
+    return this._username;
   }
 
   get credits(): number {
