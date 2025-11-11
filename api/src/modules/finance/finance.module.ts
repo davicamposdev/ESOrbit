@@ -12,6 +12,7 @@ import {
 // Application - Use Cases
 import {
   PurchaseCosmeticUseCase,
+  PurchaseBundleUseCase,
   ReturnCosmeticUseCase,
   TransferCreditsUseCase,
   ListPurchasesUseCase,
@@ -45,6 +46,7 @@ import { FinanceController } from './presentation/controllers';
 
     // Use Cases
     PurchaseCosmeticUseCase,
+    PurchaseBundleUseCase,
     ReturnCosmeticUseCase,
     TransferCreditsUseCase,
     ListPurchasesUseCase,
@@ -53,6 +55,7 @@ import { FinanceController } from './presentation/controllers';
   exports: [
     // Exporta os use cases para outros módulos se necessário
     PurchaseCosmeticUseCase,
+    PurchaseBundleUseCase,
     ReturnCosmeticUseCase,
     TransferCreditsUseCase,
     ListPurchasesUseCase,

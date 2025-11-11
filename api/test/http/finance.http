@@ -2,9 +2,10 @@
 
 ### Variáveis
 @baseUrl = http://localhost:4000/api
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzMzI5ZTVjOS0zZWY5LTQyYzMtYTY2NS05ZjJlMWQ3YzI0NzEiLCJlbWFpbCI6ImRhdmljYW1wb3NAdHV0YS5pbyIsImp0aSI6IjA0YzliNzZjLTNiYWYtNDExZS05ZTdiLTZhNzA3Y2E2ZjhkYyIsImlhdCI6MTc2MjgyNDk2OCwiZXhwIjoxNzYyODI1ODY4fQ.f0LNK2UIBDqEV4a6g2YXdslBSHNXSWPSJ4L6QDb0Qww
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNmMyNzI4Ny03Mzg2LTRhYWQtODBiZS0zNGU0MGU1Y2QzMTciLCJlbWFpbCI6ImRhdmljYW1wb3NAdHV0YS5pbyIsImp0aSI6IjYyZTE0ODNiLWVmNjEtNGZhMC05ZDllLTFkNmQ4NzQ5ZDg5MiIsImlhdCI6MTc2Mjg3NTgxNywiZXhwIjoxNzYyODc2NzE3fQ.b5QTVBsTn0q7_9EfUUhiZJ_MuRnBHfUJNnl6uhzbSTU
 @userId = seu-user-id-aqui
-@cosmeticId = 0a6518bd-d88b-4156-9221-a6dbc8d31f30
+@cosmeticId = a7faf63e-5e32-4796-b010-0b8f10ff22b1
+@bundleId = 4497b6ad-4e5f-41f2-9261-11e85f8dda67
 @purchaseId = 130bbf2a-a712-4aeb-b571-39881d449d4e
 @toUserId = id-do-usuario-destinatario
 
@@ -34,7 +35,50 @@ Authorization: Bearer {{accessToken}}
 # }
 
 ### ============================================
-### 2️⃣ LISTAR MINHAS COMPRAS (TODAS)
+### 2️⃣ COMPRAR UM BUNDLE
+### ============================================
+POST {{baseUrl}}/finance/purchases/bundle
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "bundleId": "{{bundleId}}"
+}
+
+### Resposta esperada:
+# {
+#   "mainPurchase": {
+#     "id": "uuid-da-compra-principal",
+#     "userId": "uuid-do-usuario",
+#     "cosmeticId": "uuid-do-bundle",
+#     "transactionId": "uuid-da-transacao",
+#     "isFromBundle": false,
+#     "parentPurchaseId": null,
+#     "status": "active",
+#     "returnedAt": null,
+#     "createdAt": "2025-11-10T...",
+#     "updatedAt": "2025-11-10T..."
+#   },
+#   "bundleItemsPurchases": [
+#     {
+#       "id": "uuid-compra-item-1",
+#       "userId": "uuid-do-usuario",
+#       "cosmeticId": "uuid-item-1",
+#       "transactionId": "uuid-da-transacao",
+#       "isFromBundle": true,
+#       "parentPurchaseId": "uuid-da-compra-principal",
+#       "status": "active",
+#       "returnedAt": null,
+#       "createdAt": "2025-11-10T...",
+#       "updatedAt": "2025-11-10T..."
+#     },
+#     // ... mais itens do bundle
+#   ],
+#   "totalItems": 3
+# }
+
+### ============================================
+### 3️⃣ LISTAR MINHAS COMPRAS (TODAS)
 ### ============================================
 GET {{baseUrl}}/finance/purchases
 Authorization: Bearer {{accessToken}}
@@ -56,19 +100,19 @@ Authorization: Bearer {{accessToken}}
 # ]
 
 ### ============================================
-### 3️⃣ LISTAR COMPRAS ATIVAS (COM FILTROS)
+### 4️⃣ LISTAR COMPRAS ATIVAS (COM FILTROS)
 ### ============================================
 GET {{baseUrl}}/finance/purchases?status=ACTIVE&limit=20&offset=0
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 4️⃣ LISTAR COMPRAS DEVOLVIDAS
+### 5️⃣ LISTAR COMPRAS DEVOLVIDAS
 ### ============================================
 GET {{baseUrl}}/finance/purchases?status=returned
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 5️⃣ DEVOLVER UM COSMÉTICO
+### 6️⃣ DEVOLVER UM COSMÉTICO
 ### ============================================
 POST {{baseUrl}}/finance/returns
 Content-Type: application/json
@@ -94,7 +138,7 @@ Authorization: Bearer {{accessToken}}
 # }
 
 ### ============================================
-### 6️⃣ DEVOLVER SEM MOTIVO (OPCIONAL)
+### 7️⃣ DEVOLVER SEM MOTIVO (OPCIONAL)
 ### ============================================
 POST {{baseUrl}}/finance/returns
 Content-Type: application/json
@@ -105,7 +149,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### ============================================
-### 7️⃣ TRANSFERIR CRÉDITOS PARA OUTRO USUÁRIO
+### 8️⃣ TRANSFERIR CRÉDITOS PARA OUTRO USUÁRIO
 ### ============================================
 POST {{baseUrl}}/finance/transfers
 Content-Type: application/json
@@ -131,7 +175,7 @@ Authorization: Bearer {{accessToken}}
 # }
 
 ### ============================================
-### 8️⃣ TRANSFERIR CRÉDITOS SEM DESCRIÇÃO
+### 9️⃣ TRANSFERIR CRÉDITOS SEM DESCRIÇÃO
 ### ============================================
 POST {{baseUrl}}/finance/transfers
 Content-Type: application/json
@@ -143,31 +187,31 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### ============================================
-### 9️⃣ LISTAR TODAS AS TRANSFERÊNCIAS
+### 🔟 LISTAR TODAS AS TRANSFERÊNCIAS
 ### ============================================
 GET {{baseUrl}}/finance/transfers
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 🔟 LISTAR TRANSFERÊNCIAS ENVIADAS
+### 1️⃣1️⃣ LISTAR TRANSFERÊNCIAS ENVIADAS
 ### ============================================
 GET {{baseUrl}}/finance/transfers?direction=sent
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 1️⃣1️⃣ LISTAR TRANSFERÊNCIAS RECEBIDAS
+### 1️⃣2️⃣ LISTAR TRANSFERÊNCIAS RECEBIDAS
 ### ============================================
 GET {{baseUrl}}/finance/transfers?direction=received
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 1️⃣2️⃣ LISTAR TRANSFERÊNCIAS COM PAGINAÇÃO
+### 1️⃣3️⃣ LISTAR TRANSFERÊNCIAS COM PAGINAÇÃO
 ### ============================================
 GET {{baseUrl}}/finance/transfers?limit=10&offset=0
 Authorization: Bearer {{accessToken}}
 
 ### ============================================
-### 1️⃣3️⃣ LISTAR TRANSFERÊNCIAS COMPLETADAS
+### 1️⃣4️⃣ LISTAR TRANSFERÊNCIAS COMPLETADAS
 ### ============================================
 GET {{baseUrl}}/finance/transfers?status=completed&direction=all
 Authorization: Bearer {{accessToken}}
@@ -299,6 +343,31 @@ Authorization: Bearer {{accessToken}}
   "amount": 100
 }
 # Resposta esperada: 404 Not Found
+
+### ---
+
+### Erro: Comprar bundle que não existe
+POST {{baseUrl}}/finance/purchases/bundle
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "bundleId": "00000000-0000-0000-0000-000000000000"
+}
+# Resposta esperada: 404 Not Found
+
+### ---
+
+### Erro: Comprar bundle sem saldo suficiente
+POST {{baseUrl}}/finance/purchases/bundle
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "bundleId": "{{bundleId}}"
+}
+# Resposta esperada: 400 Bad Request (saldo insuficiente)
+# Nota: Use um bundle com preço alto ou esvazie os créditos do usuário
 
 ### ============================================
 ### 📊 FLUXO COMPLETO DE TESTE

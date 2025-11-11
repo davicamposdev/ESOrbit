@@ -98,7 +98,7 @@ export class CosmeticSyncService {
     cosmetics: IntegrationCosmetic[],
     options: SyncOptions = {},
   ): Promise<SyncResult> {
-    const BATCH_SIZE = 300;
+    const BATCH_SIZE = 100;
     let itemsCreated = 0;
     let itemsUpdated = 0;
 

@@ -13,6 +13,7 @@ import { CurrentUser } from '../../../auth/presentation/decorators/current-user.
 import type { AuthenticatedUser } from '../../../auth/domain/entities/user.entity';
 import {
   PurchaseCosmeticUseCase,
+  PurchaseBundleUseCase,
   ReturnCosmeticUseCase,
   TransferCreditsUseCase,
   ListPurchasesUseCase,
@@ -20,11 +21,13 @@ import {
 } from '../../application/use-cases';
 import {
   PurchaseCosmeticDto,
+  PurchaseBundleDto,
   ReturnCosmeticDto,
   TransferCreditsDto,
   ListPurchasesDto,
   ListTransfersDto,
   PurchaseResponseDto,
+  PurchaseBundleResponseDto,
   ReturnResponseDto,
   TransferResponseDto,
 } from '../dtos';
@@ -34,6 +37,7 @@ import {
 export class FinanceController {
   constructor(
     private readonly purchaseCosmeticUseCase: PurchaseCosmeticUseCase,
+    private readonly purchaseBundleUseCase: PurchaseBundleUseCase,
     private readonly returnCosmeticUseCase: ReturnCosmeticUseCase,
     private readonly transferCreditsUseCase: TransferCreditsUseCase,
     private readonly listPurchasesUseCase: ListPurchasesUseCase,
@@ -50,6 +54,24 @@ export class FinanceController {
       userId: user.id,
       cosmeticId: dto.cosmeticId,
     });
+  }
+
+  @Post('purchases/bundle')
+  @HttpCode(HttpStatus.CREATED)
+  async purchaseBundle(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: PurchaseBundleDto,
+  ): Promise<PurchaseBundleResponseDto> {
+    const result = await this.purchaseBundleUseCase.execute({
+      userId: user.id,
+      bundleId: dto.bundleId,
+    });
+
+    return {
+      mainPurchase: result.mainPurchase,
+      bundleItemsPurchases: result.bundleItemsPurchases,
+      totalItems: result.bundleItemsPurchases.length,
+    };
   }
 
   @Get('purchases')
