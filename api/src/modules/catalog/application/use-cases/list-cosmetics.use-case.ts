@@ -11,6 +11,9 @@ export interface ListCosmeticsParams {
   isNew?: boolean;
   isAvailable?: boolean;
   isBundle?: boolean;
+  onSale?: boolean;
+  createdFrom?: Date;
+  createdTo?: Date;
   page?: number;
   pageSize?: number;
 }
@@ -38,17 +41,15 @@ export class ListCosmeticsUseCase {
     const pageSize = params.pageSize || 50;
     const offset = (page - 1) * pageSize;
 
-    this.logger.log({
-      message: 'Listing cosmetics',
-      params,
-    });
-
     const repositoryParams: FindManyParams = {
       type: params.type,
       rarity: params.rarity,
       isNew: params.isNew,
       isAvailable: params.isAvailable,
       isBundle: params.isBundle,
+      onSale: params.onSale,
+      createdFrom: params.createdFrom,
+      createdTo: params.createdTo,
       limit: pageSize,
       offset,
     };
@@ -61,6 +62,9 @@ export class ListCosmeticsUseCase {
       isNew: params.isNew,
       isAvailable: params.isAvailable,
       isBundle: params.isBundle,
+      onSale: params.onSale,
+      createdFrom: params.createdFrom,
+      createdTo: params.createdTo,
     });
 
     return {

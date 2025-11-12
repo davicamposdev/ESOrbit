@@ -34,6 +34,18 @@ GET {{baseUrl}}/catalog/cosmetics?onSale=true
 ### Listar com múltiplos filtros booleanos
 GET {{baseUrl}}/catalog/cosmetics?isNew=true&onSale=true&page=1&pageSize=10
 
+### Listar cosméticos por intervalo de data de inclusão (apenas data inicial)
+GET {{baseUrl}}/catalog/cosmetics?createdFrom=2025-11-01
+
+### Listar cosméticos por intervalo de data de inclusão (apenas data final)
+GET {{baseUrl}}/catalog/cosmetics?createdTo=2025-11-10
+
+### Listar cosméticos por intervalo de data de inclusão (data inicial e final)
+GET {{baseUrl}}/catalog/cosmetics?createdFrom=2025-11-01&createdTo=2025-11-10
+
+### Listar cosméticos com filtro de data e outros filtros combinados
+GET {{baseUrl}}/catalog/cosmetics?type=outfit&createdFrom=2025-11-01&createdTo=2025-11-10&page=1&pageSize=20
+
 ### ============================================
 ### 🔄 SINCRONIZAR COSMÉTICOS (POST)
 ### ============================================

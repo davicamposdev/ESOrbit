@@ -37,6 +37,7 @@ export class CatalogController {
         isAvailable: cosmetic.isAvailable,
         basePrice: cosmetic.basePrice,
         currentPrice: cosmetic.currentPrice,
+        onSale: cosmetic.onSale,
         isBundle: cosmetic.isBundle,
         childrenCount: cosmetic.childrenExternalIds.length,
       })),

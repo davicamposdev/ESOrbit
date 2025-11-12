@@ -17,7 +17,6 @@ export function LoginForm() {
 
     try {
       await login(email, password);
-      // O redirecionamento será feito automaticamente pelo layout
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
     } finally {

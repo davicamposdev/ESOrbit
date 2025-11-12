@@ -9,7 +9,6 @@ export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Se não está autenticado, redireciona para o login
     if (!loading && !user) {
       router.push("/login");
     }
@@ -20,7 +19,6 @@ export default function DashboardPage() {
     router.push("/login");
   };
 
-  // Mostra loading enquanto verifica autenticação
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -32,7 +30,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Se não está autenticado, não mostra nada (vai redirecionar)
   if (!user) {
     return null;
   }
@@ -42,10 +39,16 @@ export default function DashboardPage() {
       <nav className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
-            <div className="flex items-center">
+            <div className="flex items-center gap-8">
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                 ESOrbit Dashboard
               </h1>
+              <button
+                onClick={() => router.push("/catalog")}
+                className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                Ver Catálogo
+              </button>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-700 dark:text-gray-300">

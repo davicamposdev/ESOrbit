@@ -20,6 +20,9 @@ export interface FindManyParams {
   isNew?: boolean;
   isAvailable?: boolean;
   isBundle?: boolean;
+  onSale?: boolean;
+  createdFrom?: Date;
+  createdTo?: Date;
   limit?: number;
   offset?: number;
 }

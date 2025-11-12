@@ -11,6 +11,7 @@ export class Cosmetic {
     private readonly _isAvailable: boolean,
     private readonly _basePrice: number | null,
     private readonly _currentPrice: number | null,
+    private readonly _onSale: boolean,
     private readonly _isBundle: boolean,
     private readonly _childrenExternalIds: string[],
   ) {}
@@ -26,6 +27,7 @@ export class Cosmetic {
     isAvailable: boolean = false,
     basePrice: number | null = null,
     currentPrice: number | null = null,
+    onSale: boolean = false,
     isBundle: boolean = false,
     childrenExternalIds: string[] = [],
   ): Cosmetic {
@@ -41,6 +43,7 @@ export class Cosmetic {
       isAvailable,
       basePrice,
       currentPrice,
+      onSale,
       isBundle,
       childrenExternalIds,
     );
@@ -58,6 +61,7 @@ export class Cosmetic {
     isAvailable: boolean,
     basePrice: number | null,
     currentPrice: number | null,
+    onSale: boolean,
     isBundle: boolean,
     childrenExternalIds: string[] = [],
   ): Cosmetic {
@@ -73,6 +77,7 @@ export class Cosmetic {
       isAvailable,
       basePrice,
       currentPrice,
+      onSale,
       isBundle,
       childrenExternalIds,
     );
@@ -127,6 +132,10 @@ export class Cosmetic {
 
   get currentPrice(): number | null {
     return this._currentPrice;
+  }
+
+  get onSale(): boolean {
+    return this._onSale;
   }
 
   get isBundle(): boolean {

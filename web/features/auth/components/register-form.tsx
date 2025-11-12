@@ -16,7 +16,6 @@ export function RegisterForm() {
     e.preventDefault();
     setError("");
 
-    // Validações básicas
     if (password !== confirmPassword) {
       setError("As senhas não coincidem");
       return;
@@ -31,7 +30,6 @@ export function RegisterForm() {
 
     try {
       await register(email, username, password);
-      // O redirecionamento será feito automaticamente pelo layout
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta");
     } finally {

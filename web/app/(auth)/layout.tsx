@@ -13,13 +13,11 @@ export default function AuthLayout({
   const router = useRouter();
 
   useEffect(() => {
-    // Se o usuário já está autenticado, redireciona para a home
     if (!loading && user) {
       router.push("/dashboard");
     }
   }, [user, loading, router]);
 
-  // Mostra loading enquanto verifica autenticação
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -31,7 +29,6 @@ export default function AuthLayout({
     );
   }
 
-  // Se está autenticado, não mostra nada (vai redirecionar)
   if (user) {
     return null;
   }

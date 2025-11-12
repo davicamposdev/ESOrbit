@@ -31,14 +31,33 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
   }
 
   async findMany(params: FindManyParams = {}): Promise<Cosmetic[]> {
+    const where: any = {
+      type: params.type,
+      rarity: params.rarity,
+      isNew: params.isNew,
+      isAvailable: params.isAvailable,
+      isBundle: params.isBundle,
+      onSale: params.onSale,
+    };
+
+    if (params.createdFrom || params.createdTo) {
+      where.addedAt = {};
+      if (params.createdFrom) {
+        where.addedAt.gte =
+          params.createdFrom instanceof Date
+            ? params.createdFrom
+            : new Date(params.createdFrom);
+      }
+      if (params.createdTo) {
+        where.addedAt.lte =
+          params.createdTo instanceof Date
+            ? params.createdTo
+            : new Date(params.createdTo);
+      }
+    }
+
     const cosmetics = await this.prisma.cosmetic.findMany({
-      where: {
-        type: params.type,
-        rarity: params.rarity,
-        isNew: params.isNew,
-        isAvailable: params.isAvailable,
-        isBundle: params.isBundle,
-      },
+      where,
       include: {
         bundleItems: {
           select: {
@@ -69,6 +88,7 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
         isAvailable: cosmetic.isAvailable,
         basePrice: cosmetic.basePrice,
         currentPrice: cosmetic.currentPrice,
+        onSale: cosmetic.onSale,
         isBundle: cosmetic.isBundle,
       },
       include: {
@@ -89,7 +109,6 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
     cosmetic: Cosmetic,
     options: UpsertOptions = {},
   ): Promise<Cosmetic> {
-    // Campos que sempre são atualizados
     const baseUpdateData = {
       name: cosmetic.name,
       type: cosmetic.type,
@@ -99,7 +118,6 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       isBundle: cosmetic.isBundle,
     };
 
-    // Adiciona campos condicionalmente
     const updateData = {
       ...baseUpdateData,
       ...(options.updateIsNew !== false && { isNew: cosmetic.isNew }),
@@ -109,6 +127,7 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       ...(options.updatePricing === true && {
         basePrice: cosmetic.basePrice,
         currentPrice: cosmetic.currentPrice,
+        onSale: cosmetic.onSale,
       }),
     };
 
@@ -173,6 +192,7 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       data.isAvailable,
       data.basePrice,
       data.currentPrice,
+      data.onSale ?? false,
       data.isBundle,
       childrenExternalIds,
     );

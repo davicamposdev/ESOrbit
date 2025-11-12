@@ -57,6 +57,14 @@ export class CosmeticSyncService {
       integrationCosmetic.currentPrice !== null &&
       integrationCosmetic.currentPrice > 0;
 
+    // Calcula se o item está em promoção (base price > current price)
+    const onSale =
+      integrationCosmetic.basePrice !== undefined &&
+      integrationCosmetic.basePrice !== null &&
+      integrationCosmetic.currentPrice !== undefined &&
+      integrationCosmetic.currentPrice !== null &&
+      integrationCosmetic.basePrice > integrationCosmetic.currentPrice;
+
     if (
       !isAvailable &&
       (integrationCosmetic.basePrice !== undefined ||
@@ -78,6 +86,7 @@ export class CosmeticSyncService {
       isAvailable,
       integrationCosmetic.basePrice ?? null,
       integrationCosmetic.currentPrice ?? null,
+      onSale,
       isBundle,
     );
 
@@ -205,7 +214,8 @@ export class CosmeticSyncService {
     if (options.updatePricing === true) {
       if (
         existing.basePrice !== cosmetic.basePrice ||
-        existing.currentPrice !== cosmetic.currentPrice
+        existing.currentPrice !== cosmetic.currentPrice ||
+        existing.onSale !== cosmetic.onSale
       ) {
         return true;
       }

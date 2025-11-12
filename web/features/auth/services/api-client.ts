@@ -1,7 +1,3 @@
-/**
- * Cliente HTTP base para comunicação com a API
- */
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export interface ApiResponse<T> {
@@ -45,7 +41,7 @@ class ApiClient {
         ...this.getHeaders(),
         ...options.headers,
       },
-      credentials: "include", // Importante para cookies (refresh token)
+      credentials: "include",
     };
 
     try {
