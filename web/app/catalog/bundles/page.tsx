@@ -50,11 +50,15 @@ export default function BundlesPage() {
 
   useEffect(() => {
     fetchBundles(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (!authLoading && user) {
       fetchPurchasedBundles();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, user]);
 
   useEffect(() => {
     if (error) {

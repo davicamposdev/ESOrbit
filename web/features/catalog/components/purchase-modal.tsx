@@ -123,7 +123,7 @@ export function PurchaseModal({
         <Button key="close" onClick={onClose}>
           Fechar
         </Button>,
-        cosmetic.isAvailable && !cosmetic.isBundle && !isPurchased && (
+        cosmetic.isAvailable && !isPurchased && (
           <Button
             key="buy"
             type="primary"
@@ -133,18 +133,6 @@ export function PurchaseModal({
             disabled={!hasEnoughCredits}
           >
             Comprar por {cosmetic.currentPrice} V-Bucks
-          </Button>
-        ),
-        cosmetic.isBundle && (
-          <Button
-            key="bundle"
-            type="primary"
-            icon={<GiftOutlined />}
-            onClick={() => {
-              window.location.href = "/catalog/bundles";
-            }}
-          >
-            Ver na página de Bundles
           </Button>
         ),
       ]}
@@ -215,28 +203,25 @@ export function PurchaseModal({
         </Descriptions.Item>
       </Descriptions>
 
-      {!hasEnoughCredits &&
-        cosmetic.isAvailable &&
-        !cosmetic.isBundle &&
-        !isPurchased && (
-          <div
-            style={{
-              marginTop: 16,
-              padding: 12,
-              backgroundColor: "#fff2e8",
-              borderRadius: 4,
-              border: "1px solid #ffbb96",
-            }}
-          >
-            <Text type="warning">
-              Você precisa de mais{" "}
-              <strong>
-                {(cosmetic.currentPrice || 0) - userCredits} V-Bucks
-              </strong>{" "}
-              para comprar este cosmético.
-            </Text>
-          </div>
-        )}
+      {!hasEnoughCredits && cosmetic.isAvailable && !isPurchased && (
+        <div
+          style={{
+            marginTop: 16,
+            padding: 12,
+            backgroundColor: "#fff2e8",
+            borderRadius: 4,
+            border: "1px solid #ffbb96",
+          }}
+        >
+          <Text type="warning">
+            Você precisa de mais{" "}
+            <strong>
+              {(cosmetic.currentPrice || 0) - userCredits} V-Bucks
+            </strong>{" "}
+            para comprar este cosmético.
+          </Text>
+        </div>
+      )}
     </Modal>
   );
 }

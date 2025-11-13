@@ -107,21 +107,26 @@ export function CosmeticCard({
     platform: "#3498db",
   };
 
+  const badges = [];
+  if (isPurchased) {
+    badges.push({ text: "COMPRADO", color: "blue" });
+  }
+  if (cosmetic.isNew && !isPurchased) {
+    badges.push({ text: "NOVO", color: "green" });
+  }
+  if (cosmetic.isBundle && !isPurchased) {
+    badges.push({ text: "PARTE DE BUNDLE", color: "purple" });
+  }
+
+  const primaryBadge = badges[0];
+  const hasMultipleBadges = badges.length > 1;
+
   return (
     <Badge.Ribbon
-      text={
-        isPurchased
-          ? "COMPRADO"
-          : cosmetic.isNew
-          ? "NOVO"
-          : cosmetic.isBundle
-          ? "BUNDLE"
-          : undefined
-      }
-      color={isPurchased ? "blue" : cosmetic.isNew ? "green" : "purple"}
+      text={primaryBadge?.text}
+      color={primaryBadge?.color}
       style={{
-        display:
-          isPurchased || cosmetic.isNew || cosmetic.isBundle ? "block" : "none",
+        display: primaryBadge ? "block" : "none",
       }}
     >
       <Card
@@ -197,6 +202,23 @@ export function CosmeticCard({
         }
         styles={{ body: { padding: "12px 16px" } }}
       >
+        {hasMultipleBadges && (
+          <div
+            style={{
+              marginBottom: 8,
+              display: "flex",
+              gap: 4,
+              flexWrap: "wrap",
+            }}
+          >
+            {badges.slice(1).map((badge, index) => (
+              <Tag key={index} color={badge.color}>
+                {badge.text}
+              </Tag>
+            ))}
+          </div>
+        )}
+
         <div
           style={{
             marginBottom: 8,

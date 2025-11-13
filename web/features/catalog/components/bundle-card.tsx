@@ -62,6 +62,9 @@ export function BundleCard({
     return null;
   }
 
+  // Verifica se todos os itens do bundle estão disponíveis
+  const allItemsAvailable = bundle.items.every((item) => item.isAvailable);
+
   // Calcula os preços do bundle baseado nos itens
   const pricing = calculateBundlePricing(bundle.items);
 
@@ -95,10 +98,29 @@ export function BundleCard({
     }
   };
 
+  // Determinar quais badges devem ser exibidos
+  const badges = [];
+  if (isPurchased) {
+    badges.push({ text: "COMPRADO", color: "blue" });
+  }
+  if (cosmetic.isNew && !isPurchased) {
+    badges.push({ text: "NOVO", color: "green" });
+  }
+  if (!isPurchased) {
+    badges.push({ text: "BUNDLE", color: "purple" });
+  }
+
+  // Se houver múltiplos badges, usar o primeiro como ribbon principal
+  const primaryBadge = badges[0];
+  const hasMultipleBadges = badges.length > 1;
+
   return (
     <Badge.Ribbon
-      text={isPurchased ? "COMPRADO" : cosmetic.isNew ? "NOVO" : "BUNDLE"}
-      color={isPurchased ? "blue" : cosmetic.isNew ? "green" : "purple"}
+      text={primaryBadge?.text}
+      color={primaryBadge?.color}
+      style={{
+        display: primaryBadge ? "block" : "none",
+      }}
     >
       <Card
         hoverable
@@ -131,7 +153,7 @@ export function BundleCard({
                 objectFit: "contain",
               }}
             />
-            {(!cosmetic.isAvailable || isPurchased) && (
+            {(!allItemsAvailable || isPurchased) && (
               <div
                 style={{
                   position: "absolute",
@@ -173,6 +195,23 @@ export function BundleCard({
         }
         styles={{ body: { padding: "12px 16px" } }}
       >
+        {hasMultipleBadges && (
+          <div
+            style={{
+              marginBottom: 8,
+              display: "flex",
+              gap: 4,
+              flexWrap: "wrap",
+            }}
+          >
+            {badges.slice(1).map((badge, index) => (
+              <Tag key={index} color={badge.color}>
+                {badge.text}
+              </Tag>
+            ))}
+          </div>
+        )}
+
         <div
           style={{
             marginBottom: 8,
@@ -203,12 +242,18 @@ export function BundleCard({
             <Row gutter={[4, 4]}>
               {bundle.items.slice(0, 3).map((item) => (
                 <Col span={8} key={item.id}>
-                  <Tooltip title={item.name}>
+                  <Tooltip
+                    title={`${item.name}${
+                      !item.isAvailable ? " (Indisponível)" : ""
+                    }`}
+                  >
                     <div
                       style={{
                         backgroundColor: "#2a2a2a",
                         borderRadius: 4,
                         overflow: "hidden",
+                        position: "relative",
+                        opacity: item.isAvailable ? 1 : 0.5,
                       }}
                     >
                       <img
@@ -221,6 +266,25 @@ export function BundleCard({
                           display: "block",
                         }}
                       />
+                      {!item.isAvailable && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: "rgba(0, 0, 0, 0.6)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <CloseCircleOutlined
+                            style={{ color: "white", fontSize: 16 }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </Tooltip>
                 </Col>

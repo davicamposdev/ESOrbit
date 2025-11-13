@@ -91,6 +91,7 @@ export class CatalogController {
             imageUrl: cosmetic.imageUrl,
             basePrice: cosmetic.basePrice,
             currentPrice: cosmetic.currentPrice,
+            isAvailable: cosmetic.isAvailable,
           })),
         };
       }),

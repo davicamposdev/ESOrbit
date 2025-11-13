@@ -116,48 +116,18 @@ export function Navbar() {
 
   return (
     <Header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 1000,
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        background: "#fff",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        padding: "0 24px",
-      }}
+      className="sticky top-0 z-1000 w-full flex items-center justify-between bg-white shadow-md px-6"
+      style={{ background: "#fff" }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div className="flex items-center gap-4">
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            cursor: "pointer",
-          }}
+          className="flex items-center gap-2 cursor-pointer"
           onClick={() => router.push("/")}
         >
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
-              borderRadius: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
-              ES
-            </span>
+          <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">ES</span>
           </div>
-          <Text
-            strong
-            style={{ fontSize: 18, color: "#1f2937", whiteSpace: "nowrap" }}
-          >
+          <Text strong className="text-lg text-gray-800 whitespace-nowrap">
             ESOrbit
           </Text>
         </div>
@@ -166,12 +136,6 @@ export function Navbar() {
           mode="horizontal"
           selectedKeys={[selectedKey]}
           items={menuItems}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            border: "none",
-            background: "transparent",
-          }}
         />
       </div>
 
@@ -180,30 +144,15 @@ export function Navbar() {
           <Avatar icon={<UserOutlined />} />
         ) : user ? (
           <>
-            {/* Créditos (V-Bucks) */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "4px 12px",
-                borderRadius: 20,
-                fontWeight: 600,
-                fontSize: 14,
-                color: "#1f2937",
-              }}
-            >
-              <DollarCircleOutlined
-                style={{ fontSize: 18, color: "#2563eb" }}
-              />
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold text-sm text-gray-800">
+              <DollarCircleOutlined className="text-lg text-blue-600" />
               {user.credits.toLocaleString("pt-BR")}
             </div>
 
-            {/* --- Dropdown do usuário --- */}
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Space style={{ cursor: "pointer" }}>
+              <Space className="cursor-pointer">
                 <Avatar icon={<UserOutlined />} />
-                <Text strong style={{ maxWidth: 150 }}>
+                <Text strong className="max-w-[150px]">
                   {user.username}
                 </Text>
               </Space>

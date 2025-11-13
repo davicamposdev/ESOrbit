@@ -27,6 +27,7 @@ export interface BundleItem {
   imageUrl: string;
   basePrice: number | null;
   currentPrice: number | null;
+  isAvailable: boolean;
 }
 
 export interface Bundle {

@@ -62,7 +62,6 @@ export default function DashboardPage() {
       setPurchases(data);
     } catch (error) {
       console.error("Erro ao carregar compras:", error);
-      // Não mostrar erro, apenas deixar vazio
       setPurchases([]);
     } finally {
       setLoadingPurchases(false);
@@ -106,7 +105,7 @@ export default function DashboardPage() {
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
           <div>
-            <Title level={2}>Bem-vindo, {user.username}! 👋</Title>
+            <Title level={2}>Bem-vindo, {user.username}!</Title>
             <Paragraph type="secondary">
               Gerencie sua conta e explore nosso catálogo de cosméticos do
               Fortnite

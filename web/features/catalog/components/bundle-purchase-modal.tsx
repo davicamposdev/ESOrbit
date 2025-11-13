@@ -46,6 +46,9 @@ export function BundlePurchaseModal({
 
   if (!bundle || !bundle.cosmetic) return null;
 
+  // Verifica se todos os itens do bundle estão disponíveis
+  const allItemsAvailable = bundle.items.every((item) => item.isAvailable);
+
   const pricing = calculateBundlePricing(bundle.items);
   const hasEnoughCredits = userCredits >= pricing.currentPrice;
 
@@ -113,7 +116,7 @@ export function BundlePurchaseModal({
         <Button key="close" onClick={onClose}>
           Fechar
         </Button>,
-        bundle.cosmetic.isAvailable && !isPurchased && (
+        allItemsAvailable && !isPurchased && (
           <Button
             key="buy"
             type="primary"
@@ -147,7 +150,7 @@ export function BundlePurchaseModal({
           <Space>
             {isPurchased && <Tag color="blue">JÁ COMPRADO</Tag>}
             {bundle.cosmetic.isNew && <Tag color="green">NOVO</Tag>}
-            {bundle.cosmetic.isAvailable ? (
+            {allItemsAvailable ? (
               <Tag color="success" icon={<CheckCircleOutlined />}>
                 Disponível
               </Tag>
@@ -198,7 +201,24 @@ export function BundlePurchaseModal({
         </Descriptions.Item>
       </Descriptions>
 
-      {!hasEnoughCredits && bundle.cosmetic.isAvailable && !isPurchased && (
+      {!allItemsAvailable && !isPurchased && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: 12,
+            backgroundColor: "#fff1f0",
+            borderRadius: 4,
+            border: "1px solid #ffccc7",
+          }}
+        >
+          <Text type="danger">
+            Este bundle não pode ser comprado porque alguns itens não estão mais
+            disponíveis.
+          </Text>
+        </div>
+      )}
+
+      {!hasEnoughCredits && allItemsAvailable && !isPurchased && (
         <div
           style={{
             marginBottom: 16,
@@ -226,21 +246,44 @@ export function BundlePurchaseModal({
             <Card
               hoverable
               cover={
-                <img
-                  alt={item.name}
-                  src={item.imageUrl}
-                  style={{
-                    width: "100%",
-                    height: 120,
-                    objectFit: "cover",
-                  }}
-                />
+                <div style={{ position: "relative" }}>
+                  <img
+                    alt={item.name}
+                    src={item.imageUrl}
+                    style={{
+                      width: "100%",
+                      height: 120,
+                      objectFit: "cover",
+                    }}
+                  />
+                  {!item.isAvailable && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.7)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Tag color="error">INDISPONÍVEL</Tag>
+                    </div>
+                  )}
+                </div>
               }
               styles={{ body: { padding: "8px" } }}
             >
               <Text
                 ellipsis
-                style={{ fontSize: 12, display: "block" }}
+                style={{
+                  fontSize: 12,
+                  display: "block",
+                  opacity: item.isAvailable ? 1 : 0.6,
+                }}
                 title={item.name}
               >
                 {item.name}
