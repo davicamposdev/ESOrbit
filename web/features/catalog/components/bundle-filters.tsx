@@ -21,11 +21,19 @@ export function BundleFilters({ onFilter, loading }: BundleFiltersProps) {
     });
   };
 
+  const handleValuesChange = () => {
+    handleFilter();
+  };
+
   const handleReset = () => {
-    form.resetFields();
+    form.setFieldsValue({
+      isAvailable: true,
+      onSale: undefined,
+    });
     onFilter({
       page: 1,
       pageSize: 20,
+      isAvailable: true,
     });
   };
 
@@ -34,7 +42,12 @@ export function BundleFilters({ onFilter, loading }: BundleFiltersProps) {
       style={{ marginBottom: 24 }}
       styles={{ body: { padding: "16px 24px" } }}
     >
-      <Form form={form} layout="inline" onFinish={handleFilter}>
+      <Form
+        form={form}
+        layout="inline"
+        onFinish={handleFilter}
+        onValuesChange={handleValuesChange}
+      >
         <Form.Item
           name="isAvailable"
           label="Apenas Disponíveis"
@@ -49,19 +62,9 @@ export function BundleFilters({ onFilter, loading }: BundleFiltersProps) {
         </Form.Item>
 
         <Form.Item>
-          <Space>
-            <Button
-              type="primary"
-              htmlType="submit"
-              icon={<FilterOutlined />}
-              loading={loading}
-            >
-              Filtrar
-            </Button>
-            <Button icon={<ReloadOutlined />} onClick={handleReset}>
-              Limpar
-            </Button>
-          </Space>
+          <Button icon={<ReloadOutlined />} onClick={handleReset}>
+            Limpar Filtros
+          </Button>
         </Form.Item>
       </Form>
     </Card>

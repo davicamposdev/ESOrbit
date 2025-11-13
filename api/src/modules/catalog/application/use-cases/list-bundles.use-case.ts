@@ -47,17 +47,14 @@ export class ListBundlesUseCase {
       };
     }
 
-    // Busca todos os cosméticos que fazem parte dos bundles
     const allCosmeticIds = bundles.flatMap(({ cosmeticIds }) => cosmeticIds);
     const cosmeticsMap =
       await this.cosmeticRepository.findManyByIds(allCosmeticIds);
 
     this.logger.log(`Found ${cosmeticsMap.size} cosmetics for all bundles`);
 
-    // Monta os bundles com seus cosméticos
     const bundlesWithDetails = bundles
       .map(({ bundle, cosmeticIds }) => {
-        // Busca os cosméticos deste bundle
         const cosmetics = cosmeticIds
           .map((cosmeticId) => cosmeticsMap.get(cosmeticId))
           .filter((cosmetic): cosmetic is Cosmetic => cosmetic !== null);
@@ -69,17 +66,16 @@ export class ListBundlesUseCase {
           return null;
         }
 
-        // Aplica filtros (verifica se PELO MENOS UM cosmético atende aos critérios)
-        if (params.isAvailable !== undefined) {
-          const hasAvailable = cosmetics.some(
+        if (params.isAvailable) {
+          const allMatch = cosmetics.every(
             (c) => c.isAvailable === params.isAvailable,
           );
-          if (!hasAvailable) return null;
+          if (!allMatch) return null;
         }
 
-        if (params.onSale !== undefined) {
-          const hasOnSale = cosmetics.some((c) => c.onSale === params.onSale);
-          if (!hasOnSale) return null;
+        if (params.onSale) {
+          const anyMatch = cosmetics.some((c) => c.onSale === params.onSale);
+          if (!anyMatch) return null;
         }
 
         return {
@@ -93,7 +89,6 @@ export class ListBundlesUseCase {
       `After filtering, ${bundlesWithDetails.length} bundles remain`,
     );
 
-    // Paginação
     const page = params.page || 1;
     const pageSize = params.pageSize || 20;
     const offset = (page - 1) * pageSize;
@@ -102,12 +97,6 @@ export class ListBundlesUseCase {
       offset,
       offset + pageSize,
     );
-
-    this.logger.log(
-      `Returning ${paginatedBundles.length} bundles (page ${page}, total: ${bundlesWithDetails.length})`,
-    );
-
-    this.logger.log('Paginated bundles:', paginatedBundles);
 
     return {
       items: paginatedBundles,

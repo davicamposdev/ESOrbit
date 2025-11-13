@@ -3,6 +3,7 @@
 import { Card, Tag, Badge, Typography, Row, Col, Space, Tooltip } from "antd";
 import { GiftOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { type Bundle } from "../services";
+import { calculateBundlePricing } from "../utils/bundle-pricing";
 
 const { Text, Title } = Typography;
 
@@ -55,6 +56,9 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
   if (!cosmetic) {
     return null;
   }
+
+  // Calcula os preços do bundle baseado nos itens
+  const pricing = calculateBundlePricing(bundle.items);
 
   const rarityColor = rarityColors[cosmetic.rarity.toLowerCase()] || "default";
   const rarityLabel =
@@ -187,28 +191,32 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
           </div>
         )}
 
-        {cosmetic.currentPrice !== null && (
+        {pricing.currentPrice > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {cosmetic.basePrice !== null &&
-            cosmetic.basePrice !== cosmetic.currentPrice ? (
+            {pricing.hasDiscount ? (
               <>
                 <Text
                   delete
                   type="secondary"
                   style={{ fontSize: 13, lineHeight: 1 }}
                 >
-                  {cosmetic.basePrice} V-Bucks
+                  {pricing.basePrice.toLocaleString("pt-BR")} V-Bucks
                 </Text>
-                <Text
-                  strong
-                  style={{ fontSize: 18, color: "#52c41a", lineHeight: 1 }}
-                >
-                  {cosmetic.currentPrice} V-Bucks
-                </Text>
+                <Space size={4} style={{ flexWrap: "wrap" }}>
+                  <Text
+                    strong
+                    style={{ fontSize: 18, color: "#52c41a", lineHeight: 1 }}
+                  >
+                    {pricing.currentPrice.toLocaleString("pt-BR")} V-Bucks
+                  </Text>
+                  <Tag color="success" style={{ margin: 0 }}>
+                    -{pricing.discountPercentage}%
+                  </Tag>
+                </Space>
               </>
             ) : (
               <Text strong style={{ fontSize: 16, color: "#1890ff" }}>
-                {cosmetic.currentPrice} V-Bucks
+                {pricing.currentPrice.toLocaleString("pt-BR")} V-Bucks
               </Text>
             )}
           </div>

@@ -34,6 +34,7 @@ import {
   type ListBundlesParams,
 } from "@/features/catalog";
 import { financeService } from "@/features/finance";
+import { calculateBundlePricing } from "@/features/catalog/utils/bundle-pricing";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
@@ -64,6 +65,7 @@ export default function BundlesPage() {
 
   useEffect(() => {
     fetchBundles(filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -101,7 +103,9 @@ export default function BundlesPage() {
   const handlePurchase = async () => {
     if (!selectedBundle || !user || !selectedBundle.cosmetic) return;
 
-    if (user.credits < (selectedBundle.cosmetic.currentPrice || 0)) {
+    const pricing = calculateBundlePricing(selectedBundle.items);
+
+    if (user.credits < pricing.currentPrice) {
       message.error("Créditos insuficientes para esta compra!");
       return;
     }
@@ -112,7 +116,11 @@ export default function BundlesPage() {
         <div>
           <p>
             Você está prestes a comprar <strong>{selectedBundle.name}</strong>{" "}
-            por <strong>{selectedBundle.cosmetic.currentPrice} V-Bucks</strong>.
+            por{" "}
+            <strong>
+              {pricing.currentPrice.toLocaleString("pt-BR")} V-Bucks
+            </strong>
+            .
           </p>
           <p>Este bundle contém {selectedBundle.items.length} itens.</p>
           <p>Deseja continuar?</p>
@@ -214,7 +222,7 @@ export default function BundlesPage() {
       >
         <BundleFilters onFilter={handleFilter} loading={loading} />
 
-        {loading && (!bundles || bundles.length === 0) ? (
+        {loading ? (
           <div
             style={{
               display: "flex",
@@ -222,20 +230,23 @@ export default function BundlesPage() {
               alignItems: "center",
               justifyContent: "center",
               padding: "100px 0",
+              minHeight: "400px",
             }}
           >
             <Spin size="large" />
             <Text style={{ marginTop: 16 }} type="secondary">
-              Carregando bundles...
+              {bundles && bundles.length > 0
+                ? "Aplicando filtros..."
+                : "Carregando bundles..."}
             </Text>
           </div>
         ) : !bundles || bundles.length === 0 ? (
           <Empty
             description={
               <Space direction="vertical" size="large">
-                <Text>Nenhum bundle disponível no momento</Text>
+                <Text>Nenhum bundle encontrado</Text>
                 <Text type="secondary">
-                  Verifique novamente mais tarde ou sincronize a loja
+                  Tente ajustar os filtros ou recarregar a página
                 </Text>
               </Space>
             }
@@ -251,13 +262,15 @@ export default function BundlesPage() {
               </Text>
             </div>
 
-            <Row gutter={[16, 16]}>
-              {bundles.map((bundle) => (
-                <Col xs={24} sm={12} md={8} lg={6} xl={6} key={bundle.id}>
-                  <BundleCard bundle={bundle} onSelect={handleSelectBundle} />
-                </Col>
-              ))}
-            </Row>
+            <Spin spinning={loading}>
+              <Row gutter={[16, 16]}>
+                {bundles.map((bundle) => (
+                  <Col xs={24} sm={12} md={8} lg={6} xl={6} key={bundle.id}>
+                    <BundleCard bundle={bundle} onSelect={handleSelectBundle} />
+                  </Col>
+                ))}
+              </Row>
+            </Spin>
 
             {totalPages > 1 && (
               <Pagination
@@ -286,117 +299,138 @@ export default function BundlesPage() {
           <Button key="close" onClick={handleCloseModal}>
             Fechar
           </Button>,
-          selectedBundle?.cosmetic?.isAvailable && (
-            <Button
-              key="buy"
-              type="primary"
-              icon={<ShoppingCartOutlined />}
-              onClick={handlePurchase}
-              loading={purchasing}
-              disabled={
-                !user ||
-                !selectedBundle?.cosmetic ||
-                user.credits < (selectedBundle?.cosmetic?.currentPrice || 0)
-              }
-            >
-              Comprar Bundle
-            </Button>
-          ),
+          selectedBundle?.cosmetic?.isAvailable &&
+            (() => {
+              const pricing = calculateBundlePricing(selectedBundle.items);
+              return (
+                <Button
+                  key="buy"
+                  type="primary"
+                  icon={<ShoppingCartOutlined />}
+                  onClick={handlePurchase}
+                  loading={purchasing}
+                  disabled={
+                    !user ||
+                    !selectedBundle?.cosmetic ||
+                    user.credits < pricing.currentPrice
+                  }
+                >
+                  Comprar Bundle
+                </Button>
+              );
+            })(),
         ]}
         width={800}
       >
-        {selectedBundle && selectedBundle.cosmetic && (
-          <>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <img
-                src={selectedBundle.cosmetic.imageUrl}
-                alt={selectedBundle.name}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: 300,
-                  objectFit: "contain",
-                }}
-              />
-            </div>
+        {selectedBundle &&
+          selectedBundle.cosmetic &&
+          (() => {
+            const pricing = calculateBundlePricing(selectedBundle.items);
+            return (
+              <>
+                <div style={{ textAlign: "center", marginBottom: 24 }}>
+                  <img
+                    src={selectedBundle.cosmetic.imageUrl}
+                    alt={selectedBundle.name}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: 300,
+                      objectFit: "contain",
+                    }}
+                  />
+                </div>
 
-            <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
-              <Descriptions.Item label="Nome">
-                {selectedBundle.name}
-              </Descriptions.Item>
-              <Descriptions.Item label="Status">
-                <Space>
-                  {selectedBundle.cosmetic.isNew && (
-                    <Tag color="green">NOVO</Tag>
+                <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
+                  <Descriptions.Item label="Nome">
+                    {selectedBundle.name}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Status">
+                    <Space>
+                      {selectedBundle.cosmetic.isNew && (
+                        <Tag color="green">NOVO</Tag>
+                      )}
+                      {selectedBundle.cosmetic.isAvailable ? (
+                        <Tag color="success" icon={<CheckCircleOutlined />}>
+                          Disponível
+                        </Tag>
+                      ) : (
+                        <Tag color="error">Indisponível</Tag>
+                      )}
+                    </Space>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Quantidade de Itens">
+                    {selectedBundle.items.length} itens inclusos
+                  </Descriptions.Item>
+                  {pricing.currentPrice > 0 && (
+                    <Descriptions.Item label="Preço do Bundle">
+                      {pricing.hasDiscount ? (
+                        <Space direction="vertical" size={4}>
+                          <Text
+                            delete
+                            type="secondary"
+                            style={{ fontSize: 14 }}
+                          >
+                            {pricing.basePrice.toLocaleString("pt-BR")} V-Bucks
+                          </Text>
+                          <Space>
+                            <Text
+                              strong
+                              style={{ color: "#52c41a", fontSize: 18 }}
+                            >
+                              {pricing.currentPrice.toLocaleString("pt-BR")}{" "}
+                              V-Bucks
+                            </Text>
+                            <Tag color="success">
+                              EM PROMOÇÃO (-{pricing.discountPercentage}%)
+                            </Tag>
+                          </Space>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            Economia de{" "}
+                            {pricing.discount.toLocaleString("pt-BR")} V-Bucks
+                          </Text>
+                        </Space>
+                      ) : (
+                        <Text strong style={{ fontSize: 18 }}>
+                          {pricing.currentPrice.toLocaleString("pt-BR")} V-Bucks
+                        </Text>
+                      )}
+                    </Descriptions.Item>
                   )}
-                  {selectedBundle.cosmetic.isAvailable ? (
-                    <Tag color="success" icon={<CheckCircleOutlined />}>
-                      Disponível
-                    </Tag>
-                  ) : (
-                    <Tag color="error">Indisponível</Tag>
-                  )}
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="Quantidade de Itens">
-                {selectedBundle.items.length} itens inclusos
-              </Descriptions.Item>
-              {selectedBundle.cosmetic.currentPrice !== null && (
-                <Descriptions.Item label="Preço">
-                  {selectedBundle.cosmetic.basePrice !== null &&
-                  selectedBundle.cosmetic.basePrice !==
-                    selectedBundle.cosmetic.currentPrice ? (
-                    <>
-                      <Text delete type="secondary" style={{ marginRight: 8 }}>
-                        {selectedBundle.cosmetic.basePrice} V-Bucks
-                      </Text>
-                      <Text strong style={{ color: "#52c41a", fontSize: 16 }}>
-                        {selectedBundle.cosmetic.currentPrice} V-Bucks
-                      </Text>
-                      <Tag color="success" style={{ marginLeft: 8 }}>
-                        EM PROMOÇÃO
-                      </Tag>
-                    </>
-                  ) : (
-                    <Text strong style={{ fontSize: 16 }}>
-                      {selectedBundle.cosmetic.currentPrice} V-Bucks
-                    </Text>
-                  )}
-                </Descriptions.Item>
-              )}
-            </Descriptions>
+                </Descriptions>
 
-            <Title level={5}>Itens Inclusos:</Title>
-            <Row gutter={[16, 16]}>
-              {selectedBundle.items.map((item) => (
-                <Col xs={12} sm={8} md={6} key={item.id}>
-                  <Card
-                    hoverable
-                    cover={
-                      <img
-                        alt={item.name}
-                        src={item.imageUrl}
-                        style={{
-                          width: "100%",
-                          height: 120,
-                          objectFit: "cover",
-                        }}
-                      />
-                    }
-                    styles={{ body: { padding: "8px" } }}
-                  >
-                    <Text
-                      ellipsis
-                      style={{ fontSize: 12, display: "block" }}
-                      title={item.name}
-                    >
-                      {item.name}
-                    </Text>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </>
-        )}
+                <Title level={5}>Itens Inclusos:</Title>
+                <Row gutter={[16, 16]}>
+                  {selectedBundle.items.map((item) => (
+                    <Col xs={12} sm={8} md={6} key={item.id}>
+                      <Card
+                        hoverable
+                        cover={
+                          <img
+                            alt={item.name}
+                            src={item.imageUrl}
+                            style={{
+                              width: "100%",
+                              height: 120,
+                              objectFit: "cover",
+                            }}
+                          />
+                        }
+                        styles={{ body: { padding: "8px" } }}
+                      >
+                        <Text
+                          ellipsis
+                          style={{ fontSize: 12, display: "block" }}
+                          title={item.name}
+                        >
+                          {item.name}
+                        </Text>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </>
+            );
+          })()}
       </Modal>
     </Layout>
   );
