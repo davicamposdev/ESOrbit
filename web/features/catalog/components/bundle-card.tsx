@@ -10,6 +10,7 @@ const { Text, Title } = Typography;
 interface BundleCardProps {
   bundle: Bundle;
   onSelect?: (bundle: Bundle) => void;
+  isPurchased?: boolean;
 }
 
 const rarityColors: Record<string, string> = {
@@ -50,7 +51,11 @@ const rarityLabels: Record<string, string> = {
   platform: "Plataforma",
 };
 
-export function BundleCard({ bundle, onSelect }: BundleCardProps) {
+export function BundleCard({
+  bundle,
+  onSelect,
+  isPurchased = false,
+}: BundleCardProps) {
   // Fallback para casos onde o cosmetic pode estar indefinido
   const cosmetic = bundle.cosmetic;
   if (!cosmetic) {
@@ -64,6 +69,26 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
   const rarityLabel =
     rarityLabels[cosmetic.rarity.toLowerCase()] || cosmetic.rarity;
 
+  const rarityBorderColors: Record<string, string> = {
+    common: "#95a5a6",
+    uncommon: "#2ecc71",
+    rare: "#3498db",
+    epic: "#9b59b6",
+    legendary: "#f39c12",
+    mythic: "#e74c3c",
+    marvel: "#e74c3c",
+    dc: "#3498db",
+    icon: "#17a2b8",
+    starwars: "#95a5a6",
+    gaminglegends: "#9b59b6",
+    shadow: "#95a5a6",
+    slurp: "#17a2b8",
+    dark: "#9b59b6",
+    frozen: "#3498db",
+    lava: "#fd7e14",
+    platform: "#3498db",
+  };
+
   const handleClick = () => {
     if (onSelect) {
       onSelect(bundle);
@@ -72,18 +97,26 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
 
   return (
     <Badge.Ribbon
-      text={cosmetic.isNew ? "NOVO" : "BUNDLE"}
-      color={cosmetic.isNew ? "green" : "purple"}
+      text={isPurchased ? "COMPRADO" : cosmetic.isNew ? "NOVO" : "BUNDLE"}
+      color={isPurchased ? "blue" : cosmetic.isNew ? "green" : "purple"}
     >
       <Card
         hoverable
         onClick={handleClick}
+        style={{
+          opacity: isPurchased ? 0.85 : 1,
+          borderColor:
+            rarityBorderColors[cosmetic.rarity.toLowerCase()] || "#d9d9d9",
+          borderWidth: 2,
+        }}
         cover={
           <div
             style={{
               position: "relative",
+              width: "100%",
               paddingTop: "100%",
-              backgroundColor: "#2d2d2d",
+              overflow: "hidden",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             }}
           >
             <img
@@ -95,10 +128,10 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: "contain",
               }}
             />
-            {!cosmetic.isAvailable && (
+            {(!cosmetic.isAvailable || isPurchased) && (
               <div
                 style={{
                   position: "absolute",
@@ -106,7 +139,9 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                  backgroundColor: isPurchased
+                    ? "rgba(24, 144, 255, 0.3)"
+                    : "rgba(0, 0, 0, 0.6)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -122,7 +157,15 @@ export function BundleCard({ bundle, onSelect }: BundleCardProps) {
                     gap: 4,
                   }}
                 >
-                  <CloseCircleOutlined /> INDISPONÍVEL
+                  {isPurchased ? (
+                    <>
+                      <GiftOutlined /> JÁ COMPRADO
+                    </>
+                  ) : (
+                    <>
+                      <CloseCircleOutlined /> INDISPONÍVEL
+                    </>
+                  )}
                 </Text>
               </div>
             )}

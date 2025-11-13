@@ -5,9 +5,23 @@ Frontend do sistema ESOrbit construído com Next.js 16 e TypeScript seguindo o p
 ## 🚀 Tecnologias
 
 - **Next.js 16** - Framework React com App Router
+- **React 19** - Biblioteca UI
 - **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização
+- **Ant Design 5** - Componentes UI modernos
+- **Tailwind CSS 4** - Estilização utilitária
 - **JWT** - Autenticação com tokens
+
+## ✨ Funcionalidades Implementadas
+
+- ✅ **Sistema de Autenticação Completo** - Login, registro e logout com JWT
+- ✅ **Dashboard Interativo** - Visão geral com créditos e estatísticas
+- ✅ **Navegação Global** - Navbar persistente com menu de usuário
+- ✅ **Catálogo de Cosméticos** - Busca, filtros e compra de itens
+- ✅ **Sistema de Bundles** - Pacotes especiais com descontos
+- ✅ **Perfil do Usuário** - Visualização e gerenciamento de conta
+- ✅ **Histórico de Transações** - Compras e transferências detalhadas
+- ✅ **Créditos em Tempo Real** - Visualização constante do saldo
+- ✅ **Interface Responsiva** - Design adaptável para todos os dispositivos
 
 ## 📁 Estrutura do Projeto
 
@@ -20,28 +34,34 @@ web/
 │   │   └── layout.tsx     # Layout para páginas auth
 │   ├── api/               # API routes
 │   │   └── health/        # Health check
+│   ├── catalog/           # Catálogo de cosméticos
+│   │   ├── page.tsx       # Lista de cosméticos
+│   │   └── bundles/       # Página de bundles
 │   ├── dashboard/         # Dashboard (protegido)
+│   ├── profile/           # Perfil do usuário
+│   ├── transactions/      # Histórico de transações
 │   ├── layout.tsx         # Layout raiz com AuthProvider
-│   └── page.tsx           # Página inicial
+│   └── page.tsx           # Landing page
 │
 ├── features/              # Features da aplicação (módulos)
 │   ├── auth/              # Feature de autenticação
 │   │   ├── components/    # Componentes específicos de auth
-│   │   │   ├── login-form.tsx
-│   │   │   ├── register-form.tsx
-│   │   │   └── index.ts   # Barrel export
 │   │   ├── hooks/         # Hooks específicos de auth
-│   │   │   ├── use-auth.tsx
-│   │   │   └── index.ts   # Barrel export
 │   │   ├── services/      # Serviços de API de auth
-│   │   │   ├── api-client.ts
-│   │   │   ├── auth.service.ts
-│   │   │   └── index.ts   # Barrel export
 │   │   └── index.ts       # Barrel export da feature
+│   ├── catalog/           # Feature de catálogo
+│   │   ├── components/    # Cards, filtros, etc
+│   │   ├── hooks/         # useCatalog, useBundles
+│   │   ├── services/      # API de catálogo
+│   │   └── index.ts       # Barrel export
+│   ├── finance/           # Feature de finanças
+│   │   ├── services/      # Compras, transferências
+│   │   └── index.ts       # Barrel export
 │   └── index.ts           # Barrel export de todas features
 │
 └── shared/                # Código compartilhado entre features
-    ├── components/        # Componentes reutilizáveis
+    ├── components/        # Navbar, etc
+    ├── layouts/           # AppLayout
     ├── hooks/             # Hooks reutilizáveis
     ├── utils/             # Utilitários
     └── index.ts           # Barrel export
@@ -296,10 +316,10 @@ Certifique-se de usar `credentials: 'include'` nas requisições (já configurad
 
 ## 📚 Documentação Adicional
 
-- [GETTING_STARTED.md](./GETTING_STARTED.md) - Guia de início rápido
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Resumo técnico
-- [CHECKLIST.md](./CHECKLIST.md) - Checklist de testes
-- [docs/AUTHENTICATION_GUIDE.md](./docs/AUTHENTICATION_GUIDE.md) - Guia detalhado
+- [docs/SUMMARY.md](./docs/SUMMARY.md) - **Resumo Executivo das Melhorias**
+- [docs/FRONTEND_IMPROVEMENTS.md](./docs/FRONTEND_IMPROVEMENTS.md) - **Documentação Completa**
+- [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) - **Guia do Usuário**
+- [docs/AUTHENTICATION_GUIDE.md](./docs/AUTHENTICATION_GUIDE.md) - Guia de autenticação
 
 ## 📖 Recursos
 

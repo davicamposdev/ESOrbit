@@ -78,7 +78,7 @@ export class PurchaseCosmeticUseCase {
     }
 
     // Executa a compra em uma transação atômica
-    const purchase = await this.prisma.$transaction(async (tx) => {
+    const purchaseId = await this.prisma.$transaction(async (tx) => {
       // Cria a transação
       const transaction = await tx.transaction.create({
         data: {
@@ -111,20 +111,16 @@ export class PurchaseCosmeticUseCase {
         },
       });
 
-      return newPurchase;
+      return newPurchase.id;
     });
 
-    return {
-      id: purchase.id,
-      userId: purchase.userId,
-      cosmeticId: purchase.cosmeticId,
-      transactionId: purchase.transactionId,
-      isFromBundle: purchase.isFromBundle,
-      parentPurchaseId: purchase.parentPurchaseId,
-      status: purchase.status as unknown as PurchaseStatus,
-      returnedAt: purchase.returnedAt,
-      createdAt: purchase.createdAt,
-      updatedAt: purchase.updatedAt,
-    };
+    // Busca a compra completa com dados relacionados
+    const purchase = await this.purchaseRepository.findById(purchaseId);
+
+    if (!purchase) {
+      throw new BadRequestException('Failed to retrieve purchase');
+    }
+
+    return purchase;
   }
 }

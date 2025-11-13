@@ -15,7 +15,9 @@ interface UseBundlesReturn {
   page: number;
   pageSize: number;
   totalPages: number;
+  purchasedBundleIds: Set<string>;
   fetchBundles: (params?: ListBundlesParams) => Promise<void>;
+  fetchPurchasedBundles: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -27,6 +29,9 @@ export function useBundles(): UseBundlesReturn {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
+  const [purchasedBundleIds, setPurchasedBundleIds] = useState<Set<string>>(
+    new Set()
+  );
 
   const fetchBundles = useCallback(async (params?: ListBundlesParams) => {
     setLoading(true);
@@ -49,6 +54,15 @@ export function useBundles(): UseBundlesReturn {
     }
   }, []);
 
+  const fetchPurchasedBundles = useCallback(async () => {
+    try {
+      const ids = await catalogService.getPurchasedBundleIds();
+      setPurchasedBundleIds(new Set(ids));
+    } catch (err) {
+      console.error("Erro ao buscar bundles comprados:", err);
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -61,7 +75,9 @@ export function useBundles(): UseBundlesReturn {
     page,
     pageSize,
     totalPages,
+    purchasedBundleIds,
     fetchBundles,
+    fetchPurchasedBundles,
     clearError,
   };
 }

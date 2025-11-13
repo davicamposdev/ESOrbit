@@ -20,6 +20,7 @@ interface AuthContextData {
   ) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  updateUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -27,6 +28,16 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const updateUser = useCallback(async () => {
+    try {
+      const { user } = await authService.me();
+      setUser(user);
+    } catch (error) {
+      console.error("Erro ao atualizar dados do usuário:", error);
+      throw error;
+    }
+  }, []);
 
   const refreshAuth = useCallback(async () => {
     try {
@@ -40,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("accessToken", accessToken);
       }
     } catch (error) {
+      // Refresh falhou - limpar tudo
       authService.setAccessToken(null);
       setUser(null);
       if (typeof window !== "undefined") {
@@ -61,13 +73,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           authService.setAccessToken(storedToken);
 
           try {
+            // O interceptor do api-client vai tentar refresh automaticamente se necessário
             const { user } = await authService.me();
             setUser(user);
           } catch (error) {
-            try {
-              await refreshAuth();
-            } catch (refreshError) {
-              console.log("Sessão expirada. Faça login novamente.");
+            // Se chegou aqui, tanto o token quanto o refresh falharam
+            // Limpar tudo e usuário precisa fazer login novamente
+            authService.setAccessToken(null);
+            setUser(null);
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("accessToken");
             }
           }
         }
@@ -79,11 +94,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadUser();
-  }, [refreshAuth]);
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const { user, accessToken } = await authService.login({ email, password });
 
+    console.log("Login bem-sucedido, usuário:", user);
     authService.setAccessToken(accessToken);
     setUser(user);
 
@@ -134,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         refreshAuth,
+        updateUser,
       }}
     >
       {children}

@@ -35,6 +35,7 @@ export class LoginUseCase {
       user.email,
       user.username,
       user.credits,
+      user.createdAt,
     );
 
     const tokens = await this.tokenService.generateTokens(authenticatedUser);

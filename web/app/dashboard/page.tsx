@@ -2,31 +2,98 @@
 
 import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AppLayout } from "@/shared";
+import {
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Typography,
+  Space,
+  Button,
+  Spin,
+  App,
+  List,
+  Tag,
+  Avatar,
+} from "antd";
+import {
+  WalletOutlined,
+  ShoppingOutlined,
+  UserOutlined,
+  GiftOutlined,
+  HistoryOutlined,
+  TrophyOutlined,
+  FireOutlined,
+  AppstoreOutlined,
+} from "@ant-design/icons";
+import { financeService, type PurchaseResponse } from "@/features/finance";
+
+const { Title, Paragraph, Text } = Typography;
 
 export default function DashboardPage() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const { message } = App.useApp();
+  const [purchases, setPurchases] = useState<PurchaseResponse[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
 
   useEffect(() => {
+    console.log("Dashboard - user:", user, "loading:", loading);
     if (!loading && !user) {
+      console.log("Redirecionando para login...");
       router.push("/login");
     }
   }, [user, loading, router]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
+  useEffect(() => {
+    if (user && !loading) {
+      loadRecentPurchases();
+    }
+  }, [user, loading]);
+
+  const loadRecentPurchases = async () => {
+    console.log("Carregando compras recentes...");
+    setLoadingPurchases(true);
+    try {
+      const data = await financeService.listPurchases({ limit: 5 });
+      console.log("Compras carregadas:", data);
+      setPurchases(data);
+    } catch (error) {
+      console.error("Erro ao carregar compras:", error);
+      // Não mostrar erro, apenas deixar vazio
+      setPurchases([]);
+    } finally {
+      setLoadingPurchases(false);
+    }
   };
+
+  const calculateStats = () => {
+    const totalSpent = purchases.reduce(
+      (sum, purchase) => sum + (purchase.transaction?.amount || 0),
+      0
+    );
+    const totalPurchases = purchases.length;
+    return { totalSpent, totalPurchases };
+  };
+
+  const { totalSpent, totalPurchases } = calculateStats();
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Carregando...</p>
+      <AppLayout>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "80vh",
+          }}
+        >
+          <Spin size="large" />
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -35,85 +102,272 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <nav className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center gap-8">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                ESOrbit Dashboard
-              </h1>
-              <button
-                onClick={() => router.push("/catalog")}
-                className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                Ver Catálogo
-              </button>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {user.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                Sair
-              </button>
-            </div>
+    <AppLayout>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <div>
+            <Title level={2}>Bem-vindo, {user.username}! 👋</Title>
+            <Paragraph type="secondary">
+              Gerencie sua conta e explore nosso catálogo de cosméticos do
+              Fortnite
+            </Paragraph>
           </div>
-        </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Bem-vindo, {user.username}!
-          </h2>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Créditos Disponíveis"
+                  value={user.credits}
+                  prefix={<WalletOutlined />}
+                  valueStyle={{ color: "#52c41a" }}
+                  suffix="V-Bucks"
+                />
+              </Card>
+            </Col>
 
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Informações do usuário
-              </h3>
-              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    ID
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {user.id}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Email
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {user.email}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Nome de usuário
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {user.username}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Criado em
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 dark:text-white">
-                    {new Date(user.createdAt).toLocaleDateString("pt-BR")}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Total de Compras"
+                  value={totalPurchases}
+                  prefix={<ShoppingOutlined />}
+                  valueStyle={{ color: "#1890ff" }}
+                  loading={loadingPurchases}
+                />
+              </Card>
+            </Col>
+
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Total Gasto"
+                  value={totalSpent}
+                  prefix={<TrophyOutlined />}
+                  valueStyle={{ color: "#faad14" }}
+                  suffix="V-Bucks"
+                  loading={loadingPurchases}
+                />
+              </Card>
+            </Col>
+
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Statistic
+                  title="Membro desde"
+                  value={new Date(user.createdAt).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                  })}
+                  prefix={<FireOutlined />}
+                  valueStyle={{ color: "#ff4d4f" }}
+                />
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <Card title="Informações da Conta">
+                <Space
+                  direction="vertical"
+                  size="middle"
+                  style={{ width: "100%" }}
+                >
+                  <div>
+                    <Paragraph strong>ID do Usuário</Paragraph>
+                    <Paragraph copyable>{user.id}</Paragraph>
+                  </div>
+                  <div>
+                    <Paragraph strong>Email</Paragraph>
+                    <Paragraph>{user.email}</Paragraph>
+                  </div>
+                  <div>
+                    <Paragraph strong>Nome de Usuário</Paragraph>
+                    <Paragraph>{user.username}</Paragraph>
+                  </div>
+                  <div>
+                    <Paragraph strong>Membro desde</Paragraph>
+                    <Paragraph>
+                      {new Date(user.createdAt).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </Paragraph>
+                  </div>
+                </Space>
+              </Card>
+            </Col>
+
+            <Col xs={24} lg={12}>
+              <Card
+                title="Compras Recentes"
+                extra={
+                  <Button
+                    type="link"
+                    onClick={() => router.push("/transactions")}
+                  >
+                    Ver todas
+                  </Button>
+                }
+              >
+                {loadingPurchases ? (
+                  <div style={{ textAlign: "center", padding: "20px 0" }}>
+                    <Spin />
+                  </div>
+                ) : purchases.length === 0 ? (
+                  <Space
+                    direction="vertical"
+                    style={{ width: "100%", textAlign: "center" }}
+                  >
+                    <Text type="secondary">Nenhuma compra realizada ainda</Text>
+                    <Button
+                      type="primary"
+                      icon={<ShoppingOutlined />}
+                      onClick={() => router.push("/catalog")}
+                    >
+                      Explorar Catálogo
+                    </Button>
+                  </Space>
+                ) : (
+                  <List
+                    dataSource={purchases}
+                    renderItem={(purchase) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={
+                            purchase.cosmetic?.imageUrl ? (
+                              <Avatar
+                                src={purchase.cosmetic.imageUrl}
+                                shape="square"
+                                size={48}
+                              />
+                            ) : (
+                              <Avatar icon={<ShoppingOutlined />} size={48} />
+                            )
+                          }
+                          title={
+                            <Space>
+                              <Text strong>
+                                {purchase.cosmetic?.name || "Cosmético"}
+                              </Text>
+                              {purchase.status === "ACTIVE" && (
+                                <Tag color="success">Ativo</Tag>
+                              )}
+                              {purchase.status === "RETURNED" && (
+                                <Tag color="warning">Devolvido</Tag>
+                              )}
+                              {purchase.isFromBundle && (
+                                <Tag color="purple">Bundle</Tag>
+                              )}
+                            </Space>
+                          }
+                          description={
+                            <Space direction="vertical" size={0}>
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                {new Date(purchase.createdAt).toLocaleString(
+                                  "pt-BR",
+                                  {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </Text>
+                              <Text strong style={{ color: "#52c41a" }}>
+                                {purchase.transaction?.amount || 0} V-Bucks
+                              </Text>
+                              {purchase.cosmetic?.type && (
+                                <Text type="secondary" style={{ fontSize: 11 }}>
+                                  {purchase.cosmetic.type} •{" "}
+                                  {purchase.cosmetic.rarity}
+                                </Text>
+                              )}
+                            </Space>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                )}
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={16}>
+              <Card>
+                <Title level={4}>Sobre o ESOrbit</Title>
+                <Paragraph>
+                  Bem-vindo à plataforma ESOrbit! Aqui você pode explorar e
+                  adquirir cosméticos do Fortnite usando seus créditos V-Bucks.
+                  Nossa plataforma oferece um catálogo completo com skins,
+                  emotes, picaretas e muito mais.
+                </Paragraph>
+                <Paragraph>
+                  Navegue pelo catálogo para descobrir novos itens ou confira
+                  nossos bundles especiais para economizar!
+                </Paragraph>
+              </Card>
+            </Col>
+
+            <Col xs={24} lg={8}>
+              <Card title="Ações Rápidas">
+                <Space
+                  direction="vertical"
+                  size="middle"
+                  style={{ width: "100%" }}
+                >
+                  <Button
+                    type="primary"
+                    icon={<ShoppingOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/catalog")}
+                  >
+                    Explorar Catálogo
+                  </Button>
+                  <Button
+                    icon={<AppstoreOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/inventory")}
+                  >
+                    Meu Inventário
+                  </Button>
+                  <Button
+                    icon={<GiftOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/catalog/bundles")}
+                  >
+                    Ver Bundles
+                  </Button>
+                  <Button
+                    icon={<UserOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/profile")}
+                  >
+                    Ver Perfil
+                  </Button>
+                  <Button
+                    icon={<HistoryOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/transactions")}
+                  >
+                    Ver Transações
+                  </Button>
+                </Space>
+              </Card>
+            </Col>
+          </Row>
+        </Space>
+      </div>
+    </AppLayout>
   );
 }

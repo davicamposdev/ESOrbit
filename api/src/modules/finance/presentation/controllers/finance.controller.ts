@@ -11,6 +11,7 @@ import {
 import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/domain/entities/user.entity';
+import { PrismaService } from '../../../../common/database/prisma.service';
 import {
   PurchaseCosmeticUseCase,
   PurchaseBundleUseCase,
@@ -42,6 +43,7 @@ export class FinanceController {
     private readonly transferCreditsUseCase: TransferCreditsUseCase,
     private readonly listPurchasesUseCase: ListPurchasesUseCase,
     private readonly listTransfersUseCase: ListTransfersUseCase,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post('purchases')
@@ -86,6 +88,64 @@ export class FinanceController {
       limit: query.limit,
       offset: query.offset,
     });
+  }
+
+  @Get('purchases/cosmetics/ids')
+  @HttpCode(HttpStatus.OK)
+  async getPurchasedCosmeticIds(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ cosmeticIds: string[] }> {
+    const purchases = await this.listPurchasesUseCase.execute({
+      userId: user.id,
+      status: undefined, // Get all active purchases
+    });
+
+    const cosmeticIds = purchases
+      .filter((p) => p.status === 'ACTIVE')
+      .map((p) => p.cosmeticId);
+
+    return { cosmeticIds: Array.from(new Set(cosmeticIds)) };
+  }
+
+  @Get('purchases/bundles/ids')
+  @HttpCode(HttpStatus.OK)
+  async getPurchasedBundleIds(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<{ bundleIds: string[] }> {
+    const purchases = await this.listPurchasesUseCase.execute({
+      userId: user.id,
+      status: undefined,
+    });
+
+    const activePurchaseIds = new Set(
+      purchases.filter((p) => p.status === 'ACTIVE').map((p) => p.cosmeticId),
+    );
+
+    // Buscar todos os bundles e verificar se todos os cosméticos do bundle foram comprados
+    const bundles = await this.prisma.bundle.findMany({
+      include: {
+        relation: {
+          include: {
+            cosmetic: true,
+          },
+        },
+      },
+    });
+
+    const purchasedBundleIds: string[] = [];
+
+    for (const bundle of bundles) {
+      const allCosmeticIds = bundle.relation.map((r) => r.cosmeticId);
+      const allPurchased = allCosmeticIds.every((id) =>
+        activePurchaseIds.has(id),
+      );
+
+      if (allPurchased && allCosmeticIds.length > 0) {
+        purchasedBundleIds.push(bundle.id);
+      }
+    }
+
+    return { bundleIds: purchasedBundleIds };
   }
 
   @Post('returns')

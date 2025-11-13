@@ -2,24 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Layout,
-  Typography,
-  Row,
-  Col,
-  Spin,
-  Empty,
-  Button,
-  App,
-  Modal,
-  Descriptions,
-  Tag,
-  Space,
-} from "antd";
+import { Typography, Row, Col, Spin, Empty, Button, App, Space } from "antd";
 import {
   ShoppingCartOutlined,
   ReloadOutlined,
-  ArrowLeftOutlined,
   GiftOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/features/auth";
@@ -28,18 +14,18 @@ import {
   CatalogFilters,
   CosmeticCard,
   Pagination,
+  PurchaseModal,
   type Cosmetic,
   type ListCosmeticsParams,
 } from "@/features/catalog";
-import { financeService } from "@/features/finance";
+import { AppLayout } from "@/shared";
 
-const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function CatalogPage() {
   const router = useRouter();
   const { message, modal } = App.useApp();
-  const { user, loading: authLoading, refreshAuth } = useAuth();
+  const { user, loading: authLoading, updateUser } = useAuth();
   const {
     cosmetics,
     loading,
@@ -48,7 +34,9 @@ export default function CatalogPage() {
     page,
     pageSize,
     totalPages,
+    purchasedCosmeticIds,
     fetchCosmetics,
+    fetchPurchasedCosmetics,
     syncShop,
     clearError,
   } = useCatalog();
@@ -60,9 +48,13 @@ export default function CatalogPage() {
     page: 1,
     pageSize: 20,
   });
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCosmetics(filters);
+    if (!authLoading && user) {
+      fetchPurchasedCosmetics();
+    }
   }, []);
 
   useEffect(() => {
@@ -99,129 +91,42 @@ export default function CatalogPage() {
     }
   };
 
-  const [purchasing, setPurchasing] = useState(false);
-
   const handleSelectCosmetic = (cosmetic: Cosmetic) => {
     setSelectedCosmetic(cosmetic);
+    setPurchaseModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handleClosePurchaseModal = () => {
+    setPurchaseModalOpen(false);
     setSelectedCosmetic(null);
   };
 
-  const handleGoBack = () => {
-    router.push("/");
-  };
-
-  const handlePurchase = async () => {
-    if (!selectedCosmetic || !user) return;
-
-    if (selectedCosmetic.isBundle) {
-      message.info("Para comprar bundles, acesse a página de Bundles!");
-      return;
-    }
-
-    if (user.credits < (selectedCosmetic.currentPrice || 0)) {
-      message.error("Créditos insuficientes para esta compra!");
-      return;
-    }
-
-    modal.confirm({
-      title: "Confirmar Compra",
-      content: (
-        <div>
-          <p>
-            Você está prestes a comprar <strong>{selectedCosmetic.name}</strong>{" "}
-            por <strong>{selectedCosmetic.currentPrice} V-Bucks</strong>.
-          </p>
-          <p>Deseja continuar?</p>
-        </div>
-      ),
-      okText: "Sim, comprar",
-      cancelText: "Cancelar",
-      onOk: async () => {
-        setPurchasing(true);
-        try {
-          await financeService.purchaseCosmetic(selectedCosmetic.id);
-          message.success("Cosmético comprado com sucesso!");
-          await refreshAuth();
-          handleCloseModal();
-          fetchCosmetics(filters);
-        } catch (err) {
-          const errorMessage =
-            err instanceof Error ? err.message : "Erro ao comprar cosmético";
-          message.error(errorMessage);
-        } finally {
-          setPurchasing(false);
-        }
-      },
-    });
+  const handlePurchaseSuccess = async () => {
+    await updateUser();
+    await fetchPurchasedCosmetics();
+    fetchCosmetics(filters);
   };
 
   if (authLoading) {
     return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <Content
+      <AppLayout>
+        <div
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
+            minHeight: "80vh",
           }}
         >
           <Spin size="large" />
-        </Content>
-      </Layout>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Header
-        style={{
-          background: "#fff",
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <Space>
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={handleGoBack}
-            type="text"
-          >
-            Voltar
-          </Button>
-          <Title level={3} style={{ margin: 0 }}>
-            <ShoppingCartOutlined style={{ marginRight: 8 }} />
-            Catálogo de Cosméticos
-          </Title>
-        </Space>
-        <Space>
-          {user && (
-            <Text strong>
-              Olá, {user.username}! | Créditos: {user.credits}
-            </Text>
-          )}
-          <Button
-            icon={<GiftOutlined />}
-            onClick={() => router.push("/catalog/bundles")}
-          >
-            Ver Bundles
-          </Button>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-            loading={loading}
-          >
-            Atualizar
-          </Button>
-        </Space>
-      </Header>
-
-      <Content
+    <AppLayout>
+      <div
         style={{
           padding: "24px",
           maxWidth: 1400,
@@ -229,6 +134,34 @@ export default function CatalogPage() {
           width: "100%",
         }}
       >
+        <div style={{ marginBottom: 24 }}>
+          <Space direction="vertical" size="small">
+            <Title level={2} style={{ margin: 0 }}>
+              <ShoppingCartOutlined style={{ marginRight: 8 }} />
+              Catálogo de Cosméticos
+            </Title>
+            <Text type="secondary">
+              Explore e adquira cosméticos exclusivos do Fortnite
+            </Text>
+          </Space>
+          <div style={{ marginTop: 16 }}>
+            <Space wrap>
+              <Button
+                icon={<GiftOutlined />}
+                onClick={() => router.push("/catalog/bundles")}
+              >
+                Ver Bundles
+              </Button>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleRefresh}
+                loading={loading}
+              >
+                Atualizar
+              </Button>
+            </Space>
+          </div>
+        </div>
         <CatalogFilters onFilter={handleFilter} loading={loading} />
 
         {loading && (!cosmetics || cosmetics.length === 0) ? (
@@ -279,6 +212,7 @@ export default function CatalogPage() {
                   <CosmeticCard
                     cosmetic={cosmetic}
                     onSelect={handleSelectCosmetic}
+                    isPurchased={purchasedCosmeticIds.has(cosmetic.id)}
                   />
                 </Col>
               ))}
@@ -296,107 +230,20 @@ export default function CatalogPage() {
             )}
           </>
         )}
-      </Content>
+      </div>
 
-      <Modal
-        title={selectedCosmetic?.name}
-        open={!!selectedCosmetic}
-        onCancel={handleCloseModal}
-        footer={[
-          <Button key="close" onClick={handleCloseModal}>
-            Fechar
-          </Button>,
-          selectedCosmetic?.isAvailable && !selectedCosmetic.isBundle && (
-            <Button
-              key="buy"
-              type="primary"
-              icon={<ShoppingCartOutlined />}
-              onClick={handlePurchase}
-              loading={purchasing}
-              disabled={
-                !user || user.credits < (selectedCosmetic?.currentPrice || 0)
-              }
-            >
-              Comprar
-            </Button>
-          ),
-          selectedCosmetic?.isBundle && (
-            <Button
-              key="bundle"
-              type="primary"
-              icon={<GiftOutlined />}
-              onClick={() => router.push("/catalog/bundles")}
-            >
-              Ver na página de Bundles
-            </Button>
-          ),
-        ]}
-        width={600}
-      >
-        {selectedCosmetic && (
-          <>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <img
-                src={selectedCosmetic.imageUrl}
-                alt={selectedCosmetic.name}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: 300,
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="ID">
-                {selectedCosmetic.externalId}
-              </Descriptions.Item>
-              <Descriptions.Item label="Tipo">
-                {selectedCosmetic.type}
-              </Descriptions.Item>
-              <Descriptions.Item label="Raridade">
-                <Tag color="blue">{selectedCosmetic.rarity}</Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Status">
-                <Space>
-                  {selectedCosmetic.isNew && <Tag color="green">NOVO</Tag>}
-                  {selectedCosmetic.isBundle && (
-                    <Tag color="purple">BUNDLE</Tag>
-                  )}
-                  {selectedCosmetic.isAvailable ? (
-                    <Tag color="success">Disponível</Tag>
-                  ) : (
-                    <Tag color="error">Indisponível</Tag>
-                  )}
-                </Space>
-              </Descriptions.Item>
-              {selectedCosmetic.currentPrice !== null && (
-                <Descriptions.Item label="Preço">
-                  {selectedCosmetic.basePrice !== null &&
-                  selectedCosmetic.basePrice !==
-                    selectedCosmetic.currentPrice ? (
-                    <>
-                      <Text delete type="secondary" style={{ marginRight: 8 }}>
-                        {selectedCosmetic.basePrice} V-Bucks
-                      </Text>
-                      <Text strong style={{ color: "#52c41a", fontSize: 16 }}>
-                        {selectedCosmetic.currentPrice} V-Bucks
-                      </Text>
-                    </>
-                  ) : (
-                    <Text strong style={{ fontSize: 16 }}>
-                      {selectedCosmetic.currentPrice} V-Bucks
-                    </Text>
-                  )}
-                </Descriptions.Item>
-              )}
-              <Descriptions.Item label="Adicionado em">
-                {new Date(selectedCosmetic.addedAt).toLocaleDateString("pt-BR")}
-              </Descriptions.Item>
-            </Descriptions>
-          </>
-        )}
-      </Modal>
-    </Layout>
+      <PurchaseModal
+        cosmetic={selectedCosmetic}
+        open={purchaseModalOpen}
+        userCredits={user?.credits || 0}
+        onClose={handleClosePurchaseModal}
+        onSuccess={handlePurchaseSuccess}
+        isPurchased={
+          selectedCosmetic
+            ? purchasedCosmeticIds.has(selectedCosmetic.id)
+            : false
+        }
+      />
+    </AppLayout>
   );
 }

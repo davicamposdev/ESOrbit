@@ -5,8 +5,8 @@ export interface User {
   email: string;
   username: string;
   credits: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface RegisterDto {

@@ -46,7 +46,16 @@ export class AuthController {
   ) {
     const { user, tokens } = await this.registerUseCase.execute(dto);
     this.setCookie(res, tokens.refreshToken);
-    return { user, accessToken: tokens.accessToken };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        credits: user.credits,
+        createdAt: user.createdAt,
+      },
+      accessToken: tokens.accessToken,
+    };
   }
 
   @Public()
@@ -58,7 +67,16 @@ export class AuthController {
   ) {
     const { user, tokens } = await this.loginUseCase.execute(dto);
     this.setCookie(res, tokens.refreshToken);
-    return { user, accessToken: tokens.accessToken };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        credits: user.credits,
+        createdAt: user.createdAt,
+      },
+      accessToken: tokens.accessToken,
+    };
   }
 
   @Public()
@@ -84,6 +102,14 @@ export class AuthController {
 
   @Get('me')
   async getMe(@CurrentUser() user: AuthenticatedUser) {
-    return { user };
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        credits: user.credits,
+        createdAt: user.createdAt,
+      },
+    };
   }
 }

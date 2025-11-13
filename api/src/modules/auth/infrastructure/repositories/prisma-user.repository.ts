@@ -13,7 +13,13 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<AuthenticatedUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, username: true, credits: true },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        credits: true,
+        createdAt: true,
+      },
     });
 
     if (!user) return null;
@@ -23,13 +29,20 @@ export class UserRepository implements IUserRepository {
       user.email,
       user.username,
       user.credits,
+      user.createdAt,
     );
   }
 
   async findById(id: string): Promise<AuthenticatedUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, username: true, credits: true },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        credits: true,
+        createdAt: true,
+      },
     });
 
     if (!user) return null;
@@ -39,13 +52,20 @@ export class UserRepository implements IUserRepository {
       user.email,
       user.username,
       user.credits,
+      user.createdAt,
     );
   }
 
   async create(data: CreateUserData): Promise<AuthenticatedUser> {
     const user = await this.prisma.user.create({
       data: { ...data, credits: 10000 },
-      select: { id: true, email: true, username: true, credits: true },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        credits: true,
+        createdAt: true,
+      },
     });
 
     return AuthenticatedUser.create(
@@ -53,6 +73,7 @@ export class UserRepository implements IUserRepository {
       user.email,
       user.username,
       user.credits,
+      user.createdAt,
     );
   }
 

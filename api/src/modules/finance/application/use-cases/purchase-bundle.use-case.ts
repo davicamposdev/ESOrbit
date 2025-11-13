@@ -157,37 +157,30 @@ export class PurchaseBundleUseCase {
       }
 
       return {
-        mainPurchase: firstPurchase,
-        bundleCosmeticsPurchases,
+        mainPurchaseId: firstPurchase.id,
+        bundleCosmeticsPurchaseIds: bundleCosmeticsPurchases.map((p) => p.id),
       };
     });
 
+    // Busca as compras completas com dados relacionados
+    const mainPurchase = await this.purchaseRepository.findById(
+      result.mainPurchaseId,
+    );
+
+    if (!mainPurchase) {
+      throw new BadRequestException('Failed to retrieve main purchase');
+    }
+
+    const bundleCosmeticsPurchases = await Promise.all(
+      result.bundleCosmeticsPurchaseIds.map((id) =>
+        this.purchaseRepository.findById(id),
+      ),
+    );
+
     return {
-      mainPurchase: {
-        id: result.mainPurchase.id,
-        userId: result.mainPurchase.userId,
-        cosmeticId: result.mainPurchase.cosmeticId,
-        transactionId: result.mainPurchase.transactionId,
-        isFromBundle: result.mainPurchase.isFromBundle,
-        parentPurchaseId: result.mainPurchase.parentPurchaseId,
-        status: result.mainPurchase.status as unknown as PurchaseStatus,
-        returnedAt: result.mainPurchase.returnedAt,
-        createdAt: result.mainPurchase.createdAt,
-        updatedAt: result.mainPurchase.updatedAt,
-      },
-      bundleCosmeticsPurchases: result.bundleCosmeticsPurchases.map(
-        (purchase) => ({
-          id: purchase.id,
-          userId: purchase.userId,
-          cosmeticId: purchase.cosmeticId,
-          transactionId: purchase.transactionId,
-          isFromBundle: purchase.isFromBundle,
-          parentPurchaseId: purchase.parentPurchaseId,
-          status: purchase.status as unknown as PurchaseStatus,
-          returnedAt: purchase.returnedAt,
-          createdAt: purchase.createdAt,
-          updatedAt: purchase.updatedAt,
-        }),
+      mainPurchase,
+      bundleCosmeticsPurchases: bundleCosmeticsPurchases.filter(
+        (p): p is Purchase => p !== null,
       ),
     };
   }

@@ -41,24 +41,6 @@ export function RegisterForm() {
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
       <div>
         <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-          placeholder="seu@email.com"
-        />
-      </div>
-
-      <div>
-        <label
           htmlFor="username"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
@@ -75,6 +57,23 @@ export function RegisterForm() {
         />
       </div>
 
+      <div>
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          Email
+        </label>
+        <input
+          id="email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          placeholder="seu@email.com"
+        />
+      </div>
       <div>
         <label
           htmlFor="password"

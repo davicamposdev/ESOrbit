@@ -4,6 +4,7 @@ export class AuthenticatedUser {
     private readonly _email: string,
     private readonly _username: string,
     private readonly _credits: number,
+    private readonly _createdAt?: Date,
   ) {}
 
   static create(
@@ -11,8 +12,9 @@ export class AuthenticatedUser {
     email: string,
     username: string,
     credits: number,
+    createdAt?: Date,
   ): AuthenticatedUser {
-    return new AuthenticatedUser(id, email, username, credits);
+    return new AuthenticatedUser(id, email, username, credits, createdAt);
   }
 
   get id(): string {
@@ -29,5 +31,19 @@ export class AuthenticatedUser {
 
   get credits(): number {
     return this._credits;
+  }
+
+  get createdAt(): Date | undefined {
+    return this._createdAt;
+  }
+
+  toJSON() {
+    return {
+      id: this._id,
+      email: this._email,
+      username: this._username,
+      credits: this._credits,
+      createdAt: this._createdAt,
+    };
   }
 }

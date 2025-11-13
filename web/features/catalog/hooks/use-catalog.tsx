@@ -15,7 +15,9 @@ interface UseCatalogReturn {
   page: number;
   pageSize: number;
   totalPages: number;
+  purchasedCosmeticIds: Set<string>;
   fetchCosmetics: (params?: ListCosmeticsParams) => Promise<void>;
+  fetchPurchasedCosmetics: () => Promise<void>;
   syncAll: (language?: string) => Promise<void>;
   syncNew: (language?: string) => Promise<void>;
   syncShop: (language?: string) => Promise<void>;
@@ -30,6 +32,9 @@ export function useCatalog(): UseCatalogReturn {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
+  const [purchasedCosmeticIds, setPurchasedCosmeticIds] = useState<Set<string>>(
+    new Set()
+  );
 
   const fetchCosmetics = useCallback(
     async (params: ListCosmeticsParams = {}) => {
@@ -109,6 +114,15 @@ export function useCatalog(): UseCatalogReturn {
     }
   }, []);
 
+  const fetchPurchasedCosmetics = useCallback(async () => {
+    try {
+      const ids = await catalogService.getPurchasedCosmeticIds();
+      setPurchasedCosmeticIds(new Set(ids));
+    } catch (err) {
+      console.error("Erro ao buscar cosméticos comprados:", err);
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -121,7 +135,9 @@ export function useCatalog(): UseCatalogReturn {
     page,
     pageSize,
     totalPages,
+    purchasedCosmeticIds,
     fetchCosmetics,
+    fetchPurchasedCosmetics,
     syncAll,
     syncNew,
     syncShop,

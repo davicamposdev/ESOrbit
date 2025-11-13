@@ -47,6 +47,10 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
   async findById(id: string): Promise<Purchase | null> {
     const purchase = await this.prisma.purchase.findUnique({
       where: { id },
+      include: {
+        cosmetic: true,
+        transaction: true,
+      },
     });
 
     return purchase ? this.mapToEntity(purchase) : null;
@@ -102,6 +106,10 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
         userId,
         status: filters?.status as any,
       },
+      include: {
+        cosmetic: true,
+        transaction: true,
+      },
       take: filters?.limit,
       skip: filters?.offset,
       orderBy: { createdAt: 'desc' },
@@ -132,6 +140,30 @@ export class PrismaPurchaseRepository implements IPurchaseRepository {
       returnedAt: data.returnedAt,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      cosmetic: data.cosmetic
+        ? {
+            id: data.cosmetic.id,
+            name: data.cosmetic.name,
+            description: data.cosmetic.description,
+            type: data.cosmetic.type,
+            rarity: data.cosmetic.rarity,
+            imageUrl: data.cosmetic.imageUrl,
+            regularPrice: data.cosmetic.regularPrice,
+            finalPrice: data.cosmetic.finalPrice,
+            onSale: data.cosmetic.onSale,
+            isAvailable: data.cosmetic.isAvailable,
+          }
+        : undefined,
+      transaction: data.transaction
+        ? {
+            id: data.transaction.id,
+            userId: data.transaction.userId,
+            amount: data.transaction.amount,
+            type: data.transaction.type,
+            status: data.transaction.status,
+            createdAt: data.transaction.createdAt,
+          }
+        : undefined,
     };
   }
 }

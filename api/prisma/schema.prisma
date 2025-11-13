@@ -94,7 +94,7 @@ model Purchase {
   id               String         @id @default(uuid())
   userId           String         @map("user_id")
   cosmeticId       String         @map("cosmetic_id")
-  transactionId    String         @unique @map("transaction_id")
+  transactionId    String         @map("transaction_id")
   isFromBundle     Boolean        @default(false) @map("is_from_bundle")
   parentPurchaseId String?        @map("parent_purchase_id")
   status           PurchaseStatus @default(ACTIVE)

@@ -59,7 +59,6 @@ export class CatalogController {
 
     return {
       data: result.items.map(({ bundle, cosmetics }) => {
-        // Usa o outfit como cosmético principal, ou o primeiro se não houver outfit
         const mainCosmetic =
           cosmetics.find((c) => c.type === 'outfit') || cosmetics[0];
 

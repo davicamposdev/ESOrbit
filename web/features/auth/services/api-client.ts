@@ -8,6 +8,9 @@ export interface ApiResponse<T> {
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
+  private isRefreshing: boolean = false;
+  private refreshSubscribers: Array<(token: string | null) => void> = [];
+  private refreshPromise: Promise<string> | null = null;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -33,6 +36,43 @@ class ApiClient {
     return headers;
   }
 
+  private onRefreshed(token: string | null) {
+    this.refreshSubscribers.forEach((callback) => callback(token));
+    this.refreshSubscribers = [];
+  }
+
+  private addRefreshSubscriber(callback: (token: string | null) => void) {
+    this.refreshSubscribers.push(callback);
+  }
+
+  private async refreshToken(): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/api/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao renovar token");
+    }
+
+    const data = await response.json();
+    return data.accessToken;
+  }
+
+  private shouldAttemptRefresh(endpoint: string): boolean {
+    // Não tentar refresh nos endpoints de autenticação exceto /auth/me
+    const authEndpoints = [
+      "/api/auth/login",
+      "/api/auth/register",
+      "/api/auth/refresh",
+      "/api/auth/logout",
+    ];
+    return !authEndpoints.some((path) => endpoint.includes(path));
+  }
+
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const config: RequestInit = {
@@ -48,6 +88,60 @@ class ApiClient {
       const response = await fetch(url, config);
 
       if (!response.ok) {
+        if (response.status === 401 && this.shouldAttemptRefresh(endpoint)) {
+          // Token expirado, tentar refresh
+          if (!this.isRefreshing) {
+            this.isRefreshing = true;
+
+            // Criar uma promise de refresh compartilhada
+            this.refreshPromise = this.refreshToken()
+              .then((newToken) => {
+                this.setAccessToken(newToken);
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("accessToken", newToken);
+                }
+                this.onRefreshed(newToken);
+                return newToken;
+              })
+              .catch((error) => {
+                // Limpar dados e notificar subscribers sobre falha
+                this.setAccessToken(null);
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("accessToken");
+                }
+                this.onRefreshed(null);
+                throw error;
+              })
+              .finally(() => {
+                this.isRefreshing = false;
+                this.refreshPromise = null;
+              });
+
+            try {
+              await this.refreshPromise;
+              // Tentar novamente a requisição original com novo token
+              return this.request<T>(endpoint, options);
+            } catch (refreshError) {
+              throw new Error("Sessão expirada. Faça login novamente.");
+            }
+          } else {
+            // Já está fazendo refresh, aguardar a promise existente
+            return new Promise<T>((resolve, reject) => {
+              this.addRefreshSubscriber((token: string | null) => {
+                if (token) {
+                  // Refresh bem-sucedido, tentar novamente com o novo token
+                  this.request<T>(endpoint, options)
+                    .then(resolve)
+                    .catch(reject);
+                } else {
+                  // Refresh falhou
+                  reject(new Error("Sessão expirada. Faça login novamente."));
+                }
+              });
+            });
+          }
+        }
+
         const error = await response.json().catch(() => ({
           message: response.statusText,
         }));

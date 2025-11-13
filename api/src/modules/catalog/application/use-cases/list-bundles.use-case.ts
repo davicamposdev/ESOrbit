@@ -36,7 +36,6 @@ export class ListBundlesUseCase {
 
   async execute(params: ListBundlesParams = {}): Promise<ListBundlesResult> {
     const bundles = await this.bundleRepository.findAll();
-    this.logger.log(`Found ${bundles.length} bundles`);
 
     if (bundles.length === 0) {
       return {
@@ -50,8 +49,6 @@ export class ListBundlesUseCase {
     const allCosmeticIds = bundles.flatMap(({ cosmeticIds }) => cosmeticIds);
     const cosmeticsMap =
       await this.cosmeticRepository.findManyByIds(allCosmeticIds);
-
-    this.logger.log(`Found ${cosmeticsMap.size} cosmetics for all bundles`);
 
     const bundlesWithDetails = bundles
       .map(({ bundle, cosmeticIds }) => {
@@ -84,10 +81,6 @@ export class ListBundlesUseCase {
         };
       })
       .filter((item): item is BundleWithCosmetics => item !== null);
-
-    this.logger.log(
-      `After filtering, ${bundlesWithDetails.length} bundles remain`,
-    );
 
     const page = params.page || 1;
     const pageSize = params.pageSize || 20;

@@ -5,6 +5,7 @@ import { UsersController } from './presentation/controllers/users.controller';
 
 // Application
 import { GetUserUseCase } from './application/use-cases/get-user.use-case';
+import { ListUsersWithCosmeticsUseCase } from './application/use-cases/list-users-with-cosmetics.use-case';
 
 // Infrastructure
 import { UsersRepository } from './infrastructure/repositories/users.repository';
@@ -12,12 +13,11 @@ import { UsersRepository } from './infrastructure/repositories/users.repository'
 @Module({
   controllers: [UsersController],
   providers: [
-    // Repositories
     { provide: 'IUsersRepository', useClass: UsersRepository },
     UsersRepository,
 
-    // Use Cases
     GetUserUseCase,
+    ListUsersWithCosmeticsUseCase,
   ],
 })
 export class UsersModule {}

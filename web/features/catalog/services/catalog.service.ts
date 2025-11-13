@@ -158,6 +158,20 @@ export class CatalogService {
 
     return apiClient.get<ListBundlesResponse>(endpoint);
   }
+
+  async getPurchasedCosmeticIds(): Promise<string[]> {
+    const response = await apiClient.get<{ cosmeticIds: string[] }>(
+      "/api/finance/purchases/cosmetics/ids"
+    );
+    return response.cosmeticIds;
+  }
+
+  async getPurchasedBundleIds(): Promise<string[]> {
+    const response = await apiClient.get<{ bundleIds: string[] }>(
+      "/api/finance/purchases/bundles/ids"
+    );
+    return response.bundleIds;
+  }
 }
 
 export const catalogService = new CatalogService();
