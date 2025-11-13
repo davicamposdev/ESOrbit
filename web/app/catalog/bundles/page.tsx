@@ -15,54 +15,55 @@ import {
   Descriptions,
   Tag,
   Space,
+  Card,
 } from "antd";
 import {
   ShoppingCartOutlined,
   ReloadOutlined,
   ArrowLeftOutlined,
   GiftOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "@/features/auth";
 import {
-  useCatalog,
-  CatalogFilters,
-  CosmeticCard,
+  useBundles,
+  BundleCard,
   Pagination,
-  type Cosmetic,
-  type ListCosmeticsParams,
+  BundleFilters,
+  type Bundle,
+  type ListBundlesParams,
 } from "@/features/catalog";
 import { financeService } from "@/features/finance";
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-export default function CatalogPage() {
+export default function BundlesPage() {
   const router = useRouter();
   const { message, modal } = App.useApp();
   const { user, loading: authLoading, refreshAuth } = useAuth();
   const {
-    cosmetics,
+    bundles,
     loading,
     error,
     total,
     page,
     pageSize,
     totalPages,
-    fetchCosmetics,
-    syncShop,
+    fetchBundles,
     clearError,
-  } = useCatalog();
+  } = useBundles();
 
-  const [selectedCosmetic, setSelectedCosmetic] = useState<Cosmetic | null>(
-    null
-  );
-  const [filters, setFilters] = useState<ListCosmeticsParams>({
+  const [selectedBundle, setSelectedBundle] = useState<Bundle | null>(null);
+  const [purchasing, setPurchasing] = useState(false);
+  const [filters, setFilters] = useState<ListBundlesParams>({
     page: 1,
     pageSize: 20,
+    isAvailable: true,
   });
 
   useEffect(() => {
-    fetchCosmetics(filters);
+    fetchBundles(filters);
   }, []);
 
   useEffect(() => {
@@ -72,56 +73,35 @@ export default function CatalogPage() {
     }
   }, [error, clearError, message]);
 
-  const handleFilter = (newFilters: ListCosmeticsParams) => {
+  const handleFilter = (newFilters: ListBundlesParams) => {
     setFilters(newFilters);
-    fetchCosmetics(newFilters);
+    fetchBundles(newFilters);
   };
 
   const handlePageChange = (newPage: number) => {
     const newFilters = { ...filters, page: newPage };
     setFilters(newFilters);
-    fetchCosmetics(newFilters);
+    fetchBundles(newFilters);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleRefresh = () => {
-    fetchCosmetics(filters);
-    message.success("Catálogo atualizado!");
+    fetchBundles(filters);
+    message.success("Lista de bundles atualizada!");
   };
 
-  const handleSyncShop = async () => {
-    try {
-      await syncShop("pt-BR");
-      message.success("Loja sincronizada com sucesso!");
-      fetchCosmetics(filters);
-    } catch (err) {
-      message.error("Erro ao sincronizar loja");
-    }
-  };
-
-  const [purchasing, setPurchasing] = useState(false);
-
-  const handleSelectCosmetic = (cosmetic: Cosmetic) => {
-    setSelectedCosmetic(cosmetic);
+  const handleSelectBundle = (bundle: Bundle) => {
+    setSelectedBundle(bundle);
   };
 
   const handleCloseModal = () => {
-    setSelectedCosmetic(null);
-  };
-
-  const handleGoBack = () => {
-    router.push("/");
+    setSelectedBundle(null);
   };
 
   const handlePurchase = async () => {
-    if (!selectedCosmetic || !user) return;
+    if (!selectedBundle || !user || !selectedBundle.cosmetic) return;
 
-    if (selectedCosmetic.isBundle) {
-      message.info("Para comprar bundles, acesse a página de Bundles!");
-      return;
-    }
-
-    if (user.credits < (selectedCosmetic.currentPrice || 0)) {
+    if (user.credits < (selectedBundle.cosmetic.currentPrice || 0)) {
       message.error("Créditos insuficientes para esta compra!");
       return;
     }
@@ -131,9 +111,10 @@ export default function CatalogPage() {
       content: (
         <div>
           <p>
-            Você está prestes a comprar <strong>{selectedCosmetic.name}</strong>{" "}
-            por <strong>{selectedCosmetic.currentPrice} V-Bucks</strong>.
+            Você está prestes a comprar <strong>{selectedBundle.name}</strong>{" "}
+            por <strong>{selectedBundle.cosmetic.currentPrice} V-Bucks</strong>.
           </p>
+          <p>Este bundle contém {selectedBundle.items.length} itens.</p>
           <p>Deseja continuar?</p>
         </div>
       ),
@@ -142,20 +123,28 @@ export default function CatalogPage() {
       onOk: async () => {
         setPurchasing(true);
         try {
-          await financeService.purchaseCosmetic(selectedCosmetic.id);
-          message.success("Cosmético comprado com sucesso!");
+          const response = await financeService.purchaseBundle(
+            selectedBundle.id
+          );
+          message.success(
+            `Bundle comprado com sucesso! ${response.totalItems} itens adicionados à sua conta.`
+          );
           await refreshAuth();
           handleCloseModal();
-          fetchCosmetics(filters);
+          handleRefresh();
         } catch (err) {
           const errorMessage =
-            err instanceof Error ? err.message : "Erro ao comprar cosmético";
+            err instanceof Error ? err.message : "Erro ao comprar bundle";
           message.error(errorMessage);
         } finally {
           setPurchasing(false);
         }
       },
     });
+  };
+
+  const handleGoBack = () => {
+    router.push("/catalog");
   };
 
   if (authLoading) {
@@ -195,8 +184,8 @@ export default function CatalogPage() {
             Voltar
           </Button>
           <Title level={3} style={{ margin: 0 }}>
-            <ShoppingCartOutlined style={{ marginRight: 8 }} />
-            Catálogo de Cosméticos
+            <GiftOutlined style={{ marginRight: 8 }} />
+            Bundles Disponíveis
           </Title>
         </Space>
         <Space>
@@ -205,12 +194,6 @@ export default function CatalogPage() {
               Olá, {user.username}! | Créditos: {user.credits}
             </Text>
           )}
-          <Button
-            icon={<GiftOutlined />}
-            onClick={() => router.push("/catalog/bundles")}
-          >
-            Ver Bundles
-          </Button>
           <Button
             icon={<ReloadOutlined />}
             onClick={handleRefresh}
@@ -229,9 +212,9 @@ export default function CatalogPage() {
           width: "100%",
         }}
       >
-        <CatalogFilters onFilter={handleFilter} loading={loading} />
+        <BundleFilters onFilter={handleFilter} loading={loading} />
 
-        {loading && (!cosmetics || cosmetics.length === 0) ? (
+        {loading && (!bundles || bundles.length === 0) ? (
           <div
             style={{
               display: "flex",
@@ -243,43 +226,35 @@ export default function CatalogPage() {
           >
             <Spin size="large" />
             <Text style={{ marginTop: 16 }} type="secondary">
-              Carregando cosméticos...
+              Carregando bundles...
             </Text>
           </div>
-        ) : !cosmetics || cosmetics.length === 0 ? (
+        ) : !bundles || bundles.length === 0 ? (
           <Empty
             description={
               <Space direction="vertical" size="large">
-                <Text>Nenhum cosmético encontrado no banco de dados</Text>
+                <Text>Nenhum bundle disponível no momento</Text>
                 <Text type="secondary">
-                  Sincronize a loja do Fortnite para carregar os cosméticos
+                  Verifique novamente mais tarde ou sincronize a loja
                 </Text>
               </Space>
             }
             style={{ padding: "100px 0" }}
           >
-            <Space>
-              <Button type="primary" onClick={handleSyncShop} loading={loading}>
-                Sincronizar Loja
-              </Button>
-              <Button onClick={handleRefresh}>Recarregar</Button>
-            </Space>
+            <Button onClick={handleRefresh}>Recarregar</Button>
           </Empty>
         ) : (
           <>
             <div style={{ marginBottom: 16, textAlign: "right" }}>
               <Text type="secondary">
-                Mostrando {cosmetics.length} de {total} cosméticos
+                Mostrando {bundles.length} de {total} bundles
               </Text>
             </div>
 
             <Row gutter={[16, 16]}>
-              {cosmetics.map((cosmetic) => (
-                <Col xs={24} sm={12} md={8} lg={6} xl={4} key={cosmetic.id}>
-                  <CosmeticCard
-                    cosmetic={cosmetic}
-                    onSelect={handleSelectCosmetic}
-                  />
+              {bundles.map((bundle) => (
+                <Col xs={24} sm={12} md={8} lg={6} xl={6} key={bundle.id}>
+                  <BundleCard bundle={bundle} onSelect={handleSelectBundle} />
                 </Col>
               ))}
             </Row>
@@ -299,14 +274,19 @@ export default function CatalogPage() {
       </Content>
 
       <Modal
-        title={selectedCosmetic?.name}
-        open={!!selectedCosmetic}
+        title={
+          <Space>
+            <GiftOutlined />
+            {selectedBundle?.name}
+          </Space>
+        }
+        open={!!selectedBundle}
         onCancel={handleCloseModal}
         footer={[
           <Button key="close" onClick={handleCloseModal}>
             Fechar
           </Button>,
-          selectedCosmetic?.isAvailable && !selectedCosmetic.isBundle && (
+          selectedBundle?.cosmetic?.isAvailable && (
             <Button
               key="buy"
               type="primary"
@@ -314,31 +294,23 @@ export default function CatalogPage() {
               onClick={handlePurchase}
               loading={purchasing}
               disabled={
-                !user || user.credits < (selectedCosmetic?.currentPrice || 0)
+                !user ||
+                !selectedBundle?.cosmetic ||
+                user.credits < (selectedBundle?.cosmetic?.currentPrice || 0)
               }
             >
-              Comprar
-            </Button>
-          ),
-          selectedCosmetic?.isBundle && (
-            <Button
-              key="bundle"
-              type="primary"
-              icon={<GiftOutlined />}
-              onClick={() => router.push("/catalog/bundles")}
-            >
-              Ver na página de Bundles
+              Comprar Bundle
             </Button>
           ),
         ]}
-        width={600}
+        width={800}
       >
-        {selectedCosmetic && (
+        {selectedBundle && selectedBundle.cosmetic && (
           <>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <img
-                src={selectedCosmetic.imageUrl}
-                alt={selectedCosmetic.name}
+                src={selectedBundle.cosmetic.imageUrl}
+                alt={selectedBundle.name}
                 style={{
                   maxWidth: "100%",
                   maxHeight: 300,
@@ -347,53 +319,82 @@ export default function CatalogPage() {
               />
             </div>
 
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="ID">
-                {selectedCosmetic.externalId}
-              </Descriptions.Item>
-              <Descriptions.Item label="Tipo">
-                {selectedCosmetic.type}
-              </Descriptions.Item>
-              <Descriptions.Item label="Raridade">
-                <Tag color="blue">{selectedCosmetic.rarity}</Tag>
+            <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
+              <Descriptions.Item label="Nome">
+                {selectedBundle.name}
               </Descriptions.Item>
               <Descriptions.Item label="Status">
                 <Space>
-                  {selectedCosmetic.isNew && <Tag color="green">NOVO</Tag>}
-                  {selectedCosmetic.isBundle && (
-                    <Tag color="purple">BUNDLE</Tag>
+                  {selectedBundle.cosmetic.isNew && (
+                    <Tag color="green">NOVO</Tag>
                   )}
-                  {selectedCosmetic.isAvailable ? (
-                    <Tag color="success">Disponível</Tag>
+                  {selectedBundle.cosmetic.isAvailable ? (
+                    <Tag color="success" icon={<CheckCircleOutlined />}>
+                      Disponível
+                    </Tag>
                   ) : (
                     <Tag color="error">Indisponível</Tag>
                   )}
                 </Space>
               </Descriptions.Item>
-              {selectedCosmetic.currentPrice !== null && (
+              <Descriptions.Item label="Quantidade de Itens">
+                {selectedBundle.items.length} itens inclusos
+              </Descriptions.Item>
+              {selectedBundle.cosmetic.currentPrice !== null && (
                 <Descriptions.Item label="Preço">
-                  {selectedCosmetic.basePrice !== null &&
-                  selectedCosmetic.basePrice !==
-                    selectedCosmetic.currentPrice ? (
+                  {selectedBundle.cosmetic.basePrice !== null &&
+                  selectedBundle.cosmetic.basePrice !==
+                    selectedBundle.cosmetic.currentPrice ? (
                     <>
                       <Text delete type="secondary" style={{ marginRight: 8 }}>
-                        {selectedCosmetic.basePrice} V-Bucks
+                        {selectedBundle.cosmetic.basePrice} V-Bucks
                       </Text>
                       <Text strong style={{ color: "#52c41a", fontSize: 16 }}>
-                        {selectedCosmetic.currentPrice} V-Bucks
+                        {selectedBundle.cosmetic.currentPrice} V-Bucks
                       </Text>
+                      <Tag color="success" style={{ marginLeft: 8 }}>
+                        EM PROMOÇÃO
+                      </Tag>
                     </>
                   ) : (
                     <Text strong style={{ fontSize: 16 }}>
-                      {selectedCosmetic.currentPrice} V-Bucks
+                      {selectedBundle.cosmetic.currentPrice} V-Bucks
                     </Text>
                   )}
                 </Descriptions.Item>
               )}
-              <Descriptions.Item label="Adicionado em">
-                {new Date(selectedCosmetic.addedAt).toLocaleDateString("pt-BR")}
-              </Descriptions.Item>
             </Descriptions>
+
+            <Title level={5}>Itens Inclusos:</Title>
+            <Row gutter={[16, 16]}>
+              {selectedBundle.items.map((item) => (
+                <Col xs={12} sm={8} md={6} key={item.id}>
+                  <Card
+                    hoverable
+                    cover={
+                      <img
+                        alt={item.name}
+                        src={item.imageUrl}
+                        style={{
+                          width: "100%",
+                          height: 120,
+                          objectFit: "cover",
+                        }}
+                      />
+                    }
+                    styles={{ body: { padding: "8px" } }}
+                  >
+                    <Text
+                      ellipsis
+                      style={{ fontSize: 12, display: "block" }}
+                      title={item.name}
+                    >
+                      {item.name}
+                    </Text>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
           </>
         )}
       </Modal>

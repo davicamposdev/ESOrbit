@@ -23,7 +23,7 @@ export interface PurchaseBundleInput {
 
 export interface PurchaseBundleOutput {
   mainPurchase: Purchase;
-  bundleItemsPurchases: Purchase[];
+  bundleCosmeticsPurchases: Purchase[];
 }
 
 @Injectable()
@@ -37,13 +37,12 @@ export class PurchaseBundleUseCase {
   ) {}
 
   async execute(input: PurchaseBundleInput): Promise<PurchaseBundleOutput> {
-    // Busca o bundle e seus itens
     const bundle = await this.prisma.bundle.findUnique({
       where: { id: input.bundleId },
       include: {
-        items: {
+        relation: {
           include: {
-            item: true,
+            cosmetic: true,
           },
         },
       },
@@ -53,45 +52,42 @@ export class PurchaseBundleUseCase {
       throw new NotFoundException('Bundle not found');
     }
 
-    // Verifica se há itens no bundle
-    if (!bundle.items || bundle.items.length === 0) {
-      throw new BadRequestException('Bundle has no items');
+    if (!bundle.relation || bundle.relation.length === 0) {
+      throw new BadRequestException('Bundle has no cosmetics');
     }
 
-    // Calcula o preço total do bundle (soma dos itens disponíveis)
     let totalPrice = 0;
-    const availableItems: Array<{
+    const availableCosmetics: Array<{
       id: string;
-      itemId: string;
+      cosmeticId: string;
       bundleId: string;
       description: string;
     }> = [];
 
-    for (const bundleItem of bundle.items) {
-      if (bundleItem.item.isAvailable) {
+    for (const bundleCosmetic of bundle.relation) {
+      if (bundleCosmetic.cosmetic.isAvailable) {
         if (
-          !bundleItem.item.currentPrice ||
-          bundleItem.item.currentPrice <= 0
+          !bundleCosmetic.cosmetic.currentPrice ||
+          bundleCosmetic.cosmetic.currentPrice <= 0
         ) {
           throw new BadRequestException(
-            `Item "${bundleItem.item.name}" does not have a valid price`,
+            `Cosmetic "${bundleCosmetic.cosmetic.name}" does not have a valid price`,
           );
         }
-        totalPrice += bundleItem.item.currentPrice;
-        availableItems.push({
-          id: bundleItem.id,
-          itemId: bundleItem.itemId,
-          bundleId: bundleItem.bundleId,
-          description: bundleItem.description,
+        totalPrice += bundleCosmetic.cosmetic.currentPrice;
+        availableCosmetics.push({
+          id: bundleCosmetic.id,
+          cosmeticId: bundleCosmetic.cosmeticId,
+          bundleId: bundleCosmetic.bundleId,
+          description: bundleCosmetic.description,
         });
       }
     }
 
-    if (availableItems.length === 0) {
-      throw new BadRequestException('Bundle has no available items');
+    if (availableCosmetics.length === 0) {
+      throw new BadRequestException('Bundle has no available cosmetics');
     }
 
-    // Busca o usuário para verificar saldo
     const user = await this.prisma.user.findUnique({
       where: { id: input.userId },
     });
@@ -100,14 +96,11 @@ export class PurchaseBundleUseCase {
       throw new NotFoundException('User not found');
     }
 
-    // Verifica se o usuário tem saldo suficiente
     if (user.credits < totalPrice) {
       throw new BadRequestException('Insufficient credits');
     }
 
-    // Executa a compra do bundle em uma transação atômica
     const result = await this.prisma.$transaction(async (tx) => {
-      // Cria a transação principal
       const transaction = await tx.transaction.create({
         data: {
           amount: totalPrice,
@@ -118,7 +111,6 @@ export class PurchaseBundleUseCase {
         },
       });
 
-      // Debita os créditos do usuário
       await tx.user.update({
         where: { id: input.userId },
         data: {
@@ -128,30 +120,27 @@ export class PurchaseBundleUseCase {
         },
       });
 
-      // Cria compras individuais para cada item disponível do bundle
-      const bundleItemsPurchases: any[] = [];
+      const bundleCosmeticsPurchases: any[] = [];
       let firstPurchase: any = null;
 
-      for (const bundleItem of availableItems) {
-        // Verifica se o usuário já possui o item individualmente
-        const existingItemPurchase = await tx.purchase.findUnique({
+      for (const bundleCosmetic of availableCosmetics) {
+        const existingCosmeticPurchase = await tx.purchase.findUnique({
           where: {
             userId_cosmeticId: {
               userId: input.userId,
-              cosmeticId: bundleItem.itemId,
+              cosmeticId: bundleCosmetic.cosmeticId,
             },
           },
         });
 
-        // Só cria a compra se o usuário não possuir o item
         if (
-          !existingItemPurchase ||
-          existingItemPurchase.status !== PurchaseStatus.ACTIVE
+          !existingCosmeticPurchase ||
+          existingCosmeticPurchase.status !== PurchaseStatus.ACTIVE
         ) {
-          const itemPurchase = await tx.purchase.create({
+          const cosmeticPurchase = await tx.purchase.create({
             data: {
               userId: input.userId,
-              cosmeticId: bundleItem.itemId,
+              cosmeticId: bundleCosmetic.cosmeticId,
               transactionId: transaction.id,
               isFromBundle: true,
               parentPurchaseId: firstPurchase ? firstPurchase.id : null,
@@ -159,18 +148,17 @@ export class PurchaseBundleUseCase {
             },
           });
 
-          bundleItemsPurchases.push(itemPurchase);
+          bundleCosmeticsPurchases.push(cosmeticPurchase);
 
-          // A primeira compra será considerada a "principal"
           if (!firstPurchase) {
-            firstPurchase = itemPurchase;
+            firstPurchase = cosmeticPurchase;
           }
         }
       }
 
       return {
         mainPurchase: firstPurchase,
-        bundleItemsPurchases,
+        bundleCosmeticsPurchases,
       };
     });
 
@@ -187,18 +175,20 @@ export class PurchaseBundleUseCase {
         createdAt: result.mainPurchase.createdAt,
         updatedAt: result.mainPurchase.updatedAt,
       },
-      bundleItemsPurchases: result.bundleItemsPurchases.map((purchase) => ({
-        id: purchase.id,
-        userId: purchase.userId,
-        cosmeticId: purchase.cosmeticId,
-        transactionId: purchase.transactionId,
-        isFromBundle: purchase.isFromBundle,
-        parentPurchaseId: purchase.parentPurchaseId,
-        status: purchase.status as unknown as PurchaseStatus,
-        returnedAt: purchase.returnedAt,
-        createdAt: purchase.createdAt,
-        updatedAt: purchase.updatedAt,
-      })),
+      bundleCosmeticsPurchases: result.bundleCosmeticsPurchases.map(
+        (purchase) => ({
+          id: purchase.id,
+          userId: purchase.userId,
+          cosmeticId: purchase.cosmeticId,
+          transactionId: purchase.transactionId,
+          isFromBundle: purchase.isFromBundle,
+          parentPurchaseId: purchase.parentPurchaseId,
+          status: purchase.status as unknown as PurchaseStatus,
+          returnedAt: purchase.returnedAt,
+          createdAt: purchase.createdAt,
+          updatedAt: purchase.updatedAt,
+        }),
+      ),
     };
   }
 }

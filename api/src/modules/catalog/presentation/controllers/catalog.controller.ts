@@ -3,8 +3,10 @@ import { SyncCosmeticsUseCase } from '../../application/use-cases/sync-cosmetics
 import { SyncNewCosmeticsUseCase } from '../../application/use-cases/sync-new-cosmetics.use-case';
 import { SyncShopCosmeticsUseCase } from '../../application/use-cases/sync-shop-cosmetics.use-case';
 import { ListCosmeticsUseCase } from '../../application/use-cases/list-cosmetics.use-case';
+import { ListBundlesUseCase } from '../../application/use-cases/list-bundles.use-case';
 import type { ISyncLogRepository } from '../../domain/repositories/sync-log.repository.interface.';
 import { ListCosmeticsDto } from '../dtos/list-cosmetics.dto';
+import { ListBundlesDto } from '../dtos/list-bundles.dto';
 import { SyncCosmeticsDto } from '../dtos/sync-cosmetics.dto';
 import { Public } from 'src/modules/auth/presentation/decorators/public.decorator';
 
@@ -18,6 +20,7 @@ export class CatalogController {
     private readonly syncNewCosmeticsUseCase: SyncNewCosmeticsUseCase,
     private readonly syncShopCosmeticsUseCase: SyncShopCosmeticsUseCase,
     private readonly listCosmeticsUseCase: ListCosmeticsUseCase,
+    private readonly listBundlesUseCase: ListBundlesUseCase,
   ) {}
 
   @Get('cosmetics')
@@ -41,6 +44,57 @@ export class CatalogController {
         isBundle: cosmetic.isBundle,
         childrenCount: cosmetic.childrenExternalIds.length,
       })),
+      meta: {
+        page: result.page,
+        pageSize: result.pageSize,
+        total: result.total,
+        totalPages: Math.ceil(result.total / result.pageSize),
+      },
+    };
+  }
+
+  @Get('bundles')
+  async listBundles(@Query() dto: ListBundlesDto) {
+    const result = await this.listBundlesUseCase.execute(dto);
+
+    return {
+      data: result.items.map(({ bundle, cosmetics }) => {
+        // Usa o outfit como cosmético principal, ou o primeiro se não houver outfit
+        const mainCosmetic =
+          cosmetics.find((c) => c.type === 'outfit') || cosmetics[0];
+
+        return {
+          id: bundle.id,
+          externalId: bundle.externalId,
+          name: bundle.name,
+          cosmetic: mainCosmetic
+            ? {
+                id: mainCosmetic.id,
+                externalId: mainCosmetic.externalId,
+                name: mainCosmetic.name,
+                type: mainCosmetic.type,
+                rarity: mainCosmetic.rarity,
+                imageUrl: mainCosmetic.imageUrl,
+                isAvailable: mainCosmetic.isAvailable,
+                basePrice: mainCosmetic.basePrice,
+                currentPrice: mainCosmetic.currentPrice,
+                onSale: mainCosmetic.onSale,
+                isNew: mainCosmetic.isNew,
+                addedAt: mainCosmetic.addedAt,
+              }
+            : null,
+          items: cosmetics.map((cosmetic) => ({
+            id: cosmetic.id,
+            externalId: cosmetic.externalId,
+            name: cosmetic.name,
+            type: cosmetic.type,
+            rarity: cosmetic.rarity,
+            imageUrl: cosmetic.imageUrl,
+            basePrice: cosmetic.basePrice,
+            currentPrice: cosmetic.currentPrice,
+          })),
+        };
+      }),
       meta: {
         page: result.page,
         pageSize: result.pageSize,

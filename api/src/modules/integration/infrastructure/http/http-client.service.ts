@@ -112,15 +112,26 @@ export class HttpClientService {
           const duration = Date.now() - metrics.startTime;
           const status = error.response?.status || 0;
 
-          this.logger.error({
-            message: 'Request failed',
-            requestId,
-            endpoint: metrics.endpoint,
-            status,
-            duration,
-            attempts: metrics.attempts,
-            error: error.message,
-          });
+          // Log menos verboso para 503 (API inicializando)
+          if (status === 503) {
+            this.logger.debug({
+              message: 'API externa indisponível (inicializando)',
+              requestId,
+              endpoint: metrics.endpoint,
+              status,
+              duration,
+            });
+          } else {
+            this.logger.error({
+              message: 'Request failed',
+              requestId,
+              endpoint: metrics.endpoint,
+              status,
+              duration,
+              attempts: metrics.attempts,
+              error: error.message,
+            });
+          }
 
           this.metricsService.recordHttpDuration(metrics.endpoint, duration);
           this.metricsService.incrementHttpRequest(metrics.endpoint, status);
@@ -143,6 +154,14 @@ export class HttpClientService {
     }
 
     const status = error.response.status;
+    const responseData = error.response.data as any;
+
+    // Verifica se a API está inicializando
+    if (status === 503 && responseData?.error?.includes('booting up')) {
+      return new ProviderUnavailableError(
+        'API externa está inicializando. Aguarde alguns minutos.',
+      );
+    }
 
     if (status >= 500) {
       return new ProviderUnavailableError(
@@ -176,6 +195,33 @@ export class HttpClientService {
         const response = await this.client.get<T>(url, config);
         return response.data;
       } catch (error) {
+        // Verifica se é erro 503 (Service Unavailable)
+        const errorObj = error as any;
+        const isAxiosError = errorObj?.isAxiosError === true;
+        const status = errorObj?.response?.status;
+        const responseData = errorObj?.response?.data;
+
+        const isBootingUp =
+          status === 503 &&
+          (responseData?.error?.includes('booting up') ||
+            responseData?.message?.includes('booting up'));
+
+        // Se a API está inicializando, tenta apenas 1 vez (attempt 0)
+        if (isBootingUp && attempt >= 1) {
+          this.logger.warn(
+            '⚠️  API externa está inicializando. A sincronização será executada mais tarde.',
+          );
+          throw error; // Joga o erro já mapeado
+        }
+
+        // Para outros erros 5xx, limita as tentativas
+        if (isAxiosError && status >= 500 && status < 600 && attempt >= 2) {
+          this.logger.warn(
+            'API externa com problemas. Encerrando tentativas de conexão.',
+          );
+          throw error;
+        }
+
         if (attempt === maxRetries) {
           throw error;
         }
@@ -192,7 +238,10 @@ export class HttpClientService {
           }
         }
 
-        const backoff = appConfig.retryBackoffMs * Math.pow(2, attempt);
+        // Para erros 503, usa backoff menor
+        const backoffMultiplier = isBootingUp ? 1 : Math.pow(2, attempt);
+        const backoff = appConfig.retryBackoffMs * backoffMultiplier;
+
         this.logger.warn({
           message: 'Retrying request',
           attempt: attempt + 1,

@@ -7,8 +7,10 @@ export interface UpsertOptions {
 }
 
 export interface ICosmeticRepository {
+  findById(id: string): Promise<Cosmetic | null>;
   findByExternalId(externalId: string): Promise<Cosmetic | null>;
   findMany(params?: FindManyParams): Promise<Cosmetic[]>;
+  findManyByIds(ids: string[]): Promise<Map<string, Cosmetic>>;
   create(cosmetic: Cosmetic): Promise<Cosmetic>;
   update(cosmetic: Cosmetic, options?: UpsertOptions): Promise<Cosmetic>;
   findManyByExternalIds(externalIds: string[]): Promise<Map<string, Cosmetic>>;

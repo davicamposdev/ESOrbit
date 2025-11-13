@@ -69,8 +69,8 @@ export class FinanceController {
 
     return {
       mainPurchase: result.mainPurchase,
-      bundleItemsPurchases: result.bundleItemsPurchases,
-      totalItems: result.bundleItemsPurchases.length,
+      bundleCosmeticsPurchases: result.bundleCosmeticsPurchases,
+      totalCosmetics: result.bundleCosmeticsPurchases.length,
     };
   }
 

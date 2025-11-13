@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/common/database/prisma.service';
 import { IBundleRepository } from '../../domain/repositories/bundle.repository.interface';
 import { Bundle } from '../../domain/entities/bundle.entity';
 
 @Injectable()
 export class PrismaBundleRepository implements IBundleRepository {
+  private readonly logger = new Logger(PrismaBundleRepository.name);
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Bundle): Promise<Bundle> {
@@ -14,16 +15,6 @@ export class PrismaBundleRepository implements IBundleRepository {
         name: data.name,
       },
     });
-
-    return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
-  }
-
-  async findById(id: string): Promise<Bundle | null> {
-    const bundle = await this.prisma.bundle.findUnique({
-      where: { id },
-    });
-
-    if (!bundle) return null;
 
     return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
   }
@@ -38,11 +29,27 @@ export class PrismaBundleRepository implements IBundleRepository {
     return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
   }
 
-  async findAll(): Promise<Bundle[]> {
-    const bundles = await this.prisma.bundle.findMany();
-    return bundles.map((bundle) =>
-      Bundle.restore(bundle.id, bundle.externalId, bundle.name),
-    );
+  async findAll(): Promise<Array<{ bundle: Bundle; cosmeticIds: string[] }>> {
+    const bundles = await this.prisma.bundle.findMany({
+      include: {
+        relation: {
+          include: {
+            cosmetic: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const result = bundles.map((bundle) => ({
+      bundle: Bundle.restore(bundle.id, bundle.externalId, bundle.name),
+      cosmeticIds: bundle.relation.map((bc) => bc.cosmetic.id),
+    }));
+
+    return result;
   }
 
   async update(id: string, name: string): Promise<Bundle> {
@@ -54,24 +61,16 @@ export class PrismaBundleRepository implements IBundleRepository {
     return Bundle.restore(updated.id, updated.externalId, updated.name);
   }
 
-  async delete(id: string): Promise<boolean> {
-    const result = await this.prisma.bundle.deleteMany({
-      where: { id },
-    });
-
-    return result.count > 0;
-  }
-
   async createBundleRelation(
     bundleId: string,
-    itemId: string,
+    cosmeticId: string,
     description: string,
   ): Promise<void> {
-    await this.prisma.bundleItem.upsert({
+    await this.prisma.bundleCosmetic.upsert({
       where: {
-        bundleId_itemId: {
+        bundleId_cosmeticId: {
           bundleId,
-          itemId,
+          cosmeticId,
         },
       },
       update: {
@@ -79,7 +78,7 @@ export class PrismaBundleRepository implements IBundleRepository {
       },
       create: {
         bundleId,
-        itemId,
+        cosmeticId,
         description,
       },
     });

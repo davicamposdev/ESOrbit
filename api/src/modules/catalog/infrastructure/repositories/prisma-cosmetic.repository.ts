@@ -15,9 +15,9 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
     const cosmetic = await this.prisma.cosmetic.findUnique({
       where: { externalId: externalId },
       include: {
-        bundleItems: {
+        bundleCosmetics: {
           select: {
-            item: {
+            cosmetic: {
               select: { externalId: true },
             },
           },
@@ -59,10 +59,10 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
     const cosmetics = await this.prisma.cosmetic.findMany({
       where,
       include: {
-        bundleItems: {
+        bundleCosmetics: {
           select: {
-            item: {
-              select: { externalId: true },
+            cosmetic: {
+              select: { id: true },
             },
           },
         },
@@ -92,9 +92,9 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
         isBundle: cosmetic.isBundle,
       },
       include: {
-        bundleItems: {
+        bundleCosmetics: {
           select: {
-            item: {
+            cosmetic: {
               select: { externalId: true },
             },
           },
@@ -135,9 +135,9 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       where: { externalId: cosmetic.externalId },
       data: updateData,
       include: {
-        bundleItems: {
+        bundleCosmetics: {
           select: {
-            item: {
+            cosmetic: {
               select: { externalId: true },
             },
           },
@@ -146,6 +146,51 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
     });
 
     return this.toEntity(updated);
+  }
+
+  async findById(id: string): Promise<Cosmetic | null> {
+    const cosmetic = await this.prisma.cosmetic.findUnique({
+      where: { id },
+      include: {
+        bundleCosmetics: {
+          select: {
+            cosmetic: {
+              select: { externalId: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!cosmetic) return null;
+
+    return this.toEntity(cosmetic);
+  }
+
+  async findManyByIds(ids: string[]): Promise<Map<string, Cosmetic>> {
+    const cosmetics = await this.prisma.cosmetic.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+      include: {
+        bundleCosmetics: {
+          select: {
+            cosmetic: {
+              select: { externalId: true },
+            },
+          },
+        },
+      },
+    });
+
+    const cosmeticMap = new Map<string, Cosmetic>();
+    cosmetics.forEach((c) => {
+      cosmeticMap.set(c.id, this.toEntity(c));
+    });
+
+    return cosmeticMap;
   }
 
   async findManyByExternalIds(
@@ -158,9 +203,9 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
         },
       },
       include: {
-        bundleItems: {
+        bundleCosmetics: {
           select: {
-            item: {
+            cosmetic: {
               select: { externalId: true },
             },
           },
@@ -178,7 +223,7 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
 
   private toEntity(data: any): Cosmetic {
     const childrenExternalIds =
-      data.bundleItems?.map((bi: any) => bi.item.externalId) ?? [];
+      data.bundleCosmetics?.map((bi: any) => bi.cosmetic.externalId) ?? [];
 
     return Cosmetic.restore(
       data.id,

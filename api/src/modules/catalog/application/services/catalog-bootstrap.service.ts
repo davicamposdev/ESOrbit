@@ -79,23 +79,47 @@ export class CatalogBootstrapService implements OnModuleInit {
       const duration = Date.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Erro desconhecido';
-      const errorStack = error instanceof Error ? error.stack : undefined;
 
-      await this.syncLogRepository.update(logId, {
-        status: 'failed',
-        message: `Erro: ${errorMessage}`,
-        duration,
-        finishedAt: new Date(),
-      });
+      const isProviderUnavailable =
+        error instanceof Error &&
+        (error.name === 'ProviderUnavailableError' ||
+          error.message.includes('Service Unavailable') ||
+          error.message.includes('booting up'));
 
-      this.logger.error(
-        `Erro na sincronização de bootstrap: ${errorMessage}`,
-        errorStack,
-      );
+      if (isProviderUnavailable) {
+        this.logger.warn(
+          'API externa temporariamente indisponível. A sincronização será executada na próxima execução agendada.',
+        );
+        this.logger.warn(
+          'A aplicação está operacional e continuará funcionando com os dados existentes.',
+        );
 
-      this.logger.warn(
-        'A aplicação continuará executando apesar do erro na sincronização',
-      );
+        await this.syncLogRepository.update(logId, {
+          status: 'failed',
+          message:
+            'API externa indisponível (pode estar inicializando). Sincronização será tentada novamente mais tarde.',
+          duration,
+          finishedAt: new Date(),
+        });
+      } else {
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        await this.syncLogRepository.update(logId, {
+          status: 'failed',
+          message: `Erro: ${errorMessage}`,
+          duration,
+          finishedAt: new Date(),
+        });
+
+        this.logger.error(
+          `Erro na sincronização de bootstrap: ${errorMessage}`,
+          errorStack,
+        );
+
+        this.logger.warn(
+          'A aplicação continuará executando apesar do erro na sincronização',
+        );
+      }
     }
   }
 }

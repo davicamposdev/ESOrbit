@@ -43,9 +43,9 @@ model Cosmetic {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  purchases   Purchase[]
-  returns     Return[]
-  bundleItems BundleItem[]
+  purchases       Purchase[]
+  returns         Return[]
+  bundleCosmetics BundleCosmetic[]
 
   @@index([name])
   @@index([type])
@@ -68,26 +68,26 @@ model Bundle {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  items BundleItem[]
+  relation BundleCosmetic[]
 
   @@index([name])
   @@map("bundles")
 }
 
-model BundleItem {
+model BundleCosmetic {
   id          String   @id @default(uuid())
   bundleId    String   @map("bundle_id")
-  itemId      String   @map("item_id")
+  cosmeticId  String   @map("cosmetic_id")
   description String   @map("description")
   createdAt   DateTime @default(now()) @map("created_at")
 
-  bundle Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
-  item   Cosmetic @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  bundle   Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  cosmetic Cosmetic @relation(fields: [cosmeticId], references: [id], onDelete: Cascade)
 
-  @@unique([bundleId, itemId])
+  @@unique([bundleId, cosmeticId])
   @@index([bundleId])
-  @@index([itemId])
-  @@map("bundle_items")
+  @@index([cosmeticId])
+  @@map("bundle_cosmetics")
 }
 
 model Purchase {

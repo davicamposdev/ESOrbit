@@ -10,6 +10,7 @@ import { SyncCosmeticsUseCase } from './application/use-cases/sync-cosmetics.use
 import { SyncNewCosmeticsUseCase } from './application/use-cases/sync-new-cosmetics.use-case';
 import { SyncShopCosmeticsUseCase } from './application/use-cases/sync-shop-cosmetics.use-case';
 import { ListCosmeticsUseCase } from './application/use-cases/list-cosmetics.use-case';
+import { ListBundlesUseCase } from './application/use-cases/list-bundles.use-case';
 import { CatalogController } from './presentation/controllers/catalog.controller';
 import { CatalogSyncCronService } from './application/services/catalog-sync-cron.service';
 import { CatalogBootstrapService } from './application/services/catalog-bootstrap.service';
@@ -37,6 +38,7 @@ import { CatalogBootstrapService } from './application/services/catalog-bootstra
     SyncNewCosmeticsUseCase,
     SyncShopCosmeticsUseCase,
     ListCosmeticsUseCase,
+    ListBundlesUseCase,
     // Domain services
     CosmeticSyncService,
     // Application services

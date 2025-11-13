@@ -18,6 +18,38 @@ export interface Cosmetic {
   updatedAt: string;
 }
 
+export interface BundleItem {
+  id: string;
+  externalId: string;
+  name: string;
+  type: string;
+  rarity: string;
+  imageUrl: string;
+  basePrice: number | null;
+  currentPrice: number | null;
+}
+
+export interface Bundle {
+  id: string;
+  externalId: string;
+  name: string;
+  cosmetic: {
+    id: string;
+    externalId: string;
+    name: string;
+    imageUrl: string;
+    isAvailable: boolean;
+    basePrice: number | null;
+    currentPrice: number | null;
+    onSale: boolean;
+    isNew: boolean;
+    rarity: string;
+    type: string;
+    addedAt: string;
+  } | null;
+  items: BundleItem[];
+}
+
 export interface ListCosmeticsParams {
   type?: string;
   rarity?: string;
@@ -31,8 +63,25 @@ export interface ListCosmeticsParams {
   pageSize?: number;
 }
 
+export interface ListBundlesParams {
+  isAvailable?: boolean;
+  onSale?: boolean;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface ListCosmeticsResponse {
   data: Cosmetic[];
+  meta: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ListBundlesResponse {
+  data: Bundle[];
   meta: {
     page: number;
     pageSize: number;
@@ -88,6 +137,25 @@ export class CatalogService {
 
   async syncFull(data: SyncCosmeticsDto = {}): Promise<SyncResponse> {
     return apiClient.post<SyncResponse>("/api/catalog/sync/full", data);
+  }
+
+  async listBundles(
+    params: ListBundlesParams = {}
+  ): Promise<ListBundlesResponse> {
+    const queryParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, String(value));
+      }
+    });
+
+    const queryString = queryParams.toString();
+    const endpoint = `/api/catalog/bundles${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return apiClient.get<ListBundlesResponse>(endpoint);
   }
 }
 

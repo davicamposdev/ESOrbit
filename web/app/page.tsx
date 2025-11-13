@@ -35,7 +35,7 @@ export default function Home() {
       <header className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-200 dark:border-gray-800">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">ES</span>
             </div>
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -87,7 +87,7 @@ export default function Home() {
             <div>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                 Bem-vindo ao
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                <span className="block text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600">
                   ESOrbit
                 </span>
               </h1>
@@ -112,8 +112,8 @@ export default function Home() {
             </div>
 
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-3xl transform rotate-3 opacity-20"></div>
-              <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 shadow-2xl">
+              <div className="absolute inset-0 bg-linear-to-br from-blue-400 to-indigo-600 rounded-3xl transform rotate-3 opacity-20"></div>
+              <div className="relative bg-linear-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 shadow-2xl">
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 space-y-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-3 h-3 bg-green-400 rounded-full"></div>
@@ -323,7 +323,7 @@ export default function Home() {
                 key={item}
                 className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
               >
-                <div className="h-48 bg-gradient-to-br from-blue-400 to-indigo-500"></div>
+                <div className="h-48 bg-linear-to-br from-blue-400 to-indigo-500"></div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                     Cosmético {item}
@@ -350,7 +350,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600">
+      <section className="py-20 bg-linear-to-br from-blue-600 to-indigo-600">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Pronto para começar?
@@ -373,7 +373,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">ES</span>
                 </div>
                 <span className="text-2xl font-bold text-white">ESOrbit</span>

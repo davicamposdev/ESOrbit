@@ -1,18 +1,14 @@
 "use client";
 
-import { Card, Tag, Badge, Typography } from "antd";
-import {
-  StarOutlined,
-  GiftOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
-import { type Cosmetic } from "../services";
+import { Card, Tag, Badge, Typography, Row, Col, Space, Tooltip } from "antd";
+import { GiftOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { type Bundle } from "../services";
 
 const { Text, Title } = Typography;
 
-interface CosmeticCardProps {
-  cosmetic: Cosmetic;
-  onSelect?: (cosmetic: Cosmetic) => void;
+interface BundleCardProps {
+  bundle: Bundle;
+  onSelect?: (bundle: Bundle) => void;
 }
 
 const rarityColors: Record<string, string> = {
@@ -53,42 +49,27 @@ const rarityLabels: Record<string, string> = {
   platform: "Plataforma",
 };
 
-const typeLabels: Record<string, string> = {
-  outfit: "Roupa",
-  emote: "Emote",
-  glider: "Planador",
-  pickaxe: "Picareta",
-  backpack: "Mochila",
-  wrap: "Revestimento",
-  contrail: "Rastro",
-  loadingscreen: "Tela de Carregamento",
-  music: "Música",
-  spray: "Spray",
-  toy: "Brinquedo",
-  pet: "Pet",
-  banner: "Banner",
-  emoji: "Emoji",
-};
+export function BundleCard({ bundle, onSelect }: BundleCardProps) {
+  // Fallback para casos onde o cosmetic pode estar indefinido
+  const cosmetic = bundle.cosmetic;
+  if (!cosmetic) {
+    return null;
+  }
 
-export function CosmeticCard({ cosmetic, onSelect }: CosmeticCardProps) {
   const rarityColor = rarityColors[cosmetic.rarity.toLowerCase()] || "default";
   const rarityLabel =
     rarityLabels[cosmetic.rarity.toLowerCase()] || cosmetic.rarity;
-  const typeLabel = typeLabels[cosmetic.type.toLowerCase()] || cosmetic.type;
 
   const handleClick = () => {
     if (onSelect) {
-      onSelect(cosmetic);
+      onSelect(bundle);
     }
   };
 
   return (
     <Badge.Ribbon
-      text={cosmetic.isNew ? "NOVO" : cosmetic.isBundle ? "BUNDLE" : undefined}
+      text={cosmetic.isNew ? "NOVO" : "BUNDLE"}
       color={cosmetic.isNew ? "green" : "purple"}
-      style={{
-        display: cosmetic.isNew || cosmetic.isBundle ? "block" : "none",
-      }}
     >
       <Card
         hoverable
@@ -98,11 +79,11 @@ export function CosmeticCard({ cosmetic, onSelect }: CosmeticCardProps) {
             style={{
               position: "relative",
               paddingTop: "100%",
-              backgroundColor: "#d2d2d2",
+              backgroundColor: "#2d2d2d",
             }}
           >
             <img
-              alt={cosmetic.name}
+              alt={bundle.name}
               src={cosmetic.imageUrl}
               style={{
                 position: "absolute",
@@ -154,9 +135,12 @@ export function CosmeticCard({ cosmetic, onSelect }: CosmeticCardProps) {
           }}
         >
           <Tag color={rarityColor}>{rarityLabel}</Tag>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {typeLabel}
-          </Text>
+          <Space size={4}>
+            <GiftOutlined style={{ fontSize: 12 }} />
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {bundle.items.length} itens
+            </Text>
+          </Space>
         </div>
 
         <Title
@@ -164,8 +148,44 @@ export function CosmeticCard({ cosmetic, onSelect }: CosmeticCardProps) {
           ellipsis={{ rows: 1 }}
           style={{ marginBottom: 8, marginTop: 0 }}
         >
-          {cosmetic.name}
+          {bundle.name}
         </Title>
+
+        {bundle.items.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <Row gutter={[4, 4]}>
+              {bundle.items.slice(0, 3).map((item) => (
+                <Col span={8} key={item.id}>
+                  <Tooltip title={item.name}>
+                    <div
+                      style={{
+                        backgroundColor: "#2a2a2a",
+                        borderRadius: 4,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        style={{
+                          width: "100%",
+                          height: 60,
+                          objectFit: "cover",
+                          display: "block",
+                        }}
+                      />
+                    </div>
+                  </Tooltip>
+                </Col>
+              ))}
+            </Row>
+            {bundle.items.length > 3 && (
+              <Text type="secondary" style={{ fontSize: 11 }}>
+                +{bundle.items.length - 3} itens
+              </Text>
+            )}
+          </div>
+        )}
 
         {cosmetic.currentPrice !== null && (
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
