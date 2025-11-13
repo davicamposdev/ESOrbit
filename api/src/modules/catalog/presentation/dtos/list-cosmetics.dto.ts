@@ -11,6 +11,10 @@ import { Type } from 'class-transformer';
 export class ListCosmeticsDto {
   @IsOptional()
   @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
   type?: string;
 
   @IsOptional()

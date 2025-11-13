@@ -51,6 +51,7 @@ export interface Bundle {
 }
 
 export interface ListCosmeticsParams {
+  name?: string;
   type?: string;
   rarity?: string;
   isNew?: boolean;

@@ -17,6 +17,7 @@ export interface ICosmeticRepository {
 }
 
 export interface FindManyParams {
+  name?: string;
   type?: string;
   rarity?: string;
   isNew?: boolean;

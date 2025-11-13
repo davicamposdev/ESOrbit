@@ -6,6 +6,7 @@ import type {
 import { Cosmetic } from '../../domain/entities/cosmetic.entity';
 
 export interface ListCosmeticsParams {
+  name?: string;
   type?: string;
   rarity?: string;
   isNew?: boolean;
@@ -42,6 +43,7 @@ export class ListCosmeticsUseCase {
     const offset = (page - 1) * pageSize;
 
     const repositoryParams: FindManyParams = {
+      name: params.name,
       type: params.type,
       rarity: params.rarity,
       isNew: params.isNew,
@@ -57,6 +59,7 @@ export class ListCosmeticsUseCase {
     const items = await this.cosmeticRepository.findMany(repositoryParams);
 
     const allItems = await this.cosmeticRepository.findMany({
+      name: params.name,
       type: params.type,
       rarity: params.rarity,
       isNew: params.isNew,

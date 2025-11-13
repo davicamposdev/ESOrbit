@@ -11,8 +11,13 @@ import {
   Space,
   Typography,
   DatePicker,
+  Input,
 } from "antd";
-import { FilterOutlined, ClearOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  ClearOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { type ListCosmeticsParams } from "../services";
 import type { Dayjs } from "dayjs";
 
@@ -56,6 +61,7 @@ export function CatalogFilters({ onFilter, loading }: CatalogFiltersProps) {
     pageSize: 20,
   });
   const [dateRange, setDateRange] = useState<[Dayjs, Dayjs] | null>(null);
+  const [searchName, setSearchName] = useState<string>("");
 
   const handleChange = (key: keyof ListCosmeticsParams, value: any) => {
     const newFilters = {
@@ -95,6 +101,22 @@ export function CatalogFilters({ onFilter, loading }: CatalogFiltersProps) {
     handleChange(key, newValue);
   };
 
+  const handleSearchByName = () => {
+    const newFilters = {
+      ...filters,
+      name: searchName || undefined,
+      page: 1,
+    };
+    setFilters(newFilters);
+    onFilter(newFilters);
+  };
+
+  const handleNameKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearchByName();
+    }
+  };
+
   const handleReset = () => {
     const resetFilters: ListCosmeticsParams = {
       page: 1,
@@ -102,6 +124,7 @@ export function CatalogFilters({ onFilter, loading }: CatalogFiltersProps) {
     };
     setFilters(resetFilters);
     setDateRange(null);
+    setSearchName("");
     onFilter(resetFilters);
   };
 
@@ -128,6 +151,29 @@ export function CatalogFilters({ onFilter, loading }: CatalogFiltersProps) {
       style={{ marginBottom: 24 }}
     >
       <Row gutter={[16, 16]}>
+        <Col xs={24} sm={12} md={6}>
+          <label style={{ display: "block", marginBottom: 8, fontWeight: 500 }}>
+            Buscar por nome
+          </label>
+          <Space.Compact style={{ width: "100%" }}>
+            <Input
+              placeholder="Digite o nome do cosmético"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              onKeyPress={handleNameKeyPress}
+              disabled={loading}
+              allowClear
+              prefix={<SearchOutlined />}
+            />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={handleSearchByName}
+              disabled={loading}
+            />
+          </Space.Compact>
+        </Col>
+
         <Col xs={24} sm={12} md={6}>
           <label style={{ display: "block", marginBottom: 8, fontWeight: 500 }}>
             Tipo

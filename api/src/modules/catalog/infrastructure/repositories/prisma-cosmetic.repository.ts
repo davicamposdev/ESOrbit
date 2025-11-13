@@ -40,6 +40,13 @@ export class PrismaCosmeticRepository implements ICosmeticRepository {
       onSale: params.onSale,
     };
 
+    if (params.name) {
+      where.name = {
+        contains: params.name,
+        mode: 'insensitive',
+      };
+    }
+
     if (params.createdFrom || params.createdTo) {
       where.addedAt = {};
       if (params.createdFrom) {
