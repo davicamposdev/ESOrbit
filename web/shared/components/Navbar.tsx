@@ -77,12 +77,16 @@ export function Navbar() {
   ];
 
   const menuItems: MenuProps["items"] = [
-    {
-      key: "/",
-      icon: <UnorderedListOutlined />,
-      label: "Início",
-      onClick: () => router.push("/"),
-    },
+    ...(!user
+      ? [
+          {
+            key: "/",
+            icon: <UnorderedListOutlined />,
+            label: "Início",
+            onClick: () => router.push("/"),
+          },
+        ]
+      : []),
     {
       key: "/catalog",
       icon: <ShoppingOutlined />,

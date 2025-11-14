@@ -3,6 +3,9 @@
 import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Button } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -33,5 +36,16 @@ export default function AuthLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="relative min-h-screen">
+      <Link
+        href="/"
+        className="absolute top-8 left-8 z-50 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors group"
+      >
+        <HomeOutlined className="text-lg group-hover:scale-110 transition-transform" />
+        <span>Voltar ao Início</span>
+      </Link>
+      {children}
+    </div>
+  );
 }
