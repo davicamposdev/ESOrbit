@@ -1,159 +1,80 @@
-# ESOrbit - Frontend
+# ESOrbit Web
 
-Frontend do sistema ESOrbit construído com Next.js 16 e TypeScript seguindo o padrão **Feature-Sliced Design**.
+Aplicação frontend para ESOrbit, construída com Next.js 16 e TypeScript seguindo o padrão Feature-Sliced Design.
 
-## 🚀 Tecnologias
+## Visão Geral
 
-- **Next.js 16** - Framework React com App Router
-- **React 19** - Biblioteca UI
-- **TypeScript** - Tipagem estática
-- **Ant Design 5** - Componentes UI modernos
-- **Tailwind CSS 4** - Estilização utilitária
-- **JWT** - Autenticação com tokens
+A aplicação web ESOrbit fornece uma interface de usuário intuitiva para navegar cosméticos, gerenciar inventário de usuários e processar transações. A aplicação é construída com padrões modernos de React, apresentando uma arquitetura limpa que separa responsabilidades em módulos de features independentes.
 
-## ✨ Funcionalidades Implementadas
+## Arquitetura
 
-- ✅ **Sistema de Autenticação Completo** - Login, registro e logout com JWT
-- ✅ **Dashboard Interativo** - Visão geral com créditos e estatísticas
-- ✅ **Navegação Global** - Navbar persistente com menu de usuário
-- ✅ **Catálogo de Cosméticos** - Busca, filtros e compra de itens
-- ✅ **Sistema de Bundles** - Pacotes especiais com descontos
-- ✅ **Perfil do Usuário** - Visualização e gerenciamento de conta
-- ✅ **Histórico de Transações** - Compras e transferências detalhadas
-- ✅ **Créditos em Tempo Real** - Visualização constante do saldo
-- ✅ **Interface Responsiva** - Design adaptável para todos os dispositivos
+Este projeto implementa a metodologia Feature-Sliced Design, organizando o código por features ao invés de camadas técnicas. Cada feature é auto-contida com seus próprios componentes, hooks e serviços, enquanto o código compartilhado vive em um diretório dedicado.
 
-## 📁 Estrutura do Projeto
+## Principais Funcionalidades
 
-```
-web/
-├── app/                    # App Router do Next.js
-│   ├── (auth)/            # Grupo de rotas de autenticação
-│   │   ├── login/         # Página de login
-│   │   ├── register/      # Página de registro
-│   │   └── layout.tsx     # Layout para páginas auth
-│   ├── api/               # API routes
-│   │   └── health/        # Health check
-│   ├── catalog/           # Catálogo de cosméticos
-│   │   ├── page.tsx       # Lista de cosméticos
-│   │   └── bundles/       # Página de bundles
-│   ├── dashboard/         # Dashboard (protegido)
-│   ├── profile/           # Perfil do usuário
-│   ├── transactions/      # Histórico de transações
-│   ├── layout.tsx         # Layout raiz com AuthProvider
-│   └── page.tsx           # Landing page
-│
-├── features/              # Features da aplicação (módulos)
-│   ├── auth/              # Feature de autenticação
-│   │   ├── components/    # Componentes específicos de auth
-│   │   ├── hooks/         # Hooks específicos de auth
-│   │   ├── services/      # Serviços de API de auth
-│   │   └── index.ts       # Barrel export da feature
-│   ├── catalog/           # Feature de catálogo
-│   │   ├── components/    # Cards, filtros, etc
-│   │   ├── hooks/         # useCatalog, useBundles
-│   │   ├── services/      # API de catálogo
-│   │   └── index.ts       # Barrel export
-│   ├── finance/           # Feature de finanças
-│   │   ├── services/      # Compras, transferências
-│   │   └── index.ts       # Barrel export
-│   └── index.ts           # Barrel export de todas features
-│
-└── shared/                # Código compartilhado entre features
-    ├── components/        # Navbar, etc
-    ├── layouts/           # AppLayout
-    ├── hooks/             # Hooks reutilizáveis
-    ├── utils/             # Utilitários
-    └── index.ts           # Barrel export
-```
+### Experiência do Usuário
 
-## 🎯 Padrão Feature-Sliced Design
+- Interface limpa e responsiva para todos os tamanhos de dispositivos
+- Navegação persistente com contexto de usuário
+- Atualizações de saldo de créditos em tempo real
+- Busca e filtragem intuitivas
+- Suporte a modo escuro
 
-Cada feature é um módulo independente e auto-contido:
+### Sistema de Autenticação
 
-```
-features/
-├── auth/              # Feature de autenticação
-│   ├── components/    # Componentes UI específicos
-│   ├── hooks/         # Hooks e contexts
-│   ├── services/      # Lógica de negócio e API
-│   └── index.ts       # Exports públicos
-```
+- Fluxos completos de registro e login
+- Autenticação baseada em JWT com renovação automática de tokens
+- Tratamento de rotas protegidas
+- Persistência de sessão
+- Logout seguro
 
-**Benefícios:**
+### Navegação de Catálogo
 
-- ✅ Código organizado por funcionalidade
-- ✅ Fácil de escalar e manter
-- ✅ Imports limpos com barrel exports
-- ✅ Reuso de código via pasta `shared/`
-- ✅ Isolamento de responsabilidades
+- Navegar cosméticos individuais com informações detalhadas
+- Ver pacotes de bundles com itens incluídos
+- Filtrar por tipo, raridade, disponibilidade e promoções
+- Funcionalidade de busca
+- Layouts de cards responsivos
 
-## 🔐 Sistema de Autenticação
+### Dashboard do Usuário
 
-### Como Funciona
+- Visão geral do status da conta
+- Acesso rápido a inventário e transações
+- Exibição de saldo de créditos
+- Feed de atividades recentes
 
-1. **Login/Registro**: O usuário faz login ou cria uma conta
-2. **Tokens JWT**:
-   - **Access Token**: Armazenado no localStorage, usado em requisições
-   - **Refresh Token**: Armazenado em cookie HttpOnly pela API
-3. **Proteção de Rotas**: Context verifica autenticação e redireciona
-4. **Renovação Automática**: Tenta renovar tokens automaticamente ao carregar
+### Gerenciamento de Inventário
 
-### Hook de Autenticação
+- Visualizar cosméticos possuídos
+- Filtrar e buscar no inventário
+- Rastrear datas de compra
+- Ver detalhes dos itens
 
-O hook `useAuth` gerencia o estado global de autenticação:
+### Histórico de Transações
 
-```tsx
-import { useAuth } from "@/features/auth";
+- Histórico completo de compras
+- Registros de transferências
+- Rastreamento de devoluções/reembolsos
+- Detalhes e timestamps de transações
 
-const { user, loading, login, register, logout, refreshAuth } = useAuth();
-```
+## Stack Tecnológica
 
-**API do Hook:**
+- **Framework**: Next.js 16 com App Router
+- **Biblioteca UI**: React 19
+- **Linguagem**: TypeScript 5
+- **Componentes UI**: Ant Design 5
+- **Estilização**: Tailwind CSS 4
+- **Autenticação**: JWT com refresh tokens
+- **Gerenciamento de Estado**: React Context API
+- **Cliente HTTP**: Fetch API com wrapper customizado
 
-- `user`: Dados do usuário autenticado ou null
-- `loading`: Estado de carregamento
-- `login(email, password)`: Faz login
-- `register(email, username, password)`: Registra novo usuário
-- `logout()`: Faz logout
-- `refreshAuth()`: Renova os tokens
+## Como Começar
 
-### Serviço de API
+### Pré-requisitos
 
-O `authService` comunica com a API:
-
-```typescript
-import { authService } from "@/features/auth";
-
-// Login
-const { user, accessToken } = await authService.login({ email, password });
-
-// Registro
-const { user, accessToken } = await authService.register({
-  email,
-  username,
-  password,
-});
-
-// Renovar token
-const { accessToken } = await authService.refresh();
-
-// Obter usuário atual
-const { user } = await authService.me();
-
-// Logout
-await authService.logout();
-```
-
-## 🔧 Configuração
-
-### Variáveis de Ambiente
-
-Crie um arquivo `.env.local`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
-```
+- Node.js 20 ou superior
+- npm ou yarn
+- Instância da API ESOrbit rodando
 
 ### Instalação
 
@@ -161,19 +82,145 @@ NEXT_PUBLIC_API_URL=http://localhost:4000
 # Instalar dependências
 npm install
 
-# Iniciar em desenvolvimento
-npm run dev
-
-# Build para produção
-npm run build
-
-# Iniciar produção
-npm start
+# Copiar configuração de ambiente
+cp .env.example .env.local
 ```
 
-## 📝 Guia de Desenvolvimento
+### Configuração
 
-### 1. Criar uma Nova Página Protegida
+Edite `.env.local` com suas configurações:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_APP_NAME=ESOrbit
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### Executando a Aplicação
+
+```bash
+# Modo desenvolvimento com hot reload
+npm run dev
+
+# Build de produção
+npm run build
+
+# Iniciar servidor de produção
+npm start
+
+# Executar linter
+npm run lint
+```
+
+A aplicação estará disponível em `http://localhost:3000`
+
+## Estrutura do Projeto
+
+```
+web/
+├── app/                       # Next.js App Router
+│   ├── (auth)/               # Grupo de rotas de autenticação
+│   │   ├── login/            # Página de login
+│   │   ├── register/         # Página de registro
+│   │   └── layout.tsx        # Layout de auth
+│   ├── api/                  # Rotas de API
+│   │   └── health/           # Endpoint de health check
+│   ├── catalog/              # Páginas do catálogo
+│   │   ├── page.tsx          # Listagem de cosméticos
+│   │   └── bundles/          # Página de bundles
+│   ├── dashboard/            # Página de dashboard
+│   ├── inventory/            # Inventário do usuário
+│   ├── profile/              # Perfil do usuário
+│   ├── transactions/         # Histórico de transações
+│   ├── layout.tsx            # Layout raiz com providers
+│   └── page.tsx              # Landing page
+│
+├── features/                  # Módulos de features
+│   ├── auth/                 # Feature de autenticação
+│   │   ├── components/       # Formulários de Login/Register
+│   │   ├── hooks/            # Hook useAuth
+│   │   ├── services/         # Serviço de API de auth
+│   │   └── index.ts          # Exports públicos
+│   ├── catalog/              # Feature de catálogo
+│   │   ├── components/       # Cards, filtros
+│   │   ├── hooks/            # useCatalog, useBundles
+│   │   ├── services/         # Serviço de API de catálogo
+│   │   └── index.ts          # Exports públicos
+│   ├── finance/              # Feature de finanças
+│   │   ├── services/         # Serviços de compra, transferência
+│   │   └── index.ts          # Exports públicos
+│   ├── dashboard/            # Feature de dashboard
+│   ├── inventory/            # Feature de inventário
+│   ├── profile/              # Feature de perfil
+│   ├── transactions/         # Feature de transações
+│   └── index.ts              # Barrel export de features
+│
+└── shared/                    # Código compartilhado
+    ├── components/           # Componentes reutilizáveis (Navbar, etc.)
+    ├── layouts/              # Layouts comuns
+    ├── hooks/                # Hooks compartilhados
+    ├── utils/                # Funções utilitárias
+    └── index.ts              # Exports compartilhados
+```
+
+## Feature-Sliced Design
+
+Cada feature é um módulo independente com uma estrutura consistente:
+
+```
+features/[nome-da-feature]/
+├── components/          # Componentes UI específicos desta feature
+├── hooks/              # Hooks customizados para esta feature
+├── services/           # Chamadas de API e lógica de negócio
+└── index.ts            # API pública da feature
+```
+
+**Benefícios**:
+
+- Clara separação de responsabilidades
+- Fácil de escalar e manter
+- Previne dependências circulares
+- Promove reusabilidade de código
+- Simplifica testes
+
+**Regras**:
+
+- Features não devem importar de outras features diretamente
+- Código compartilhado vai no diretório `shared/`
+- Cada feature exporta apenas o que é necessário via `index.ts`
+- Use barrel exports para imports limpos
+
+## Fluxo de Autenticação
+
+### Como Funciona
+
+1. Usuário submete credenciais via formulário de login ou registro
+2. API retorna access token (curta duração) e refresh token (longa duração em cookie HttpOnly)
+3. Access token é armazenado no localStorage
+4. Todas as requisições à API incluem o access token no header Authorization
+5. Quando o access token expira, o refresh token é usado para obter um novo access token
+6. Se o refresh falhar, usuário é redirecionado para login
+
+### Usando Autenticação
+
+O hook `useAuth` fornece estado e métodos de autenticação:
+
+```tsx
+import { useAuth } from "@/features/auth";
+
+function MeuComponente() {
+  const { user, loading, login, logout, register, refreshAuth } = useAuth();
+
+  if (loading) return <div>Carregando...</div>;
+  if (!user) return <div>Por favor, faça login</div>;
+
+  return <div>Bem-vindo, {user.username}!</div>;
+}
+```
+
+### Rotas Protegidas
+
+Para proteger uma página, verifique o status de autenticação:
 
 ```tsx
 "use client";
@@ -182,7 +229,7 @@ import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function MinhaRota() {
+export default function PaginaProtegida() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -198,36 +245,50 @@ export default function MinhaRota() {
 }
 ```
 
-### 2. Criar Nova Feature
+## Integração com API
 
-```bash
-# Estrutura de uma nova feature
-features/
-└── minha-feature/
-    ├── components/       # Componentes React
-    │   ├── component-1.tsx
-    │   └── index.ts
-    ├── hooks/            # Hooks customizados
-    │   ├── use-minha-feature.tsx
-    │   └── index.ts
-    ├── services/         # Lógica de negócio e API
-    │   ├── minha-feature.service.ts
-    │   └── index.ts
-    └── index.ts          # Barrel export
+### Cliente API
+
+A aplicação usa um cliente API customizado com tratamento automático de tokens:
+
+```typescript
+import { apiClient } from "@/features/auth/services";
+
+// Requisição GET
+const data = await apiClient.get("/endpoint");
+
+// Requisição POST
+const result = await apiClient.post("/endpoint", { data });
+
+// Requisição PUT
+await apiClient.put("/endpoint/:id", { data });
+
+// Requisição DELETE
+await apiClient.delete("/endpoint/:id");
 ```
 
-**Exemplo de serviço:**
+O cliente automaticamente:
+
+- Adiciona token JWT às requisições
+- Trata refresh de token em erros 401
+- Inclui credentials para auth baseada em cookies
+- Faz parse de respostas JSON
+- Lança erros para respostas não-2xx
+
+### Criando Novos Serviços
+
+Para adicionar um novo serviço de API:
 
 ```typescript
 // features/minha-feature/services/minha-feature.service.ts
 import { apiClient } from "@/features/auth/services";
 
 export class MinhaFeatureService {
-  async buscarDados() {
+  async obterDados() {
     return apiClient.get("/meu-endpoint");
   }
 
-  async enviarDados(data: any) {
+  async criarItem(data: any) {
     return apiClient.post("/meu-endpoint", data);
   }
 }
@@ -235,99 +296,312 @@ export class MinhaFeatureService {
 export const minhaFeatureService = new MinhaFeatureService();
 ```
 
-### 3. Fazer Requisições Autenticadas
+## Desenvolvimento de Componentes
 
-```typescript
-import { apiClient } from "@/features/auth";
+### Criando Componentes de Feature
 
-// O token é adicionado automaticamente
-const data = await apiClient.get("/algum-endpoint");
-```
+Coloque componentes no diretório da feature:
 
-### 4. Importar de Features
-
-Graças aos barrel exports, as importações são limpas:
-
-```typescript
-// ✅ Bom - Importa direto da feature
-import { useAuth, LoginForm, authService } from "@/features/auth";
-
-// ❌ Evite - Importações específicas de caminho
-import { useAuth } from "@/features/auth/hooks/use-auth";
-import { LoginForm } from "@/features/auth/components/login-form";
-```
-
-### 5. Compartilhar Código Entre Features
-
-Use a pasta `shared/` para código reutilizável:
-
-```typescript
-// shared/components/button.tsx
-export function Button({ children, ...props }) {
-  return <button {...props}>{children}</button>;
+```tsx
+// features/catalog/components/cosmetic-card.tsx
+interface CosmeticCardProps {
+  cosmetic: Cosmetic;
+  onPurchase?: (id: string) => void;
 }
 
-// shared/index.ts
-export * from "./components/button";
-
-// Usar em qualquer feature
-import { Button } from "@/shared";
+export function CosmeticCard({ cosmetic, onPurchase }: CosmeticCardProps) {
+  return (
+    <div>
+      <h3>{cosmetic.name}</h3>
+      <p>{cosmetic.type}</p>
+      {onPurchase && (
+        <button onClick={() => onPurchase(cosmetic.id)}>Comprar</button>
+      )}
+    </div>
+  );
+}
 ```
 
-## 🎨 Estilização
-
-O projeto usa Tailwind CSS 4. Classes principais:
-
-- **Cores**: `bg-blue-600`, `text-gray-900`, etc.
-- **Dark Mode**: Prefixo `dark:`, ex: `dark:bg-gray-800`
-- **Layout**: `flex`, `grid`, `space-y-4`
-- **Responsivo**: Prefixos `sm:`, `md:`, `lg:`
-
-## 🔒 Segurança
-
-- ✅ Refresh tokens em cookies HttpOnly (gerenciado pela API)
-- ✅ Access tokens com duração curta (15 min)
-- ✅ Renovação automática de tokens
-- ✅ Proteção contra XSS (cookies httpOnly)
-- ✅ Proteção CSRF (sameSite: 'lax')
-- ✅ HTTPS em produção (configurar `secure: true`)
-
-## 🐛 Troubleshooting
-
-### Token expirando muito rápido
-
-O access token expira em 15 minutos. O sistema tenta renovar automaticamente usando o refresh token.
-
-### CORS errors
-
-Certifique-se de que a API está configurada para aceitar requisições do frontend:
+Exporte do index da feature:
 
 ```typescript
-// Na API (main.ts)
-app.enableCors({
-  origin: "http://localhost:3000",
-  credentials: true, // IMPORTANTE!
+// features/catalog/index.ts
+export * from "./components/cosmetic-card";
+export * from "./hooks/use-catalog";
+export * from "./services/catalog.service";
+```
+
+### Componentes Compartilhados
+
+Coloque componentes reutilizáveis em `shared/components/`:
+
+```tsx
+// shared/components/button.tsx
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: "primary" | "secondary";
+  onClick?: () => void;
+}
+
+export function Button({
+  children,
+  variant = "primary",
+  onClick,
+}: ButtonProps) {
+  return (
+    <button className={`btn btn-${variant}`} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+```
+
+## Estilização
+
+O projeto usa Tailwind CSS 4 para estilização. Padrões comuns:
+
+### Layout
+
+```tsx
+<div className="flex items-center justify-between">
+  <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Conteúdo */}
+    </div>
+  </div>
+</div>
+```
+
+### Cores
+
+```tsx
+<div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+  <span className="text-blue-600">Primário</span>
+  <span className="text-green-600">Sucesso</span>
+  <span className="text-red-600">Perigo</span>
+</div>
+```
+
+### Design Responsivo
+
+```tsx
+<div className="text-sm sm:text-base md:text-lg lg:text-xl">
+  <div className="hidden md:block">Apenas desktop</div>
+  <div className="md:hidden">Apenas mobile</div>
+</div>
+```
+
+## Gerenciamento de Estado
+
+A aplicação usa React Context para estado global:
+
+### Context de Auth
+
+Gerencia estado de autenticação do usuário:
+
+```tsx
+import { useAuth } from "@/features/auth";
+
+const { user, loading, login, logout } = useAuth();
+```
+
+### Criando Novos Contexts
+
+Para estado específico de feature:
+
+```tsx
+// features/catalog/hooks/use-catalog.tsx
+import { createContext, useContext, useState } from "react";
+
+interface CatalogContextType {
+  filters: Filters;
+  setFilters: (filters: Filters) => void;
+}
+
+const CatalogContext = createContext<CatalogContextType | undefined>(undefined);
+
+export function CatalogProvider({ children }: { children: React.ReactNode }) {
+  const [filters, setFilters] = useState<Filters>({});
+
+  return (
+    <CatalogContext.Provider value={{ filters, setFilters }}>
+      {children}
+    </CatalogContext.Provider>
+  );
+}
+
+export function useCatalog() {
+  const context = useContext(CatalogContext);
+  if (!context)
+    throw new Error("useCatalog deve ser usado dentro de CatalogProvider");
+  return context;
+}
+```
+
+## Formulários e Validação
+
+Use componentes de formulário do Ant Design com validação integrada:
+
+```tsx
+import { Form, Input, Button } from "antd";
+
+export function LoginForm() {
+  const [form] = Form.useForm();
+  const { login } = useAuth();
+
+  const handleSubmit = async (values: any) => {
+    await login(values.email, values.password);
+  };
+
+  return (
+    <Form form={form} onFinish={handleSubmit}>
+      <Form.Item
+        name="email"
+        rules={[
+          { required: true, message: "Email é obrigatório" },
+          { type: "email", message: "Email inválido" },
+        ]}
+      >
+        <Input placeholder="Email" />
+      </Form.Item>
+
+      <Form.Item
+        name="password"
+        rules={[{ required: true, message: "Senha é obrigatória" }]}
+      >
+        <Input.Password placeholder="Senha" />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Entrar
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+}
+```
+
+## Boas Práticas
+
+### Organização de Código
+
+- Mantenha componentes pequenos e focados
+- Extraia lógica reutilizável em hooks customizados
+- Use TypeScript para type safety
+- Siga os princípios do feature-sliced design
+- Use barrel exports para imports limpos
+
+### Performance
+
+- Use diretiva `'use client'` apenas quando necessário
+- Implemente paginação para listas grandes
+- Otimize imagens com componente Image do Next.js
+- Minimize tamanho do bundle com imports apropriados
+- Use React.memo para componentes custosos
+
+### Segurança
+
+- Nunca armazene dados sensíveis no localStorage
+- Valide todas as entradas de usuário
+- Sanitize dados antes de renderizar
+- Use HTTPS em produção
+- Mantenha dependências atualizadas
+
+### Acessibilidade
+
+- Use elementos HTML semânticos
+- Forneça texto alt para imagens
+- Garanta que navegação por teclado funciona
+- Use labels ARIA quando necessário
+- Teste com leitores de tela
+
+## Testes
+
+Embora testes abrangentes ainda não estejam implementados, a estrutura do projeto suporta testes:
+
+```bash
+# Testes unitários
+npm test
+
+# Testes de integração
+npm run test:integration
+
+# Testes E2E
+npm run test:e2e
+```
+
+Exemplo de estrutura de teste:
+
+```typescript
+// features/auth/hooks/use-auth.test.tsx
+import { renderHook } from "@testing-library/react";
+import { useAuth } from "./use-auth";
+
+describe("useAuth", () => {
+  it("deve inicializar com usuário null", () => {
+    const { result } = renderHook(() => useAuth());
+    expect(result.current.user).toBeNull();
+  });
 });
 ```
 
-### Cookies não sendo enviados
+## Resolução de Problemas
 
-Certifique-se de usar `credentials: 'include'` nas requisições (já configurado no `apiClient`).
+### Problemas Comuns
 
-## 📚 Documentação Adicional
+**Erros de CORS**:
 
-- [docs/SUMMARY.md](./docs/SUMMARY.md) - **Resumo Executivo das Melhorias**
-- [docs/FRONTEND_IMPROVEMENTS.md](./docs/FRONTEND_IMPROVEMENTS.md) - **Documentação Completa**
-- [docs/USER_GUIDE.md](./docs/USER_GUIDE.md) - **Guia do Usuário**
-- [docs/AUTHENTICATION_GUIDE.md](./docs/AUTHENTICATION_GUIDE.md) - Guia de autenticação
+- Certifique-se de que a API tem configuração CORS apropriada
+- Verifique se `NEXT_PUBLIC_API_URL` está correto
+- Confira se a API aceita credentials
 
-## 📖 Recursos
+**Autenticação não persistindo**:
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [Feature-Sliced Design](https://feature-sliced.design/)
-- [JWT.io](https://jwt.io/)
+- Verifique se cookies estão sendo enviados (`credentials: 'include'`)
+- Certifique-se de que refresh token está sendo armazenado em cookie HttpOnly
+- Garanta que API e frontend estão em domínios compatíveis
 
----
+**Componentes não atualizando**:
 
-**Desenvolvido com ❤️ usando Next.js 16, TypeScript e Tailwind CSS**
+- Verifique se o gerenciamento de estado está funcionando
+- Confira se context providers estão envolvendo apropriadamente
+- Certifique-se de que dependências do useEffect estão corretas
+
+**Erros de build**:
+
+- Limpe diretório `.next`: `rm -rf .next`
+- Delete node_modules e reinstale: `rm -rf node_modules && npm install`
+- Verifique erros do TypeScript: `npm run type-check`
+
+**Estilização não funcionando**:
+
+- Verifique se Tailwind está configurado apropriadamente
+- Confira se CSS está importado no layout
+- Limpe cache do navegador e reconstrua
+
+## Deploy
+
+Para deploy em produção:
+
+1. Defina variáveis de ambiente apropriadas para produção
+2. Construa a aplicação: `npm run build`
+3. Inicie o servidor de produção: `npm start`
+4. Configure reverse proxy (nginx, Apache)
+5. Configure certificados SSL/TLS
+6. Configure CDN para assets estáticos
+7. Habilite headers de cache
+8. Monitore performance e erros
+
+## Recursos Adicionais
+
+- [Documentação Next.js](https://nextjs.org/docs)
+- [Documentação React](https://react.dev)
+- [Documentação TypeScript](https://www.typescriptlang.org/docs)
+- [Documentação Tailwind CSS](https://tailwindcss.com/docs)
+- [Documentação Ant Design](https://ant.design/docs/react/introduce)
+- [Feature-Sliced Design](https://feature-sliced.design)
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT.

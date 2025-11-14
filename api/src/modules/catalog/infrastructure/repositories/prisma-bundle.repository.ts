@@ -9,14 +9,37 @@ export class PrismaBundleRepository implements IBundleRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: Bundle): Promise<Bundle> {
-    const bundle = await this.prisma.bundle.create({
-      data: {
-        externalId: data.externalId,
-        name: data.name,
-      },
-    });
+    try {
+      const bundle = await this.prisma.bundle.create({
+        data: {
+          externalId: data.externalId,
+          name: data.name,
+        },
+      });
 
-    return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
+      return Bundle.restore(bundle.id, bundle.externalId, bundle.name);
+    } catch (error: any) {
+      if (
+        error.code === 'P2002' &&
+        error.meta?.target?.includes('external_id')
+      ) {
+        this.logger.debug(
+          `Bundle com external_id ${data.externalId} já existe, buscando...`,
+        );
+        const existingBundle = await this.prisma.bundle.findUnique({
+          where: { externalId: data.externalId },
+        });
+
+        if (existingBundle) {
+          return Bundle.restore(
+            existingBundle.id,
+            existingBundle.externalId,
+            existingBundle.name,
+          );
+        }
+      }
+      throw error;
+    }
   }
 
   async findByExternalId(externalId: string): Promise<Bundle | null> {

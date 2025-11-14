@@ -9,7 +9,7 @@ RUN npm ci --only=production
 
 FROM base AS builder
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --include=dev
 COPY . .
 RUN npx prisma generate
 RUN npm run build
