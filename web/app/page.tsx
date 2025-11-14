@@ -98,7 +98,7 @@ export default function Home() {
                 </span>
               </h1>
               <p className="text-xl text-gray-600 leading-relaxed">
-                A plataforma completa de e-commerce com arquitetura moderna,
+                A plataforma completa de e-commerce com arquitetura limpa,
                 segurança avançada e experiência excepcional para seus clientes.
                 Gerencie seu catálogo, transações e muito mais.
               </p>
@@ -177,7 +177,7 @@ export default function Home() {
                       </span>
                     </div>
                     <div className="w-14 h-14 bg-white/40 backdrop-blur rounded-xl flex items-center justify-center">
-                      <span className="text-white text-2xl">📊</span>
+                      <span className="text-white text-2xl"></span>
                     </div>
                   </div>
                 </div>

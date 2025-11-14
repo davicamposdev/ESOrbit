@@ -2,82 +2,28 @@
 
 import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AppLayout } from "@/shared";
+import { Row, Col, Space, Spin } from "antd";
 import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Typography,
-  Space,
-  Button,
-  Spin,
-  App,
-  List,
-  Tag,
-  Avatar,
-} from "antd";
-import {
-  WalletOutlined,
-  ShoppingOutlined,
-  UserOutlined,
-  GiftOutlined,
-  HistoryOutlined,
-  TrophyOutlined,
-  FireOutlined,
-  AppstoreOutlined,
-} from "@ant-design/icons";
-import { financeService, type PurchaseResponse } from "@/features/finance";
-
-const { Title, Paragraph, Text } = Typography;
+  useDashboard,
+  DashboardHeader,
+  DashboardStats,
+  RecentPurchases,
+  QuickActions,
+  AccountInfo,
+} from "@/features/dashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { message } = App.useApp();
-  const [purchases, setPurchases] = useState<PurchaseResponse[]>([]);
-  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const { purchases, loading: loadingPurchases, stats } = useDashboard();
 
   useEffect(() => {
-    console.log("Dashboard - user:", user, "loading:", loading);
     if (!loading && !user) {
-      console.log("Redirecionando para login...");
       router.push("/login");
     }
   }, [user, loading, router]);
-
-  useEffect(() => {
-    if (user && !loading) {
-      loadRecentPurchases();
-    }
-  }, [user, loading]);
-
-  const loadRecentPurchases = async () => {
-    console.log("Carregando compras recentes...");
-    setLoadingPurchases(true);
-    try {
-      const data = await financeService.listPurchases({ limit: 3 });
-      console.log("Compras carregadas:", data);
-      setPurchases(data);
-    } catch (error) {
-      console.error("Erro ao carregar compras:", error);
-      setPurchases([]);
-    } finally {
-      setLoadingPurchases(false);
-    }
-  };
-
-  const calculateStats = () => {
-    const totalSpent = purchases.reduce(
-      (sum, purchase) => sum + (purchase.transaction?.amount || 0),
-      0
-    );
-    const totalPurchases = purchases.length;
-    return { totalSpent, totalPurchases };
-  };
-
-  const { totalSpent, totalPurchases } = calculateStats();
 
   if (loading) {
     return (
@@ -104,280 +50,48 @@ export default function DashboardPage() {
     <AppLayout>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div className="bg-linear-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 shadow-2xl mb-4">
-            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
-              <Title level={2} style={{ color: "white", margin: 0 }}>
-                Bem-vindo, {user.username}! 👋
-              </Title>
-              <Paragraph
-                style={{
-                  color: "rgba(255,255,255,0.9)",
-                  margin: "8px 0 0 0",
-                  fontSize: "16px",
-                }}
-              >
-                Gerencie sua conta e explore nosso catálogo de cosméticos do
-                Fortnite
-              </Paragraph>
-            </div>
-          </div>
+          <DashboardHeader username={user.username} />
 
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={12} lg={6}>
-              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
-                <Statistic
-                  title="Créditos Disponíveis"
-                  value={user.credits}
-                  prefix={<WalletOutlined />}
-                  valueStyle={{ color: "#52c41a", fontWeight: "bold" }}
-                  suffix="V-Bucks"
-                />
-              </Card>
-            </Col>
-
-            <Col xs={24} sm={12} lg={6}>
-              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
-                <Statistic
-                  title="Total de Compras"
-                  value={totalPurchases}
-                  prefix={<ShoppingOutlined />}
-                  valueStyle={{ color: "#1890ff", fontWeight: "bold" }}
-                  loading={loadingPurchases}
-                />
-              </Card>
-            </Col>
-
-            <Col xs={24} sm={12} lg={6}>
-              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
-                <Statistic
-                  title="Total Gasto"
-                  value={totalSpent}
-                  prefix={<TrophyOutlined />}
-                  valueStyle={{ color: "#faad14", fontWeight: "bold" }}
-                  suffix="V-Bucks"
-                  loading={loadingPurchases}
-                />
-              </Card>
-            </Col>
-
-            <Col xs={24} sm={12} lg={6}>
-              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
-                <Statistic
-                  title="Membro desde"
-                  value={new Date(user.createdAt).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "short",
-                  })}
-                  prefix={<FireOutlined />}
-                  valueStyle={{ color: "#ff4d4f", fontWeight: "bold" }}
-                />
-              </Card>
-            </Col>
-          </Row>
+          <DashboardStats
+            credits={user.credits}
+            totalPurchases={stats.totalPurchases}
+            totalSpent={stats.totalSpent}
+            memberSince={new Date(user.createdAt).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "short",
+            })}
+            loading={loadingPurchases}
+          />
 
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <Card
-                title="Compras Recentes"
-                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-                style={{ height: "100%" }}
-                extra={
-                  <Button
-                    type="link"
-                    onClick={() => router.push("/transactions")}
-                  >
-                    Ver todas
-                  </Button>
-                }
-              >
-                <div>
-                  {loadingPurchases ? (
-                    <div style={{ textAlign: "center", padding: "20px 0" }}>
-                      <Spin />
-                    </div>
-                  ) : purchases.length === 0 ? (
-                    <Space
-                      direction="vertical"
-                      style={{ width: "100%", textAlign: "center" }}
-                    >
-                      <Text type="secondary">
-                        Nenhuma compra realizada ainda
-                      </Text>
-                      <Button
-                        type="primary"
-                        icon={<ShoppingOutlined />}
-                        onClick={() => router.push("/catalog")}
-                      >
-                        Explorar Catálogo
-                      </Button>
-                    </Space>
-                  ) : (
-                    <List
-                      dataSource={purchases}
-                      renderItem={(purchase) => (
-                        <List.Item>
-                          <List.Item.Meta
-                            avatar={
-                              purchase.cosmetic?.imageUrl ? (
-                                <Avatar
-                                  src={purchase.cosmetic.imageUrl}
-                                  shape="square"
-                                  size={48}
-                                />
-                              ) : (
-                                <Avatar icon={<ShoppingOutlined />} size={48} />
-                              )
-                            }
-                            title={
-                              <Space>
-                                <Text strong>
-                                  {purchase.cosmetic?.name || "Cosmético"}
-                                </Text>
-                                {purchase.status === "ACTIVE" && (
-                                  <Tag color="success">Ativo</Tag>
-                                )}
-                                {purchase.status === "RETURNED" && (
-                                  <Tag color="warning">Devolvido</Tag>
-                                )}
-                                {purchase.isFromBundle && (
-                                  <Tag color="purple">Bundle</Tag>
-                                )}
-                              </Space>
-                            }
-                            description={
-                              <Space direction="vertical" size={0}>
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  {new Date(purchase.createdAt).toLocaleString(
-                                    "pt-BR",
-                                    {
-                                      day: "2-digit",
-                                      month: "short",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
-                                </Text>
-                                <Text strong style={{ color: "#52c41a" }}>
-                                  {purchase.transaction?.amount || 0} V-Bucks
-                                </Text>
-                                {purchase.cosmetic?.type && (
-                                  <Text
-                                    type="secondary"
-                                    style={{ fontSize: 11 }}
-                                  >
-                                    {purchase.cosmetic.type} •{" "}
-                                    {purchase.cosmetic.rarity}
-                                  </Text>
-                                )}
-                              </Space>
-                            }
-                          />
-                        </List.Item>
-                      )}
-                    />
-                  )}
-                </div>
-              </Card>
+              <RecentPurchases
+                purchases={purchases}
+                loading={loadingPurchases}
+                onViewAll={() => router.push("/transactions")}
+                onExploreCatalog={() => router.push("/catalog")}
+              />
             </Col>
 
             <Col xs={24} lg={12}>
-              <Card
-                title="Ações Rápidas"
-                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-                style={{ height: "100%" }}
-              >
-                <Space
-                  direction="vertical"
-                  size="middle"
-                  style={{ width: "100%" }}
-                >
-                  <Button
-                    type="primary"
-                    icon={<ShoppingOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/catalog")}
-                    className="h-14 text-base font-semibold"
-                  >
-                    Explorar Catálogo
-                  </Button>
-                  <Button
-                    icon={<AppstoreOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/inventory")}
-                    className="h-14 text-base font-semibold"
-                  >
-                    Meu Inventário
-                  </Button>
-                  <Button
-                    icon={<GiftOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/catalog/bundles")}
-                    className="h-14 text-base font-semibold"
-                  >
-                    Ver Bundles
-                  </Button>
-                  <Button
-                    icon={<UserOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/profile")}
-                    className="h-14 text-base font-semibold"
-                  >
-                    Ver Perfil
-                  </Button>
-                  <Button
-                    icon={<HistoryOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/transactions")}
-                    className="h-14 text-base font-semibold"
-                  >
-                    Ver Transações
-                  </Button>
-                </Space>
-              </Card>
+              <QuickActions
+                onExploreCatalog={() => router.push("/catalog")}
+                onViewInventory={() => router.push("/inventory")}
+                onViewBundles={() => router.push("/catalog/bundles")}
+                onViewProfile={() => router.push("/profile")}
+                onViewTransactions={() => router.push("/transactions")}
+              />
             </Col>
           </Row>
 
           <Row gutter={[16, 16]}>
             <Col xs={24}>
-              <Card
-                title="Informações da Conta"
-                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-              >
-                <Space
-                  direction="vertical"
-                  size="middle"
-                  style={{ width: "100%" }}
-                >
-                  <div>
-                    <Paragraph strong>ID do Usuário</Paragraph>
-                    <Paragraph copyable>{user.id}</Paragraph>
-                  </div>
-                  <div>
-                    <Paragraph strong>Email</Paragraph>
-                    <Paragraph>{user.email}</Paragraph>
-                  </div>
-                  <div>
-                    <Paragraph strong>Nome de Usuário</Paragraph>
-                    <Paragraph>{user.username}</Paragraph>
-                  </div>
-                  <div>
-                    <Paragraph strong>Membro desde</Paragraph>
-                    <Paragraph>
-                      {new Date(user.createdAt).toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </Paragraph>
-                  </div>
-                </Space>
-              </Card>
+              <AccountInfo
+                id={user.id}
+                email={user.email}
+                username={user.username}
+                createdAt={user.createdAt.toString()}
+              />
             </Col>
           </Row>
         </Space>
