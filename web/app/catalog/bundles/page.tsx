@@ -13,12 +13,11 @@ import {
   useBundles,
   BundleCard,
   Pagination,
-  BundleFilters,
   BundlePurchaseModal,
   type Bundle,
   type ListBundlesParams,
 } from "@/features/catalog";
-import { AppLayout } from "@/shared";
+import { AppLayout, ItemFilters, type ItemFiltersConfig } from "@/shared";
 
 const { Title, Text } = Typography;
 
@@ -128,20 +127,32 @@ export default function BundlesPage() {
         }}
       >
         <div style={{ marginBottom: 24 }}>
-          <Space direction="vertical" size="small">
-            <Title level={2} style={{ margin: 0 }}>
-              <GiftOutlined style={{ marginRight: 8 }} />
-              Bundles Disponíveis
-            </Title>
-            <Text type="secondary">
-              Economize comprando pacotes especiais com múltiplos itens
-            </Text>
-          </Space>
-          <div style={{ marginTop: 16 }}>
+          <div className="bg-linear-to-br from-purple-600 to-pink-500 rounded-3xl p-8 shadow-2xl mb-6">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+              <Space
+                direction="vertical"
+                size="small"
+                style={{ width: "100%" }}
+              >
+                <Title level={2} style={{ margin: 0, color: "white" }}>
+                  <GiftOutlined style={{ marginRight: 8 }} />
+                  Bundles
+                </Title>
+                <Text
+                  style={{ color: "rgba(255,255,255,0.9)", fontSize: "16px" }}
+                >
+                  Economize comprando pacotes especiais com múltiplos itens
+                </Text>
+              </Space>
+            </div>
+          </div>
+          <div>
             <Space wrap>
               <Button
                 icon={<ShoppingOutlined />}
                 onClick={() => router.push("/catalog")}
+                size="large"
+                className="h-12 font-semibold"
               >
                 Ver Catálogo
               </Button>
@@ -149,13 +160,35 @@ export default function BundlesPage() {
                 icon={<ReloadOutlined />}
                 onClick={handleRefresh}
                 loading={loading}
+                size="large"
+                className="h-12 font-semibold"
               >
                 Atualizar
               </Button>
             </Space>
           </div>
         </div>
-        <BundleFilters onFilter={handleFilter} loading={loading} />
+        <ItemFilters<ListBundlesParams>
+          config={{
+            searchPlaceholder: "Digite o nome do bundle",
+            showType: false,
+            showRarity: false,
+            showDateRange: false,
+            toggleFilters: [
+              {
+                key: "isAvailable",
+                label: "Apenas disponíveis",
+                checked: true,
+              },
+              { key: "onSale", label: "Em promoção" },
+            ],
+            initialFilters: {
+              isAvailable: true,
+            },
+          }}
+          onFilter={handleFilter}
+          loading={loading}
+        />
 
         {loading ? (
           <div

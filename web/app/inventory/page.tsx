@@ -3,7 +3,7 @@
 import { useAuth } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AppLayout } from "@/shared";
+import { AppLayout, ItemFilters, type ItemFiltersConfig } from "@/shared";
 import {
   Card,
   Row,
@@ -16,8 +16,6 @@ import {
   Empty,
   Badge,
   Tag,
-  Input,
-  Select,
   Tooltip,
   Statistic,
   Modal,
@@ -26,12 +24,10 @@ import {
 } from "antd";
 import {
   AppstoreOutlined,
-  SearchOutlined,
   FilterOutlined,
   ArrowLeftOutlined,
   TrophyOutlined,
   ShoppingOutlined,
-  EyeOutlined,
   RollbackOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
@@ -48,9 +44,6 @@ export default function InventoryPage() {
     PurchaseResponse[]
   >([]);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [filterType, setFilterType] = useState<string>("ALL");
-  const [filterRarity, setFilterRarity] = useState<string>("ALL");
   const [selectedPurchase, setSelectedPurchase] =
     useState<PurchaseResponse | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -69,8 +62,8 @@ export default function InventoryPage() {
   }, [user, loading]);
 
   useEffect(() => {
-    applyFilters();
-  }, [purchases, searchText, filterType, filterRarity]);
+    setFilteredPurchases(purchases);
+  }, [purchases]);
 
   const loadInventory = async () => {
     setLoadingPurchases(true);
@@ -86,29 +79,38 @@ export default function InventoryPage() {
     }
   };
 
-  const applyFilters = () => {
+  const handleFilter = (filters: {
+    name?: string;
+    type?: string;
+    rarity?: string;
+    page?: number;
+    pageSize?: number;
+  }) => {
     let filtered = [...purchases];
 
     // Filtrar por texto de busca
-    if (searchText) {
+    if (filters.name) {
       filtered = filtered.filter((purchase) =>
         purchase.cosmetic?.name
           ?.toLowerCase()
-          .includes(searchText.toLowerCase())
+          .includes(filters.name!.toLowerCase())
       );
     }
 
     // Filtrar por tipo
-    if (filterType !== "ALL") {
+    if (filters.type) {
       filtered = filtered.filter(
-        (purchase) => purchase.cosmetic?.type === filterType
+        (purchase) =>
+          purchase.cosmetic?.type?.toLowerCase() === filters.type?.toLowerCase()
       );
     }
 
     // Filtrar por raridade
-    if (filterRarity !== "ALL") {
+    if (filters.rarity) {
       filtered = filtered.filter(
-        (purchase) => purchase.cosmetic?.rarity === filterRarity
+        (purchase) =>
+          purchase.cosmetic?.rarity?.toLowerCase() ===
+          filters.rarity?.toLowerCase()
       );
     }
 
@@ -234,102 +236,84 @@ export default function InventoryPage() {
             <Button
               icon={<ArrowLeftOutlined />}
               onClick={() => router.push("/dashboard")}
-              style={{ marginBottom: 16 }}
+              size="large"
+              className="h-12 font-semibold mb-4"
             >
               Voltar ao Dashboard
             </Button>
-            <Title level={2}>
-              <AppstoreOutlined /> Meu Inventário
-            </Title>
-            <Paragraph type="secondary">
-              Todos os itens que você comprou e possui atualmente
-            </Paragraph>
+            <div className="bg-linear-to-br from-orange-500 to-red-600 rounded-3xl p-8 shadow-2xl">
+              <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+                <Title level={2} style={{ color: "white", margin: 0 }}>
+                  <AppstoreOutlined /> Meu Inventário
+                </Title>
+                <Paragraph
+                  style={{
+                    color: "rgba(255,255,255,0.9)",
+                    margin: "8px 0 0 0",
+                    fontSize: "16px",
+                  }}
+                >
+                  Todos os itens que você comprou e possui atualmente
+                </Paragraph>
+              </div>
+            </div>
           </div>
 
           {/* Estatísticas */}
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Total de Itens"
                   value={stats.totalItems}
                   prefix={<AppstoreOutlined />}
-                  valueStyle={{ color: "#1890ff" }}
+                  valueStyle={{ color: "#1890ff", fontWeight: "bold" }}
                 />
               </Card>
             </Col>
             <Col xs={24} sm={8}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Tipos Únicos"
                   value={stats.uniqueTypes}
                   prefix={<FilterOutlined />}
-                  valueStyle={{ color: "#52c41a" }}
+                  valueStyle={{ color: "#52c41a", fontWeight: "bold" }}
                 />
               </Card>
             </Col>
             <Col xs={24} sm={8}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Valor Total Investido"
                   value={stats.totalValue}
                   prefix={<TrophyOutlined />}
                   suffix="V-Bucks"
-                  valueStyle={{ color: "#faad14" }}
+                  valueStyle={{ color: "#faad14", fontWeight: "bold" }}
                 />
               </Card>
             </Col>
           </Row>
 
           {/* Filtros */}
-          <Card>
-            <Row gutter={[16, 16]} align="middle">
-              <Col xs={24} md={12}>
-                <Input
-                  placeholder="Buscar por nome do item..."
-                  prefix={<SearchOutlined />}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  allowClear
-                  size="large"
-                />
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <Select
-                  value={filterType}
-                  onChange={setFilterType}
-                  style={{ width: "100%" }}
-                  size="large"
-                  placeholder="Filtrar por tipo"
-                >
-                  <Select.Option value="ALL">Todos os Tipos</Select.Option>
-                  <Select.Option value="SKIN">Skins</Select.Option>
-                  <Select.Option value="EMOTE">Emotes</Select.Option>
-                  <Select.Option value="PICKAXE">Picaretas</Select.Option>
-                  <Select.Option value="GLIDER">Planadores</Select.Option>
-                  <Select.Option value="BACKPACK">Mochilas</Select.Option>
-                  <Select.Option value="WRAP">Embalagens</Select.Option>
-                </Select>
-              </Col>
-              <Col xs={24} sm={12} md={6}>
-                <Select
-                  value={filterRarity}
-                  onChange={setFilterRarity}
-                  style={{ width: "100%" }}
-                  size="large"
-                  placeholder="Filtrar por raridade"
-                >
-                  <Select.Option value="ALL">Todas as Raridades</Select.Option>
-                  <Select.Option value="COMMON">Comum</Select.Option>
-                  <Select.Option value="UNCOMMON">Incomum</Select.Option>
-                  <Select.Option value="RARE">Raro</Select.Option>
-                  <Select.Option value="EPIC">Épico</Select.Option>
-                  <Select.Option value="LEGENDARY">Lendário</Select.Option>
-                  <Select.Option value="MYTHIC">Mítico</Select.Option>
-                </Select>
-              </Col>
-            </Row>
-          </Card>
+          <ItemFilters
+            config={{
+              searchPlaceholder: "Buscar por nome do item...",
+              types: [
+                { value: undefined, label: "Todos os tipos" },
+                { value: "skin", label: "Skins" },
+                { value: "emote", label: "Emotes" },
+                { value: "pickaxe", label: "Picaretas" },
+                { value: "glider", label: "Planadores" },
+                { value: "backpack", label: "Mochilas" },
+                { value: "wrap", label: "Embalagens" },
+              ],
+              showDateRange: false,
+              showPageSize: false,
+              toggleFilters: [],
+            }}
+            onFilter={handleFilter}
+            loading={loadingPurchases}
+          />
 
           {/* Grid de Itens */}
           {loadingPurchases ? (

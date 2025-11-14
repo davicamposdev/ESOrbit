@@ -116,18 +116,21 @@ export function Navbar() {
 
   return (
     <Header
-      className="sticky top-0 z-1000 w-full flex items-center justify-between bg-white shadow-md px-6"
+      className="sticky top-0 z-1000 w-full flex items-center justify-between bg-white shadow-lg px-6 border-b-2 border-gray-100"
       style={{ background: "#fff" }}
     >
       <div className="flex items-center gap-4">
         <div
-          className="flex items-center gap-2 cursor-pointer"
+          className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
           onClick={() => router.push("/")}
         >
-          <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">ES</span>
+          <div className="w-12 h-12 bg-linear-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-xl">ES</span>
           </div>
-          <Text strong className="text-lg text-gray-800 whitespace-nowrap">
+          <Text
+            strong
+            className="text-2xl bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent whitespace-nowrap"
+          >
             ESOrbit
           </Text>
         </div>
@@ -141,18 +144,24 @@ export function Navbar() {
 
       <Space size="middle">
         {loading ? (
-          <Avatar icon={<UserOutlined />} />
+          <Avatar icon={<UserOutlined />} size={40} />
         ) : user ? (
           <>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold text-sm text-gray-800">
-              <DollarCircleOutlined className="text-lg text-blue-600" />
-              {user.credits.toLocaleString("pt-BR")}
+            <div className="flex items-center gap-2 px-4 py-2 bg-linear-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl font-bold text-base text-gray-800 shadow-sm">
+              <DollarCircleOutlined className="text-xl text-green-600" />
+              <span className="text-green-700">
+                {user.credits.toLocaleString("pt-BR")}
+              </span>
             </div>
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <Space className="cursor-pointer">
-                <Avatar icon={<UserOutlined />} />
-                <Text strong className="max-w-[150px]">
+              <Space className="cursor-pointer hover:opacity-80 transition-opacity">
+                <Avatar
+                  icon={<UserOutlined />}
+                  size={40}
+                  className="bg-linear-to-br from-blue-600 to-indigo-600"
+                />
+                <Text strong className="max-w-[150px] text-base">
                   {user.username}
                 </Text>
               </Space>
@@ -163,10 +172,17 @@ export function Navbar() {
             <Button
               icon={<LoginOutlined />}
               onClick={() => router.push("/login")}
+              size="large"
+              className="h-11 font-semibold"
             >
               Entrar
             </Button>
-            <Button type="primary" onClick={() => router.push("/register")}>
+            <Button
+              type="primary"
+              onClick={() => router.push("/register")}
+              size="large"
+              className="h-11 font-semibold"
+            >
               Criar conta
             </Button>
           </Space>

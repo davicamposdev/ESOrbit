@@ -256,31 +256,40 @@ export default function TransactionsPage() {
     <AppLayout>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div>
-              <Title level={2} style={{ margin: 0 }}>
-                Histórico de Transações
-              </Title>
-              <Text type="secondary">
-                Acompanhe suas compras e transferências
-              </Text>
+          <div className="bg-linear-to-br from-green-500 to-cyan-600 rounded-3xl p-8 shadow-2xl">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <Title level={2} style={{ margin: 0, color: "white" }}>
+                    Histórico de Transações
+                  </Title>
+                  <Text
+                    style={{ color: "rgba(255,255,255,0.9)", fontSize: "16px" }}
+                  >
+                    Acompanhe suas compras e transferências
+                  </Text>
+                </div>
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={handleRefresh}
+                  loading={loadingPurchases || loadingTransfers}
+                  size="large"
+                  className="h-12 font-semibold"
+                  style={{ backgroundColor: "white" }}
+                >
+                  Atualizar
+                </Button>
+              </div>
             </div>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-              loading={loadingPurchases || loadingTransfers}
-            >
-              Atualizar
-            </Button>
           </div>
 
-          <Card>
+          <Card className="border-2 border-gray-100 rounded-2xl shadow-lg">
             <Tabs
               activeKey={activeTab}
               onChange={setActiveTab}

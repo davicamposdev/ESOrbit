@@ -11,14 +11,13 @@ import {
 import { useAuth } from "@/features/auth";
 import {
   useCatalog,
-  CatalogFilters,
   CosmeticCard,
   Pagination,
   PurchaseModal,
   type Cosmetic,
   type ListCosmeticsParams,
 } from "@/features/catalog";
-import { AppLayout } from "@/shared";
+import { AppLayout, ItemFilters, type ItemFiltersConfig } from "@/shared";
 
 const { Title, Text } = Typography;
 
@@ -135,20 +134,32 @@ export default function CatalogPage() {
         }}
       >
         <div style={{ marginBottom: 24 }}>
-          <Space direction="vertical" size="small">
-            <Title level={2} style={{ margin: 0 }}>
-              <ShoppingCartOutlined style={{ marginRight: 8 }} />
-              Catálogo de Cosméticos
-            </Title>
-            <Text type="secondary">
-              Explore e adquira cosméticos exclusivos do Fortnite
-            </Text>
-          </Space>
-          <div style={{ marginTop: 16 }}>
+          <div className="bg-linear-to-br from-purple-500 to-pink-600 rounded-3xl p-8 shadow-2xl mb-6">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+              <Space
+                direction="vertical"
+                size="small"
+                style={{ width: "100%" }}
+              >
+                <Title level={2} style={{ margin: 0, color: "white" }}>
+                  <ShoppingCartOutlined style={{ marginRight: 8 }} />
+                  Catálogo de Cosméticos
+                </Title>
+                <Text
+                  style={{ color: "rgba(255,255,255,0.9)", fontSize: "16px" }}
+                >
+                  Explore e adquira cosméticos exclusivos do Fortnite
+                </Text>
+              </Space>
+            </div>
+          </div>
+          <div>
             <Space wrap>
               <Button
                 icon={<GiftOutlined />}
                 onClick={() => router.push("/catalog/bundles")}
+                size="large"
+                className="h-12 font-semibold"
               >
                 Ver Bundles
               </Button>
@@ -156,13 +167,27 @@ export default function CatalogPage() {
                 icon={<ReloadOutlined />}
                 onClick={handleRefresh}
                 loading={loading}
+                size="large"
+                className="h-12 font-semibold"
               >
                 Atualizar
               </Button>
             </Space>
           </div>
         </div>
-        <CatalogFilters onFilter={handleFilter} loading={loading} />
+        <ItemFilters<ListCosmeticsParams>
+          config={{
+            searchPlaceholder: "Digite o nome do cosmético",
+            toggleFilters: [
+              { key: "isNew", label: "Apenas novos" },
+              { key: "isBundle", label: "Apenas bundles" },
+              { key: "isAvailable", label: "Apenas disponíveis" },
+              { key: "onSale", label: "Apenas em promoção" },
+            ],
+          }}
+          onFilter={handleFilter}
+          loading={loading}
+        />
 
         {loading && (!cosmetics || cosmetics.length === 0) ? (
           <div

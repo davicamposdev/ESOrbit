@@ -59,25 +59,46 @@ export default function ProfilePage() {
     <AppLayout>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Card>
-            <Space
-              direction="vertical"
-              align="center"
-              style={{ width: "100%" }}
-            >
-              <Avatar size={100} icon={<UserOutlined />} />
-              <Title level={2} style={{ margin: 0 }}>
-                {user.username}
-              </Title>
-              <Paragraph type="secondary">{user.email}</Paragraph>
-              <Tag color="green" icon={<WalletOutlined />}>
-                {user.credits} V-Bucks
-              </Tag>
-            </Space>
+          <Card className="bg-linear-to-br from-blue-500 to-indigo-600 border-0 shadow-2xl rounded-3xl">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+              <Space
+                direction="vertical"
+                align="center"
+                style={{ width: "100%" }}
+              >
+                <div className="bg-white rounded-full p-2 shadow-xl">
+                  <Avatar
+                    size={100}
+                    icon={<UserOutlined />}
+                    className="bg-linear-to-br from-blue-600 to-indigo-600"
+                  />
+                </div>
+                <Title level={2} style={{ margin: 0, color: "white" }}>
+                  {user.username}
+                </Title>
+                <Paragraph
+                  style={{ color: "rgba(255,255,255,0.9)", margin: 0 }}
+                >
+                  {user.email}
+                </Paragraph>
+                <Tag
+                  color="green"
+                  icon={<WalletOutlined />}
+                  style={{
+                    fontSize: "16px",
+                    padding: "8px 16px",
+                    marginTop: "8px",
+                  }}
+                >
+                  {user.credits} V-Bucks
+                </Tag>
+              </Space>
+            </div>
           </Card>
 
           <Card
             title="Informações da Conta"
+            className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
             extra={
               <Button icon={<EditOutlined />} type="text">
                 Editar
@@ -146,17 +167,29 @@ export default function ProfilePage() {
             </Descriptions>
           </Card>
 
-          <Card title="Atividade">
+          <Card
+            title="Atividade"
+            className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+          >
             <Paragraph type="secondary">
               Nenhuma atividade recente para exibir.
             </Paragraph>
           </Card>
 
           <Space>
-            <Button onClick={() => router.push("/dashboard")}>
+            <Button
+              onClick={() => router.push("/dashboard")}
+              size="large"
+              className="h-12 font-semibold"
+            >
               Voltar ao Dashboard
             </Button>
-            <Button type="primary" onClick={() => router.push("/catalog")}>
+            <Button
+              type="primary"
+              onClick={() => router.push("/catalog")}
+              size="large"
+              className="h-12 font-semibold"
+            >
               Explorar Catálogo
             </Button>
           </Space>

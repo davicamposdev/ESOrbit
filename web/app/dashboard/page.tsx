@@ -57,7 +57,7 @@ export default function DashboardPage() {
     console.log("Carregando compras recentes...");
     setLoadingPurchases(true);
     try {
-      const data = await financeService.listPurchases({ limit: 5 });
+      const data = await financeService.listPurchases({ limit: 3 });
       console.log("Compras carregadas:", data);
       setPurchases(data);
     } catch (error) {
@@ -104,46 +104,56 @@ export default function DashboardPage() {
     <AppLayout>
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <div>
-            <Title level={2}>Bem-vindo, {user.username}!</Title>
-            <Paragraph type="secondary">
-              Gerencie sua conta e explore nosso catálogo de cosméticos do
-              Fortnite
-            </Paragraph>
+          <div className="bg-linear-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 shadow-2xl mb-4">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+              <Title level={2} style={{ color: "white", margin: 0 }}>
+                Bem-vindo, {user.username}! 👋
+              </Title>
+              <Paragraph
+                style={{
+                  color: "rgba(255,255,255,0.9)",
+                  margin: "8px 0 0 0",
+                  fontSize: "16px",
+                }}
+              >
+                Gerencie sua conta e explore nosso catálogo de cosméticos do
+                Fortnite
+              </Paragraph>
+            </div>
           </div>
 
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={12} lg={6}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Créditos Disponíveis"
                   value={user.credits}
                   prefix={<WalletOutlined />}
-                  valueStyle={{ color: "#52c41a" }}
+                  valueStyle={{ color: "#52c41a", fontWeight: "bold" }}
                   suffix="V-Bucks"
                 />
               </Card>
             </Col>
 
             <Col xs={24} sm={12} lg={6}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Total de Compras"
                   value={totalPurchases}
                   prefix={<ShoppingOutlined />}
-                  valueStyle={{ color: "#1890ff" }}
+                  valueStyle={{ color: "#1890ff", fontWeight: "bold" }}
                   loading={loadingPurchases}
                 />
               </Card>
             </Col>
 
             <Col xs={24} sm={12} lg={6}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Total Gasto"
                   value={totalSpent}
                   prefix={<TrophyOutlined />}
-                  valueStyle={{ color: "#faad14" }}
+                  valueStyle={{ color: "#faad14", fontWeight: "bold" }}
                   suffix="V-Bucks"
                   loading={loadingPurchases}
                 />
@@ -151,7 +161,7 @@ export default function DashboardPage() {
             </Col>
 
             <Col xs={24} sm={12} lg={6}>
-              <Card>
+              <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-gray-100 rounded-2xl">
                 <Statistic
                   title="Membro desde"
                   value={new Date(user.createdAt).toLocaleDateString("pt-BR", {
@@ -159,7 +169,7 @@ export default function DashboardPage() {
                     month: "short",
                   })}
                   prefix={<FireOutlined />}
-                  valueStyle={{ color: "#ff4d4f" }}
+                  valueStyle={{ color: "#ff4d4f", fontWeight: "bold" }}
                 />
               </Card>
             </Col>
@@ -167,7 +177,178 @@ export default function DashboardPage() {
 
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <Card title="Informações da Conta">
+              <Card
+                title="Compras Recentes"
+                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                style={{ height: "100%" }}
+                extra={
+                  <Button
+                    type="link"
+                    onClick={() => router.push("/transactions")}
+                  >
+                    Ver todas
+                  </Button>
+                }
+              >
+                <div>
+                  {loadingPurchases ? (
+                    <div style={{ textAlign: "center", padding: "20px 0" }}>
+                      <Spin />
+                    </div>
+                  ) : purchases.length === 0 ? (
+                    <Space
+                      direction="vertical"
+                      style={{ width: "100%", textAlign: "center" }}
+                    >
+                      <Text type="secondary">
+                        Nenhuma compra realizada ainda
+                      </Text>
+                      <Button
+                        type="primary"
+                        icon={<ShoppingOutlined />}
+                        onClick={() => router.push("/catalog")}
+                      >
+                        Explorar Catálogo
+                      </Button>
+                    </Space>
+                  ) : (
+                    <List
+                      dataSource={purchases}
+                      renderItem={(purchase) => (
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={
+                              purchase.cosmetic?.imageUrl ? (
+                                <Avatar
+                                  src={purchase.cosmetic.imageUrl}
+                                  shape="square"
+                                  size={48}
+                                />
+                              ) : (
+                                <Avatar icon={<ShoppingOutlined />} size={48} />
+                              )
+                            }
+                            title={
+                              <Space>
+                                <Text strong>
+                                  {purchase.cosmetic?.name || "Cosmético"}
+                                </Text>
+                                {purchase.status === "ACTIVE" && (
+                                  <Tag color="success">Ativo</Tag>
+                                )}
+                                {purchase.status === "RETURNED" && (
+                                  <Tag color="warning">Devolvido</Tag>
+                                )}
+                                {purchase.isFromBundle && (
+                                  <Tag color="purple">Bundle</Tag>
+                                )}
+                              </Space>
+                            }
+                            description={
+                              <Space direction="vertical" size={0}>
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                  {new Date(purchase.createdAt).toLocaleString(
+                                    "pt-BR",
+                                    {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </Text>
+                                <Text strong style={{ color: "#52c41a" }}>
+                                  {purchase.transaction?.amount || 0} V-Bucks
+                                </Text>
+                                {purchase.cosmetic?.type && (
+                                  <Text
+                                    type="secondary"
+                                    style={{ fontSize: 11 }}
+                                  >
+                                    {purchase.cosmetic.type} •{" "}
+                                    {purchase.cosmetic.rarity}
+                                  </Text>
+                                )}
+                              </Space>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  )}
+                </div>
+              </Card>
+            </Col>
+
+            <Col xs={24} lg={12}>
+              <Card
+                title="Ações Rápidas"
+                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+                style={{ height: "100%" }}
+              >
+                <Space
+                  direction="vertical"
+                  size="middle"
+                  style={{ width: "100%" }}
+                >
+                  <Button
+                    type="primary"
+                    icon={<ShoppingOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/catalog")}
+                    className="h-14 text-base font-semibold"
+                  >
+                    Explorar Catálogo
+                  </Button>
+                  <Button
+                    icon={<AppstoreOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/inventory")}
+                    className="h-14 text-base font-semibold"
+                  >
+                    Meu Inventário
+                  </Button>
+                  <Button
+                    icon={<GiftOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/catalog/bundles")}
+                    className="h-14 text-base font-semibold"
+                  >
+                    Ver Bundles
+                  </Button>
+                  <Button
+                    icon={<UserOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/profile")}
+                    className="h-14 text-base font-semibold"
+                  >
+                    Ver Perfil
+                  </Button>
+                  <Button
+                    icon={<HistoryOutlined />}
+                    size="large"
+                    block
+                    onClick={() => router.push("/transactions")}
+                    className="h-14 text-base font-semibold"
+                  >
+                    Ver Transações
+                  </Button>
+                </Space>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]}>
+            <Col xs={24}>
+              <Card
+                title="Informações da Conta"
+                className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+              >
                 <Space
                   direction="vertical"
                   size="middle"
@@ -195,172 +376,6 @@ export default function DashboardPage() {
                       })}
                     </Paragraph>
                   </div>
-                </Space>
-              </Card>
-            </Col>
-
-            <Col xs={24} lg={12}>
-              <Card
-                title="Compras Recentes"
-                extra={
-                  <Button
-                    type="link"
-                    onClick={() => router.push("/transactions")}
-                  >
-                    Ver todas
-                  </Button>
-                }
-              >
-                {loadingPurchases ? (
-                  <div style={{ textAlign: "center", padding: "20px 0" }}>
-                    <Spin />
-                  </div>
-                ) : purchases.length === 0 ? (
-                  <Space
-                    direction="vertical"
-                    style={{ width: "100%", textAlign: "center" }}
-                  >
-                    <Text type="secondary">Nenhuma compra realizada ainda</Text>
-                    <Button
-                      type="primary"
-                      icon={<ShoppingOutlined />}
-                      onClick={() => router.push("/catalog")}
-                    >
-                      Explorar Catálogo
-                    </Button>
-                  </Space>
-                ) : (
-                  <List
-                    dataSource={purchases}
-                    renderItem={(purchase) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={
-                            purchase.cosmetic?.imageUrl ? (
-                              <Avatar
-                                src={purchase.cosmetic.imageUrl}
-                                shape="square"
-                                size={48}
-                              />
-                            ) : (
-                              <Avatar icon={<ShoppingOutlined />} size={48} />
-                            )
-                          }
-                          title={
-                            <Space>
-                              <Text strong>
-                                {purchase.cosmetic?.name || "Cosmético"}
-                              </Text>
-                              {purchase.status === "ACTIVE" && (
-                                <Tag color="success">Ativo</Tag>
-                              )}
-                              {purchase.status === "RETURNED" && (
-                                <Tag color="warning">Devolvido</Tag>
-                              )}
-                              {purchase.isFromBundle && (
-                                <Tag color="purple">Bundle</Tag>
-                              )}
-                            </Space>
-                          }
-                          description={
-                            <Space direction="vertical" size={0}>
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {new Date(purchase.createdAt).toLocaleString(
-                                  "pt-BR",
-                                  {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </Text>
-                              <Text strong style={{ color: "#52c41a" }}>
-                                {purchase.transaction?.amount || 0} V-Bucks
-                              </Text>
-                              {purchase.cosmetic?.type && (
-                                <Text type="secondary" style={{ fontSize: 11 }}>
-                                  {purchase.cosmetic.type} •{" "}
-                                  {purchase.cosmetic.rarity}
-                                </Text>
-                              )}
-                            </Space>
-                          }
-                        />
-                      </List.Item>
-                    )}
-                  />
-                )}
-              </Card>
-            </Col>
-          </Row>
-
-          <Row gutter={[16, 16]}>
-            <Col xs={24} lg={16}>
-              <Card>
-                <Title level={4}>Sobre o ESOrbit</Title>
-                <Paragraph>
-                  Bem-vindo à plataforma ESOrbit! Aqui você pode explorar e
-                  adquirir cosméticos do Fortnite usando seus créditos V-Bucks.
-                  Nossa plataforma oferece um catálogo completo com skins,
-                  emotes, picaretas e muito mais.
-                </Paragraph>
-                <Paragraph>
-                  Navegue pelo catálogo para descobrir novos itens ou confira
-                  nossos bundles especiais para economizar!
-                </Paragraph>
-              </Card>
-            </Col>
-
-            <Col xs={24} lg={8}>
-              <Card title="Ações Rápidas">
-                <Space
-                  direction="vertical"
-                  size="middle"
-                  style={{ width: "100%" }}
-                >
-                  <Button
-                    type="primary"
-                    icon={<ShoppingOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/catalog")}
-                  >
-                    Explorar Catálogo
-                  </Button>
-                  <Button
-                    icon={<AppstoreOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/inventory")}
-                  >
-                    Meu Inventário
-                  </Button>
-                  <Button
-                    icon={<GiftOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/catalog/bundles")}
-                  >
-                    Ver Bundles
-                  </Button>
-                  <Button
-                    icon={<UserOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/profile")}
-                  >
-                    Ver Perfil
-                  </Button>
-                  <Button
-                    icon={<HistoryOutlined />}
-                    size="large"
-                    block
-                    onClick={() => router.push("/transactions")}
-                  >
-                    Ver Transações
-                  </Button>
                 </Space>
               </Card>
             </Col>
