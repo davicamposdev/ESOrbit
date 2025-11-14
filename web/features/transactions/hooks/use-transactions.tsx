@@ -30,7 +30,6 @@ export function useTransactions(userId?: string) {
       setPurchases(data);
     } catch (error) {
       message.error("Erro ao carregar compras");
-      console.error(error);
     } finally {
       setLoadingPurchases(false);
     }
@@ -43,7 +42,6 @@ export function useTransactions(userId?: string) {
       setTransfers(data);
     } catch (error) {
       message.error("Erro ao carregar transferências");
-      console.error(error);
     } finally {
       setLoadingTransfers(false);
     }

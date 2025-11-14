@@ -56,16 +56,13 @@ export function BundleCard({
   onSelect,
   isPurchased = false,
 }: BundleCardProps) {
-  // Fallback para casos onde o cosmetic pode estar indefinido
   const cosmetic = bundle.cosmetic;
   if (!cosmetic) {
     return null;
   }
 
-  // Verifica se todos os itens do bundle estão disponíveis
   const allItemsAvailable = bundle.items.every((item) => item.isAvailable);
 
-  // Calcula os preços do bundle baseado nos itens
   const pricing = calculateBundlePricing(bundle.items);
 
   const rarityColor = rarityColors[cosmetic.rarity.toLowerCase()] || "default";
@@ -98,7 +95,6 @@ export function BundleCard({
     }
   };
 
-  // Determinar quais badges devem ser exibidos
   const badges = [];
   if (isPurchased) {
     badges.push({ text: "COMPRADO", color: "blue" });
@@ -110,7 +106,6 @@ export function BundleCard({
     badges.push({ text: "BUNDLE", color: "purple" });
   }
 
-  // Se houver múltiplos badges, usar o primeiro como ribbon principal
   const primaryBadge = badges[0];
   const hasMultipleBadges = badges.length > 1;
 

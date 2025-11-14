@@ -97,7 +97,7 @@ export class FinanceController {
   ): Promise<{ cosmeticIds: string[] }> {
     const purchases = await this.listPurchasesUseCase.execute({
       userId: user.id,
-      status: undefined, // Get all active purchases
+      status: undefined,
     });
 
     const cosmeticIds = purchases
@@ -121,7 +121,6 @@ export class FinanceController {
       purchases.filter((p) => p.status === 'ACTIVE').map((p) => p.cosmeticId),
     );
 
-    // Buscar todos os bundles e verificar se todos os cosméticos do bundle foram comprados
     const bundles = await this.prisma.bundle.findMany({
       include: {
         relation: {

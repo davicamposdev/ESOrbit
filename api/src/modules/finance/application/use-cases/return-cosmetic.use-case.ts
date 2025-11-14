@@ -37,24 +37,20 @@ export class ReturnCosmeticUseCase {
   ) {}
 
   async execute(input: ReturnCosmeticInput): Promise<Return> {
-    // Busca a compra
     const purchase = await this.purchaseRepository.findById(input.purchaseId);
 
     if (!purchase) {
       throw new NotFoundException('Purchase not found');
     }
 
-    // Valida se a compra pertence ao usuário
     if (purchase.userId !== input.userId) {
       throw new BadRequestException('Purchase does not belong to this user');
     }
 
-    // Valida se a compra pode ser devolvida
     if (purchase.status !== PurchaseStatus.ACTIVE) {
       throw new BadRequestException('Only active purchases can be returned');
     }
 
-    // Busca a transação original para obter o valor
     const originalTransaction = await this.transactionRepository.findById(
       purchase.transactionId,
     );
@@ -63,9 +59,7 @@ export class ReturnCosmeticUseCase {
       throw new NotFoundException('Original transaction not found');
     }
 
-    // Executa a devolução em uma transação atômica
     const returnRecord = await this.prisma.$transaction(async (tx) => {
-      // Cria a transação de reembolso
       const refundTransaction = await tx.transaction.create({
         data: {
           amount: originalTransaction.amount,
@@ -76,7 +70,6 @@ export class ReturnCosmeticUseCase {
         },
       });
 
-      // Credita os créditos de volta ao usuário
       await tx.user.update({
         where: { id: input.userId },
         data: {
@@ -86,7 +79,6 @@ export class ReturnCosmeticUseCase {
         },
       });
 
-      // Marca a compra como devolvida
       await tx.purchase.update({
         where: { id: input.purchaseId },
         data: {
@@ -95,7 +87,6 @@ export class ReturnCosmeticUseCase {
         },
       });
 
-      // Cria o registro de devolução
       const newReturn = await tx.return.create({
         data: {
           purchaseId: input.purchaseId,

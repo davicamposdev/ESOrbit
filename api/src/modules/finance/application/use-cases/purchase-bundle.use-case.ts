@@ -162,7 +162,6 @@ export class PurchaseBundleUseCase {
       };
     });
 
-    // Busca as compras completas com dados relacionados
     const mainPurchase = await this.purchaseRepository.findById(
       result.mainPurchaseId,
     );

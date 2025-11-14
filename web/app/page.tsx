@@ -23,7 +23,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-100 shadow-sm">
         <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -71,7 +70,6 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* Hero Section */}
       <section className="pt-32 pb-24 px-6 bg-linear-to-br from-blue-50 via-white to-indigo-50">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -114,7 +112,6 @@ export default function Home() {
                 </Link>
               </div>
 
-              {/* Stats */}
               <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
                 <div>
                   <div className="text-3xl font-bold text-blue-600">100%</div>
@@ -177,7 +174,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
@@ -347,7 +343,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Catalog Preview Section */}
       <section
         id="catalog"
         className="py-24 bg-linear-to-br from-gray-50 to-blue-50"
@@ -424,7 +419,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-24 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -460,7 +454,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer id="about" className="bg-gray-900 text-gray-300 py-16">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-12 mb-12">

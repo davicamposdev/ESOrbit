@@ -34,7 +34,6 @@ export class TransferCreditsUseCase {
   ) {}
 
   async execute(input: TransferCreditsInput): Promise<Transfer> {
-    // Validações
     if (input.fromUserId === input.toUserId) {
       throw new BadRequestException('Cannot transfer credits to yourself');
     }
@@ -43,7 +42,6 @@ export class TransferCreditsUseCase {
       throw new BadRequestException('Transfer amount must be positive');
     }
 
-    // Busca os usuários
     const fromUser = await this.prisma.user.findUnique({
       where: { id: input.fromUserId },
     });
@@ -60,14 +58,11 @@ export class TransferCreditsUseCase {
       throw new NotFoundException('Recipient user not found');
     }
 
-    // Verifica saldo
     if (fromUser.credits < input.amount) {
       throw new BadRequestException('Insufficient credits for transfer');
     }
 
-    // Executa a transferência em uma transação atômica
     const transfer = await this.prisma.$transaction(async (tx) => {
-      // Cria a transação de débito (remetente)
       const debitTransaction = await tx.transaction.create({
         data: {
           amount: input.amount,
@@ -78,7 +73,6 @@ export class TransferCreditsUseCase {
         },
       });
 
-      // Cria a transação de crédito (destinatário)
       const creditTransaction = await tx.transaction.create({
         data: {
           amount: input.amount,
@@ -89,7 +83,6 @@ export class TransferCreditsUseCase {
         },
       });
 
-      // Debita do remetente
       await tx.user.update({
         where: { id: input.fromUserId },
         data: {
@@ -99,7 +92,6 @@ export class TransferCreditsUseCase {
         },
       });
 
-      // Credita ao destinatário
       await tx.user.update({
         where: { id: input.toUserId },
         data: {
@@ -109,7 +101,6 @@ export class TransferCreditsUseCase {
         },
       });
 
-      // Cria o registro de transferência
       const newTransfer = await tx.transfer.create({
         data: {
           fromUserId: input.fromUserId,

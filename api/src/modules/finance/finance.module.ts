@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/database/prisma.module';
 
-// Infrastructure - Repositories
 import {
   PrismaTransactionRepository,
   PrismaPurchaseRepository,
@@ -9,7 +8,6 @@ import {
   PrismaTransferRepository,
 } from './infrastructure/repositories';
 
-// Application - Use Cases
 import {
   PurchaseCosmeticUseCase,
   PurchaseBundleUseCase,
@@ -19,14 +17,12 @@ import {
   ListTransfersUseCase,
 } from './application/use-cases';
 
-// Presentation - Controllers
 import { FinanceController } from './presentation/controllers';
 
 @Module({
   imports: [PrismaModule],
   controllers: [FinanceController],
   providers: [
-    // Repositories
     {
       provide: 'ITransactionRepository',
       useClass: PrismaTransactionRepository,
@@ -44,7 +40,6 @@ import { FinanceController } from './presentation/controllers';
       useClass: PrismaTransferRepository,
     },
 
-    // Use Cases
     PurchaseCosmeticUseCase,
     PurchaseBundleUseCase,
     ReturnCosmeticUseCase,
@@ -53,7 +48,6 @@ import { FinanceController } from './presentation/controllers';
     ListTransfersUseCase,
   ],
   exports: [
-    // Exporta os use cases para outros módulos se necessário
     PurchaseCosmeticUseCase,
     PurchaseBundleUseCase,
     ReturnCosmeticUseCase,

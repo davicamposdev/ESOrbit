@@ -19,7 +19,6 @@ import { CatalogBootstrapService } from './application/services/catalog-bootstra
   imports: [PrismaModule, IntegrationModule, ScheduleModule.forRoot()],
   controllers: [CatalogController],
   providers: [
-    // Repositories
     {
       provide: 'ICosmeticRepository',
       useClass: PrismaCosmeticRepository,
@@ -33,15 +32,12 @@ import { CatalogBootstrapService } from './application/services/catalog-bootstra
       useClass: PrismaSyncLogRepository,
     },
 
-    // Use Cases
     SyncCosmeticsUseCase,
     SyncNewCosmeticsUseCase,
     SyncShopCosmeticsUseCase,
     ListCosmeticsUseCase,
     ListBundlesUseCase,
-    // Domain services
     CosmeticSyncService,
-    // Application services
     CatalogBootstrapService,
     CatalogSyncCronService,
   ],

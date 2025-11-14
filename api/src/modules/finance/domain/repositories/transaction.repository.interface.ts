@@ -10,24 +10,12 @@ export interface CreateTransactionDto {
 }
 
 export interface ITransactionRepository {
-  /**
-   * Cria uma nova transação
-   */
   create(data: CreateTransactionDto): Promise<Transaction>;
 
-  /**
-   * Busca uma transação por ID
-   */
   findById(id: string): Promise<Transaction | null>;
 
-  /**
-   * Atualiza o status de uma transação
-   */
   updateStatus(id: string, status: TransactionStatus): Promise<Transaction>;
 
-  /**
-   * Lista transações com filtros
-   */
   findMany(filters?: {
     type?: TransactionType;
     status?: TransactionStatus;

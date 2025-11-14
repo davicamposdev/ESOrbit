@@ -22,7 +22,6 @@ export function useUsersInventory() {
       setUsers(response.users);
     } catch (err) {
       setError("Erro ao carregar usuários");
-      console.error(err);
     } finally {
       setLoading(false);
     }

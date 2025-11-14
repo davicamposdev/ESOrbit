@@ -1,7 +1,4 @@
 services:
-  # ===========================================
-  # Banco de Dados PostgreSQL
-  # ===========================================
   postgres:
     image: postgres:16-alpine
     container_name: esorbit-db
@@ -16,173 +13,54 @@ services:
       TZ: America/Sao_Paulo
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - esorbit-network
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${DB_USER:-esorbit} -d ${DB_NAME:-esorbit}",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
-  # ===========================================
-  # Redis (Cache e BullMQ)
-  # ===========================================
-  redis:
-    image: redis:7-alpine
-    container_name: esorbit-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    environment:
-      TZ: America/Sao_Paulo
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
-    networks:
-      - esorbit-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # ===========================================
-  # API Backend (NestJS)
-  # ===========================================
   api:
     build:
       context: ./api
       dockerfile: Dockerfile
-      target: ${NODE_ENV:-development}
-    image: esorbit-api:latest
+      target: production
+    image: esorbit-api:production
     container_name: esorbit-api
     restart: unless-stopped
     ports:
       - "4000:4000"
-      - "9229:9229" # Porta de debug para desenvolvimento
+    env_file:
+      - ./api/.env
     environment:
-      # App
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 4000
-
-      # Database
+      NODE_ENV: production
       DATABASE_URL: postgresql://${DB_USER:-esorbit}:${DB_PASSWORD:-esorbit123}@postgres:5432/${DB_NAME:-esorbit}?schema=public
-
-      # Redis
-      REDIS_URL: redis://redis:6379
-
-      # Auth
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
-      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      COOKIE_SAME_SITE: ${COOKIE_SAME_SITE:-lax}
-
-      # External API
-      esorbit_API_BASE: ${esorbit_API_BASE:-https://esorbit-api.com}
-      esorbit_API_KEY: ${esorbit_API_KEY:-}
-
-      # Jobs/Crons
-      SYNC_FULL_CRON: ${SYNC_FULL_CRON:-0 3 * * *}
-      SYNC_NEW_CRON: ${SYNC_NEW_CRON:-*/45 * * * *}
-      SYNC_SHOP_CRON: ${SYNC_SHOP_CRON:-*/45 * * * *}
-
-      # Rate Limiting
-      RATE_LIMIT_TTL: ${RATE_LIMIT_TTL:-60}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-60}
-
-      # CORS
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:4000}
-
-      # Timezone
       TZ: America/Sao_Paulo
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./api:/app:delegated
-      - /app/node_modules
-      - /app/dist
+      - postgres
     networks:
       - esorbit-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    profiles:
-      - app
 
-  # ===========================================
-  # Frontend Web (Next.js)
-  # ===========================================
   web:
     build:
       context: ./web
       dockerfile: Dockerfile
-      target: ${NODE_ENV:-development}
-    image: esorbit-web:latest
+      target: production
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-ESOrbit}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    image: esorbit-web:production
     container_name: esorbit-web
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - ./web/.env.local
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
-      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-ESOrbit}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NODE_ENV: production
       TZ: America/Sao_Paulo
     depends_on:
       - api
-    volumes:
-      - ./web:/app:delegated
-      - /app/node_modules
-      - /app/.next
     networks:
       - esorbit-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    profiles:
-      - app
 
-  # ===========================================
-  # BullMQ Board
-  # ===========================================
-  bull-board:
-    image: deadly0/bull-board:latest
-    container_name: esorbit-bull-board
-    restart: unless-stopped
-    ports:
-      - "3001:3000"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      TZ: America/Sao_Paulo
-    depends_on:
-      - redis
-    networks:
-      - esorbit-network
-    profiles:
-      - monitoring
-
-  # ===========================================
-  # DBeaver (CloudBeaver Web)
-  # ===========================================
   cloudbeaver:
     image: dbeaver/cloudbeaver:latest
     container_name: esorbit-cloudbeaver
@@ -201,23 +79,10 @@ services:
     profiles:
       - tools
 
-# ===========================================
-# Volumes
-# ===========================================
 volumes:
   postgres_data:
-    name: esorbit-postgres-data
-  redis_data:
-    name: esorbit-redis-data
-  pgadmin_data:
-    name: esorbit-pgadmin-data
   cloudbeaver_data:
-    name: esorbit-cloudbeaver-data
 
-# ===========================================
-# Redes
-# ===========================================
 networks:
   esorbit-network:
-    name: esorbit-network
     driver: bridge

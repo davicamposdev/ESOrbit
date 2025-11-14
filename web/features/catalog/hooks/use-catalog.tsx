@@ -53,7 +53,6 @@ export function useCatalog(): UseCatalogReturn {
         const errorMessage =
           err instanceof Error ? err.message : "Erro ao buscar cosméticos";
         setError(errorMessage);
-        console.error("Erro ao buscar cosméticos:", err);
       } finally {
         setLoading(false);
       }
@@ -71,7 +70,6 @@ export function useCatalog(): UseCatalogReturn {
       const errorMessage =
         err instanceof Error ? err.message : "Erro ao sincronizar cosméticos";
       setError(errorMessage);
-      console.error("Erro ao sincronizar todos os cosméticos:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -90,7 +88,6 @@ export function useCatalog(): UseCatalogReturn {
           ? err.message
           : "Erro ao sincronizar novos cosméticos";
       setError(errorMessage);
-      console.error("Erro ao sincronizar novos cosméticos:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -107,7 +104,6 @@ export function useCatalog(): UseCatalogReturn {
       const errorMessage =
         err instanceof Error ? err.message : "Erro ao sincronizar loja";
       setError(errorMessage);
-      console.error("Erro ao sincronizar loja:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -118,9 +114,7 @@ export function useCatalog(): UseCatalogReturn {
     try {
       const ids = await catalogService.getPurchasedCosmeticIds();
       setPurchasedCosmeticIds(new Set(ids));
-    } catch (err) {
-      console.error("Erro ao buscar cosméticos comprados:", err);
-    }
+    } catch (err) {}
   }, []);
 
   const clearError = useCallback(() => {

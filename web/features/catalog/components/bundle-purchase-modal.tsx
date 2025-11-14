@@ -46,7 +46,6 @@ export function BundlePurchaseModal({
 
   if (!bundle || !bundle.cosmetic) return null;
 
-  // Verifica se todos os itens do bundle estão disponíveis
   const allItemsAvailable = bundle.items.every((item) => item.isAvailable);
 
   const pricing = calculateBundlePricing(bundle.items);

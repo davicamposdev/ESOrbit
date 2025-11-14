@@ -38,7 +38,6 @@ export function useBundles(): UseBundlesReturn {
     setError(null);
     try {
       const response = await catalogService.listBundles(params);
-      console.log("Fetched bundles:", response);
       setBundles(response.data);
       setTotal(response.meta.total);
       setPage(response.meta.page);
@@ -58,9 +57,7 @@ export function useBundles(): UseBundlesReturn {
     try {
       const ids = await catalogService.getPurchasedBundleIds();
       setPurchasedBundleIds(new Set(ids));
-    } catch (err) {
-      console.error("Erro ao buscar bundles comprados:", err);
-    }
+    } catch (err) {}
   }, []);
 
   const clearError = useCallback(() => {

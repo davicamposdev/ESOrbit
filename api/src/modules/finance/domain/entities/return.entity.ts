@@ -46,30 +46,18 @@ export class ReturnEntity implements Return {
     };
   }
 
-  /**
-   * Verifica se a devolução está pendente
-   */
   isPending(): boolean {
     return this.status === ReturnStatus.PENDING;
   }
 
-  /**
-   * Verifica se a devolução foi completada
-   */
   isCompleted(): boolean {
     return this.status === ReturnStatus.COMPLETED;
   }
 
-  /**
-   * Verifica se a devolução falhou
-   */
   isFailed(): boolean {
     return this.status === ReturnStatus.FAILED;
   }
 
-  /**
-   * Marca a devolução como completa
-   */
   markAsCompleted(): void {
     if (this.isCompleted()) {
       throw new Error('Return is already completed');
@@ -80,9 +68,6 @@ export class ReturnEntity implements Return {
     this.status = ReturnStatus.COMPLETED;
   }
 
-  /**
-   * Marca a devolução como falha
-   */
   markAsFailed(): void {
     if (this.isFailed()) {
       throw new Error('Return is already failed');
@@ -93,9 +78,6 @@ export class ReturnEntity implements Return {
     this.status = ReturnStatus.FAILED;
   }
 
-  /**
-   * Valida a consistência da devolução
-   */
   validate(): void {
     if (
       !this.purchaseId ||

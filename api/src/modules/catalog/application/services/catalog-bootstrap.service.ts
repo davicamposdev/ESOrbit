@@ -37,8 +37,6 @@ export class CatalogBootstrapService implements OnModuleInit {
     });
 
     try {
-      // Executa sincronizações sequencialmente para evitar race conditions
-      // no upsert de cosméticos com o mesmo external_id
       this.logger.log('Sincronizando catálogo completo...');
       const allResult = await this.syncCosmeticsUseCase.execute('pt-BR');
 

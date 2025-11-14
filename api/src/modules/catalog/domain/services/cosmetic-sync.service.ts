@@ -57,7 +57,6 @@ export class CosmeticSyncService {
       integrationCosmetic.currentPrice !== null &&
       integrationCosmetic.currentPrice > 0;
 
-    // Calcula se o item está em promoção (base price > current price)
     const onSale =
       integrationCosmetic.basePrice !== undefined &&
       integrationCosmetic.basePrice !== null &&
@@ -90,7 +89,6 @@ export class CosmeticSyncService {
       isBundle,
     );
 
-    // Verifica se o cosmético já existe
     const existing = await this.cosmeticRepository.findByExternalId(
       cosmetic.externalId,
     );
@@ -100,18 +98,15 @@ export class CosmeticSyncService {
     let wasUpdated = false;
 
     if (!existing) {
-      // Não existe, cria novo
       savedCosmetic = await this.cosmeticRepository.create(cosmetic);
       wasCreated = true;
     } else {
-      // Existe, verifica se precisa atualizar
       const needsUpdate = this.hasChanges(existing, cosmetic, options);
 
       if (needsUpdate) {
         savedCosmetic = await this.cosmeticRepository.update(cosmetic, options);
         wasUpdated = true;
       } else {
-        // Não há mudanças, usa o existente
         savedCosmetic = existing;
       }
     }
@@ -176,16 +171,11 @@ export class CosmeticSyncService {
     };
   }
 
-  /**
-   * Verifica se há mudanças entre o cosmético existente e o novo
-   * Esta é a lógica de negócio que decide se um update é necessário
-   */
   private hasChanges(
     existing: Cosmetic,
     cosmetic: Cosmetic,
     options: SyncOptions,
   ): boolean {
-    // Compara campos base que sempre são verificados
     if (
       existing.name !== cosmetic.name ||
       existing.type !== cosmetic.type ||
@@ -197,12 +187,10 @@ export class CosmeticSyncService {
       return true;
     }
 
-    // Verifica isNew se deve ser atualizado
     if (options.updateIsNew !== false && existing.isNew !== cosmetic.isNew) {
       return true;
     }
 
-    // Verifica isAvailable se deve ser atualizado
     if (
       options.updateIsAvailable !== false &&
       existing.isAvailable !== cosmetic.isAvailable
@@ -210,7 +198,6 @@ export class CosmeticSyncService {
       return true;
     }
 
-    // Verifica preços se deve ser atualizado
     if (options.updatePricing === true) {
       if (
         existing.basePrice !== cosmetic.basePrice ||
@@ -221,7 +208,6 @@ export class CosmeticSyncService {
       }
     }
 
-    // Nenhuma mudança detectada
     return false;
   }
 
@@ -231,7 +217,6 @@ export class CosmeticSyncService {
   ): Promise<void> {
     const newBundle = Bundle.create(setInfo.backendValue, setInfo.value);
 
-    // Verifica se o bundle já existe
     const existing = await this.bundleRepository.findByExternalId(
       newBundle.externalId,
     );
@@ -239,13 +224,10 @@ export class CosmeticSyncService {
     let bundle: Bundle;
 
     if (!existing) {
-      // Cria novo bundle
       bundle = await this.bundleRepository.create(newBundle);
     } else if (existing.name !== newBundle.name) {
-      // Atualiza se o nome mudou
       bundle = await this.bundleRepository.update(existing.id, newBundle.name);
     } else {
-      // Usa o existente
       bundle = existing;
     }
 

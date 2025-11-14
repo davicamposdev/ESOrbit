@@ -65,37 +65,22 @@ export class PurchaseEntity implements Purchase {
     };
   }
 
-  /**
-   * Verifica se a compra está ativa
-   */
   isActive(): boolean {
     return this.status === PurchaseStatus.ACTIVE;
   }
 
-  /**
-   * Verifica se a compra foi devolvida
-   */
   isReturned(): boolean {
     return this.status === PurchaseStatus.RETURNED;
   }
 
-  /**
-   * Verifica se a compra foi cancelada
-   */
   isCancelled(): boolean {
     return this.status === PurchaseStatus.CANCELLED;
   }
 
-  /**
-   * Verifica se a compra pode ser devolvida
-   */
   canBeReturned(): boolean {
     return this.status === PurchaseStatus.ACTIVE;
   }
 
-  /**
-   * Marca a compra como devolvida
-   */
   markAsReturned(): void {
     if (!this.canBeReturned()) {
       throw new Error(
@@ -106,9 +91,6 @@ export class PurchaseEntity implements Purchase {
     this.returnedAt = new Date();
   }
 
-  /**
-   * Cancela a compra
-   */
   cancel(): void {
     if (!this.isActive()) {
       throw new Error('Only active purchases can be cancelled');
@@ -116,9 +98,6 @@ export class PurchaseEntity implements Purchase {
     this.status = PurchaseStatus.CANCELLED;
   }
 
-  /**
-   * Valida a consistência da compra
-   */
   validate(): void {
     if (!this.userId || !this.cosmeticId || !this.transactionId) {
       throw new Error(

@@ -15,22 +15,18 @@ import { IntegrationController } from './presentation/controllers/integration.co
 @Module({
   controllers: [IntegrationController],
   providers: [
-    // Config
     IntegrationConfigService,
 
-    // Infrastructure
     HttpClientService,
     RateLimiterService,
     CircuitBreakerService,
     MetricsService,
 
-    // Adapters
     {
       provide: 'ICosmeticsReadPort',
       useClass: FortniteApiAdapter,
     },
 
-    // Use Cases
     FetchAllCosmeticsUseCase,
     FetchNewCosmeticsUseCase,
     FetchShopUseCase,
@@ -48,7 +44,6 @@ export class IntegrationModule implements OnModuleInit {
   constructor(private readonly metricsService: MetricsService) {}
 
   onModuleInit() {
-    // Initialize static dependencies
     CosmeticMapper.setMetricsService(this.metricsService);
   }
 }

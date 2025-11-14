@@ -89,7 +89,7 @@ describe('Auth (e2e)', () => {
         .post('/api/auth/register')
         .send({
           email: 'invalid-email',
-          password: '123', // muito curta
+          password: '123',
         })
         .expect(400);
     });

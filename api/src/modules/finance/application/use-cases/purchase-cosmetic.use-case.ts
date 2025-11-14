@@ -32,7 +32,6 @@ export class PurchaseCosmeticUseCase {
   ) {}
 
   async execute(input: PurchaseCosmeticInput): Promise<Purchase> {
-    // Verifica se o usuário já possui este cosmético
     const existingPurchase =
       await this.purchaseRepository.findByUserAndCosmetic(
         input.userId,
@@ -43,7 +42,6 @@ export class PurchaseCosmeticUseCase {
       throw new BadRequestException('User already owns this cosmetic');
     }
 
-    // Busca o usuário para verificar saldo
     const user = await this.prisma.user.findUnique({
       where: { id: input.userId },
     });
@@ -52,7 +50,6 @@ export class PurchaseCosmeticUseCase {
       throw new NotFoundException('User not found');
     }
 
-    // Busca o cosmético para validação
     const cosmetic = await this.prisma.cosmetic.findUnique({
       where: { id: input.cosmeticId },
     });
@@ -65,21 +62,17 @@ export class PurchaseCosmeticUseCase {
       throw new BadRequestException('Cosmetic is not available for purchase');
     }
 
-    // Valida se o cosmético tem preço definido
     if (!cosmetic.currentPrice || cosmetic.currentPrice <= 0) {
       throw new BadRequestException('Cosmetic does not have a valid price');
     }
 
     const price = cosmetic.currentPrice;
 
-    // Verifica se o usuário tem saldo suficiente
     if (user.credits < price) {
       throw new BadRequestException('Insufficient credits');
     }
 
-    // Executa a compra em uma transação atômica
     const purchaseId = await this.prisma.$transaction(async (tx) => {
-      // Cria a transação
       const transaction = await tx.transaction.create({
         data: {
           amount: price,
@@ -90,7 +83,6 @@ export class PurchaseCosmeticUseCase {
         },
       });
 
-      // Debita os créditos do usuário
       await tx.user.update({
         where: { id: input.userId },
         data: {
@@ -100,7 +92,6 @@ export class PurchaseCosmeticUseCase {
         },
       });
 
-      // Cria a compra
       const newPurchase = await tx.purchase.create({
         data: {
           userId: input.userId,
@@ -114,7 +105,6 @@ export class PurchaseCosmeticUseCase {
       return newPurchase.id;
     });
 
-    // Busca a compra completa com dados relacionados
     const purchase = await this.purchaseRepository.findById(purchaseId);
 
     if (!purchase) {

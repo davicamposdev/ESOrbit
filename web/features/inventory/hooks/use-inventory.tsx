@@ -34,7 +34,6 @@ export function useInventory() {
       const data = await financeService.listPurchases({ status: "ACTIVE" });
       setPurchases(data);
     } catch (error) {
-      console.error("Erro ao carregar inventário:", error);
       message.error("Erro ao carregar seu inventário");
       setPurchases([]);
     } finally {
@@ -119,7 +118,6 @@ export function useInventory() {
           handleCloseModal();
           await Promise.all([loadInventory(), updateUser()]);
         } catch (error: any) {
-          console.error("Erro ao devolver cosmético:", error);
           message.error(
             error.response?.data?.message ||
               "Erro ao devolver o cosmético. Tente novamente."

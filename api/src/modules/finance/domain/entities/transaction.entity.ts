@@ -37,30 +37,18 @@ export class TransactionEntity implements Transaction {
     };
   }
 
-  /**
-   * Valida se o valor da transação é positivo
-   */
   isValidAmount(): boolean {
     return this.amount > 0;
   }
 
-  /**
-   * Verifica se a transação está completa
-   */
   isCompleted(): boolean {
     return this.status === TransactionStatus.COMPLETED;
   }
 
-  /**
-   * Verifica se a transação falhou
-   */
   isFailed(): boolean {
     return this.status === TransactionStatus.FAILED;
   }
 
-  /**
-   * Marca a transação como completa
-   */
   markAsCompleted(): void {
     if (this.status === TransactionStatus.COMPLETED) {
       throw new Error('Transaction is already completed');
@@ -68,9 +56,6 @@ export class TransactionEntity implements Transaction {
     this.status = TransactionStatus.COMPLETED;
   }
 
-  /**
-   * Marca a transação como falha
-   */
   markAsFailed(): void {
     if (this.status === TransactionStatus.FAILED) {
       throw new Error('Transaction is already failed');

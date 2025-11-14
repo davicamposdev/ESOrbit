@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { user } = await authService.me();
       setUser(user);
     } catch (error) {
-      console.error("Erro ao atualizar dados do usuário:", error);
       throw error;
     }
   }, []);
@@ -51,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("accessToken", accessToken);
       }
     } catch (error) {
-      // Refresh falhou - limpar tudo
       authService.setAccessToken(null);
       setUser(null);
       if (typeof window !== "undefined") {
@@ -73,12 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           authService.setAccessToken(storedToken);
 
           try {
-            // O interceptor do api-client vai tentar refresh automaticamente se necessário
             const { user } = await authService.me();
             setUser(user);
           } catch (error) {
-            // Se chegou aqui, tanto o token quanto o refresh falharam
-            // Limpar tudo e usuário precisa fazer login novamente
             authService.setAccessToken(null);
             setUser(null);
             if (typeof window !== "undefined") {
@@ -87,7 +82,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Erro ao carregar usuário:", error);
       } finally {
         setLoading(false);
       }
@@ -99,7 +93,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     const { user, accessToken } = await authService.login({ email, password });
 
-    console.log("Login bem-sucedido, usuário:", user);
     authService.setAccessToken(accessToken);
     setUser(user);
 
@@ -130,7 +123,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.logout();
     } catch (error) {
-      console.error("Erro ao fazer logout:", error);
     } finally {
       authService.setAccessToken(null);
       setUser(null);

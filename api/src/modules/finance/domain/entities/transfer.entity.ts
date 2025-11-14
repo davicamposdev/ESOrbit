@@ -42,30 +42,18 @@ export class TransferEntity implements Transfer {
     };
   }
 
-  /**
-   * Verifica se a transferência está pendente
-   */
   isPending(): boolean {
     return this.status === TransferStatus.PENDING;
   }
 
-  /**
-   * Verifica se a transferência foi completada
-   */
   isCompleted(): boolean {
     return this.status === TransferStatus.COMPLETED;
   }
 
-  /**
-   * Verifica se a transferência falhou
-   */
   isFailed(): boolean {
     return this.status === TransferStatus.FAILED;
   }
 
-  /**
-   * Marca a transferência como completa
-   */
   markAsCompleted(): void {
     if (this.isCompleted()) {
       throw new Error('Transfer is already completed');
@@ -76,9 +64,6 @@ export class TransferEntity implements Transfer {
     this.status = TransferStatus.COMPLETED;
   }
 
-  /**
-   * Marca a transferência como falha
-   */
   markAsFailed(): void {
     if (this.isFailed()) {
       throw new Error('Transfer is already failed');
@@ -89,9 +74,6 @@ export class TransferEntity implements Transfer {
     this.status = TransferStatus.FAILED;
   }
 
-  /**
-   * Valida a consistência da transferência
-   */
   validate(): void {
     if (!this.fromUserId || !this.toUserId) {
       throw new Error('Transfer must have fromUserId and toUserId');

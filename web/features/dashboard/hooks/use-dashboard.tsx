@@ -21,7 +21,6 @@ export function useDashboard() {
       const data = await financeService.listPurchases({ limit: 3 });
       setPurchases(data);
     } catch (error) {
-      console.error("Erro ao carregar compras:", error);
       setPurchases([]);
     } finally {
       setLoading(false);
