@@ -59,35 +59,69 @@ export default function ProfilePage() {
     <AppLayout>
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px" }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          <Card className="bg-linear-to-br from-blue-500 to-indigo-600 border-0 shadow-2xl rounded-3xl">
-            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6">
+          {/* Header do Perfil */}
+          <Card
+            variant="borderless"
+            style={{
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              borderRadius: "16px",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(10px)",
+                borderRadius: "12px",
+                padding: "32px 24px",
+              }}
+            >
               <Space
                 direction="vertical"
                 align="center"
                 style={{ width: "100%" }}
               >
-                <div className="bg-white rounded-full p-2 shadow-xl">
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "50%",
+                    padding: "4px",
+                    boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+                  }}
+                >
                   <Avatar
                     size={100}
                     icon={<UserOutlined />}
-                    className="bg-linear-to-br from-blue-600 to-indigo-600"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    }}
                   />
                 </div>
-                <Title level={2} style={{ margin: 0, color: "white" }}>
+                <Title
+                  level={2}
+                  style={{ margin: "16px 0 0 0", color: "white" }}
+                >
                   {user.username}
                 </Title>
                 <Paragraph
-                  style={{ color: "rgba(255,255,255,0.9)", margin: 0 }}
+                  style={{
+                    color: "rgba(255,255,255,0.95)",
+                    margin: "4px 0",
+                    fontSize: "16px",
+                  }}
                 >
                   {user.email}
                 </Paragraph>
                 <Tag
-                  color="green"
+                  color="success"
                   icon={<WalletOutlined />}
                   style={{
                     fontSize: "16px",
-                    padding: "8px 16px",
-                    marginTop: "8px",
+                    padding: "8px 20px",
+                    marginTop: "12px",
+                    borderRadius: "20px",
+                    border: "none",
+                    fontWeight: 600,
                   }}
                 >
                   {user.credits} V-Bucks
@@ -96,9 +130,18 @@ export default function ProfilePage() {
             </div>
           </Card>
 
+          {/* Informações da Conta */}
           <Card
-            title="Informações da Conta"
-            className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+            title={
+              <span style={{ fontSize: "18px", fontWeight: 600 }}>
+                Informações da Conta
+              </span>
+            }
+            variant="borderless"
+            style={{
+              borderRadius: "16px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}
             extra={
               <Button icon={<EditOutlined />} type="text">
                 Editar
@@ -109,7 +152,7 @@ export default function ProfilePage() {
               <Descriptions.Item
                 label={
                   <Space>
-                    <UserOutlined />
+                    <UserOutlined style={{ color: "#667eea" }} />
                     <span>ID do Usuário</span>
                   </Space>
                 }
@@ -121,7 +164,7 @@ export default function ProfilePage() {
               <Descriptions.Item
                 label={
                   <Space>
-                    <UserOutlined />
+                    <UserOutlined style={{ color: "#667eea" }} />
                     <span>Nome de Usuário</span>
                   </Space>
                 }
@@ -131,7 +174,7 @@ export default function ProfilePage() {
               <Descriptions.Item
                 label={
                   <Space>
-                    <MailOutlined />
+                    <MailOutlined style={{ color: "#667eea" }} />
                     <span>Email</span>
                   </Space>
                 }
@@ -141,17 +184,27 @@ export default function ProfilePage() {
               <Descriptions.Item
                 label={
                   <Space>
-                    <WalletOutlined />
+                    <WalletOutlined style={{ color: "#667eea" }} />
                     <span>Créditos</span>
                   </Space>
                 }
               >
-                <Tag color="green">{user.credits} V-Bucks</Tag>
+                <Tag
+                  color="success"
+                  style={{
+                    fontSize: "14px",
+                    padding: "4px 12px",
+                    borderRadius: "12px",
+                    fontWeight: 500,
+                  }}
+                >
+                  {user.credits} V-Bucks
+                </Tag>
               </Descriptions.Item>
               <Descriptions.Item
                 label={
                   <Space>
-                    <CalendarOutlined />
+                    <CalendarOutlined style={{ color: "#667eea" }} />
                     <span>Conta Criada</span>
                   </Space>
                 }
@@ -167,20 +220,42 @@ export default function ProfilePage() {
             </Descriptions>
           </Card>
 
+          {/* Atividade */}
           <Card
-            title="Atividade"
-            className="border-2 border-gray-100 rounded-2xl shadow-lg hover:shadow-xl transition-all"
+            title={
+              <span style={{ fontSize: "18px", fontWeight: 600 }}>
+                Atividade Recente
+              </span>
+            }
+            variant="borderless"
+            style={{
+              borderRadius: "16px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}
           >
-            <Paragraph type="secondary">
+            <Paragraph
+              type="secondary"
+              style={{
+                textAlign: "center",
+                margin: "24px 0",
+                fontSize: "15px",
+              }}
+            >
               Nenhuma atividade recente para exibir.
             </Paragraph>
           </Card>
 
-          <Space>
+          {/* Ações */}
+          <Space style={{ width: "100%", justifyContent: "center" }} wrap>
             <Button
               onClick={() => router.push("/dashboard")}
               size="large"
-              className="h-12 font-semibold"
+              style={{
+                height: "48px",
+                borderRadius: "12px",
+                fontWeight: 500,
+                minWidth: "160px",
+              }}
             >
               Voltar ao Dashboard
             </Button>
@@ -188,7 +263,14 @@ export default function ProfilePage() {
               type="primary"
               onClick={() => router.push("/catalog")}
               size="large"
-              className="h-12 font-semibold"
+              style={{
+                height: "48px",
+                borderRadius: "12px",
+                fontWeight: 500,
+                minWidth: "160px",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                border: "none",
+              }}
             >
               Explorar Catálogo
             </Button>
