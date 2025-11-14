@@ -2,7 +2,7 @@
 
 import { Card, List, Space, Tag, Avatar, Button, Spin } from "antd";
 import { ShoppingOutlined } from "@ant-design/icons";
-import { type PurchaseResponse } from "@/features/finance";
+import { type PurchaseResponse } from "@/shared";
 
 const { Text } = Typography;
 import { Typography } from "antd";

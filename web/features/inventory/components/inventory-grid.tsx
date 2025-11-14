@@ -13,7 +13,7 @@ import {
   Spin,
 } from "antd";
 import { AppstoreOutlined, ShoppingOutlined } from "@ant-design/icons";
-import { type PurchaseResponse } from "@/features/finance";
+import { type PurchaseResponse } from "@/shared";
 import { Typography } from "antd";
 
 const { Text } = Typography;

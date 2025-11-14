@@ -39,11 +39,6 @@ export function AccountInfoCard({
         borderRadius: "16px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
       }}
-      extra={
-        <Button icon={<EditOutlined />} type="text">
-          Editar
-        </Button>
-      }
     >
       <Descriptions column={1} bordered>
         <Descriptions.Item

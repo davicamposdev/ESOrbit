@@ -2,7 +2,7 @@
 
 import { Modal, Space, Tag, Badge, Divider, Descriptions, Button } from "antd";
 import { AppstoreOutlined, RollbackOutlined } from "@ant-design/icons";
-import { type PurchaseResponse } from "@/features/finance";
+import { type PurchaseResponse } from "@/shared";
 import { Typography } from "antd";
 
 const { Title, Text, Paragraph } = Typography;

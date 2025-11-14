@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
-import { financeService, type PurchaseResponse } from "@/features/finance";
+import { financeService, type PurchaseResponse } from "@/shared";
 
 export function useDashboard() {
   const { user, loading: authLoading } = useAuth();

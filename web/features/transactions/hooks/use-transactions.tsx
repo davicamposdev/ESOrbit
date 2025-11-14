@@ -6,7 +6,7 @@ import {
   financeService,
   type PurchaseResponse,
   type TransferResponse,
-} from "@/features/finance";
+} from "@/shared";
 
 export function useTransactions(userId?: string) {
   const { message } = App.useApp();

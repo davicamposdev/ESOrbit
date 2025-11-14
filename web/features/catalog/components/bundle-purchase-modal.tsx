@@ -19,7 +19,7 @@ import {
 } from "@ant-design/icons";
 import { useState } from "react";
 import { type Bundle } from "../services";
-import { financeService } from "@/features/finance";
+import { financeService } from "@/shared";
 import { calculateBundlePricing } from "../utils/bundle-pricing";
 
 const { Text, Title } = Typography;

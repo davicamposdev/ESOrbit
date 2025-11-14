@@ -6,7 +6,7 @@ import {
   ClockCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
-import { type TransferResponse } from "@/features/finance";
+import { type TransferResponse } from "@/shared";
 
 const { Text } = Typography;
 

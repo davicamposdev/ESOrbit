@@ -16,7 +16,7 @@ import {
   ClockCircleOutlined,
   CloseCircleOutlined,
 } from "@ant-design/icons";
-import { type PurchaseResponse } from "@/features/finance";
+import { type PurchaseResponse } from "@/shared";
 
 const { Text } = Typography;
 

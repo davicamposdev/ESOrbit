@@ -4,7 +4,7 @@ import { Modal, Descriptions, Tag, Space, Typography, Button, App } from "antd";
 import { ShoppingCartOutlined, GiftOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { type Cosmetic } from "../services";
-import { financeService } from "@/features/finance";
+import { financeService } from "@/shared";
 
 const { Text } = Typography;
 
